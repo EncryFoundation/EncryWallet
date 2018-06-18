@@ -41,15 +41,15 @@ object Page {
     ),
     div( cls:="form-group")(
       label(`for`:="exampleCurrencyInput")("Fee"),
-      input(tpe:="number", cls:="form-control", id:="exampleCurrencyInput", placeholder:="0", name:="fee")
+      input(tpe:="number", cls:="form-control", id:="exampleFeeInput", placeholder:="0", name:="fee")
     ),
     div( cls:="form-group")(
       label(`for`:="exampleCurrencyInput")("Change"),
-      input(tpe:="number", cls:="form-control", id:="exampleCurrencyInput", placeholder:="0", name:="change")
+      input(tpe:="number", cls:="form-control", id:="exampleChangeInput", placeholder:="0", name:="change")
     ),
     div( cls:="form-group")(
       label(`for`:="exampleCurrencyInput")("Amount"),
-      input(tpe:="number", cls:="form-control", id:="exampleCurrencyInput", placeholder:="0", name:="amount")
+      input(tpe:="number", cls:="form-control", id:="exampleAmountInput", placeholder:="0", name:="amount")
     ),
     div( cls:="form-group")(
       label(`for`:="exampleAddressInput")("Address"),
@@ -65,7 +65,7 @@ object Page {
   lazy val submitButton = button(tpe:="submit", cls:="btn btn-primary")("Submit")
 
   lazy val transactionForm1 = form(transactionFormInner)(submitButton)
-  lazy val transactionForm2 = form(transactionFormInner)(textarea, submitButton)
+  lazy val transactionForm2 = form(transactionFormInner)(contractInput, submitButton)
 
   lazy val buttonGroup =
     div(cls:="btn-group-vertical")(
