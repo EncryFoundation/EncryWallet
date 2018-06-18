@@ -1,21 +1,26 @@
+package org.encryfoundation.wallet
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
+
+import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
 
 object WebServer {
   def main(args: Array[String]) {
 
-    implicit val system = ActorSystem("my-system")
-    implicit val materializer = ActorMaterializer()
+    implicit val system: ActorSystem = ActorSystem("my-system")
+    implicit val materializer: ActorMaterializer = ActorMaterializer()
     // needed for the future flatMap/onComplete in the end
-    implicit val executionContext = system.dispatcher
+    implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
     import Page._
-    val data = Map.empty[String,Number]
-    val route =
+    val data: Map[String, Number] = Map.empty
+    val route: Route =
       path(""){
         get {
           complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, page(modalButton, modal).render))
