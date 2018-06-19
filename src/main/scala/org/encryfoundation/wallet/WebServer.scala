@@ -6,7 +6,7 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.util.ByteString
-import encry.modifiers.mempool.TransactionFactory
+import io.circe._
 import org.encryfoundation.wallet.crypto.PrivateKey25519
 import org.encryfoundation.wallet.transaction.{EncryTransaction, Transaction}
 import org.encryfoundation.wallet.transaction.box.{AssetBox, EncryBox}
@@ -33,6 +33,7 @@ object WebServer {
 
     import io.circe.syntax._
 
+
     val route =
       path(""){
         get {
@@ -48,10 +49,9 @@ object WebServer {
             HttpRequest(uri = nodeUri)
           ) .flatMap(_.entity.dataBytes.runFold(ByteString.empty)(_ ++ _))
             .map(_.utf8String.trace)
+//            .map(decode[Seq[AssetBox]])
             .map(_ => Right(Seq.empty[AssetBox]))
-            .map(_.map(_.collect{
-                  case x: AssetBox => x
-                }.foldLeft(Seq[AssetBox]()) { case (seq, box) =>
+            .map(_.map(_.foldLeft(Seq[AssetBox]()) { case (seq, box) =>
                   if (seq.map(_.amount).sum < (amount + fee)) seq :+ box else seq
                 }.toIndexedSeq
               )
