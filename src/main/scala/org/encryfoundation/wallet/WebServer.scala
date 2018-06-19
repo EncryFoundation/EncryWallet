@@ -1,27 +1,28 @@
+package org.encryfoundation.wallet
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.HttpHeader.ParsingResult.Ok
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import encry.account.Address
-import encry.crypto.{PrivateKey25519, PublicKey25519}
-import encry.modifiers.mempool.{EncryTransaction, TransactionFactory}
-//import encry.
+import org.encryfoundation.wallet.crypto.PrivateKey25519
+import org.encryfoundation.wallet.transaction.{EncryTransaction, Transaction}
+import org.encryfoundation.wallet.utils.ExtUtils._
+import org.encryfoundation.wallet.Page._
+import io.circe.syntax._
 
+import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
 
 object WebServer {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
 
-    implicit val system = ActorSystem("my-system")
-    implicit val materializer = ActorMaterializer()
+    implicit val system: ActorSystem = ActorSystem("my-system")
+    implicit val materializer: ActorMaterializer = ActorMaterializer()
     // needed for the future flatMap/onComplete in the end
-    implicit val executionContext = system.dispatcher
+    implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-    import Page._
-    import ExtUtils._
-    val data = Map.empty[String,Number]
+    val data: Map[String, Number] = Map.empty
     val route =
       path(""){
         get {
@@ -36,10 +37,8 @@ object WebServer {
       } ~ path("send") {
         parameters('recepient, 'fee.as[Long], 'change.as[Long], 'amount.as[Long]) { (recepient, fee, change, amount) =>
           val (prKey, pubKey) = PrivateKey25519.generateKeys("1".getBytes)
-          val transaction: EncryTransaction = TransactionFactory.defaultPaymentTransactionScratch(
-            prKey, fee, System.currentTimeMillis, ???, recepient.asInstanceOf[Address], amount, None)
-          import encry.modifiers.mempool.EncryTransaction._
-          import io.circe.syntax._
+          val transaction: EncryTransaction = Transaction.defaultPaymentTransactionScratch(
+            prKey, fee, System.currentTimeMillis, ???, recepient, amount, None)
           transaction.asJson.trace
 
           complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, page(jumbModalButton, modal).render))

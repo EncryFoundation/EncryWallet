@@ -1,3 +1,5 @@
+package org.encryfoundation.wallet.utils
+
 object ExtUtils {
   trait Printer[U]{
     def print[T](obj: T): Unit
