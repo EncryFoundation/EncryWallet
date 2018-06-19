@@ -61,10 +61,13 @@ class WalletData(val user1PrivateKey: PrivateKey25519, val user1PublicKey: Publi
   lazy val layout = div(cls:="container-fluid")(
     div(cls:="row")(
       div(cls:="col-3")(
+        h1("Encry Wallet"),
         div(cls:="btn-group-vertical")(
           modalButton(id1)(id1),
-          modalButton(id2)(id2)
-        )
+          modalButton(id2)(id2),
+          button(tpe:="button", cls:="btn btn-outline-warning", attr("data-toggle"):="modal",
+            attr("data-target"):=s"#")
+        ),
       ),
       div(cls:="col-9")(transactionHistory.view),
     )

@@ -81,7 +81,7 @@ object Page {
     )
   )
 
-  def modalButton(modalId: String) = button(tpe:="button", cls:="btn btn-primary", attr("data-toggle"):="modal",
+  def modalButton(modalId: String) = button(tpe:="button", cls:="btn btn-outline-primary", attr("data-toggle"):="modal",
     attr("data-target"):=s"#$modalId")
   lazy val jumbModalButton =
     div(cls:="jumbotron")(modalButton("SendMoney"))
