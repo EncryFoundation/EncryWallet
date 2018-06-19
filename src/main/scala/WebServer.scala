@@ -45,7 +45,7 @@ object WebServer {
 
       } ~ path("test") {
         parameters('recepient, 'fee.as[Long], 'change.as[Long], 'amount.as[Long]) { (recepient, fee, change, amount) =>
-          val nodeUri = Uri(s"http://172.16.10.55:9051/account/${walletData.user1PublicKey}/boxes")
+          val nodeUri = Uri(s"http://172.16.10.55:9051/account/${walletData.user1PublicKey}/boxes").trace
           val (prKey, pubKey) = PrivateKey25519.generateKeys("1".getBytes)
           val useboxes: Future[Either[_,IndexedSeq[MonetaryBox]]] = Http().singleRequest(
             HttpRequest(uri = nodeUri)

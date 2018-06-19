@@ -121,6 +121,12 @@ object Page {
       )
     )
 
+  def numberInput(inputName: String, idPrefix: String) = div( cls:="form-group")(
+    label(`for`:=s"$idPrefix${inputName.capitalize}Input")(inputName.capitalize),
+    input(tpe:="number", cls:="form-control", id:=s"$idPrefix${inputName.capitalize}Input", placeholder:="0",
+      name :=s"${inputName.toLowerCase}")
+  )
+
   lazy val modal2: Modifier =
     div(cls:="modal", id:="myModal2")(
       div(cls:="modal-dialog")(

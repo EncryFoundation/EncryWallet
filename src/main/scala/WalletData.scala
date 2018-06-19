@@ -4,7 +4,28 @@ import scalatags.Text.all._
 
 import Page._
 
-class WalletData(val user1PrivateKey: PrivateKey25519, val user1PublicKey: PublicKey25519, val user2: Address) {
+
+case class Transaction(address: Address, amount: Long, fee: Long, change: Long){}
+case class TransactionHistory(transactions: Seq[Transaction] = Seq.empty){
+  val view = table(cls:="table table-striped")(
+    thead(
+      tr(
+        th("Address"),
+        th("Amount"),
+        th("Fee"),
+        th("Change"),
+      ),tbody(
+        transactions.map{
+          case Transaction(address, amount, fee, change) =>
+            tr(td(address), td(amount), td(fee), td(change))
+        }
+      )
+    )
+  )
+}
+
+class WalletData(val user1PrivateKey: PrivateKey25519, val user1PublicKey: PublicKey25519, val user2: Address,
+                 transactionHistory: TransactionHistory = TransactionHistory()) {
   //val transactionForm =
   lazy val transactionFormInner = Seq(
     div( cls:="form-group")(
@@ -34,7 +55,7 @@ class WalletData(val user1PrivateKey: PrivateKey25519, val user1PublicKey: Publi
   val id2 = "transaction2"
   def view = page(layout,
     modal( id1, form(transactionFormInner)(submitButton)),
-    modal( id2, form(transactionFormInner)(contractInput,submitButton))
+    modal( id2, form(transactionFormInner)(contractInput,submitButton)),
   )
 
   lazy val layout = div(cls:="container-fluid")(
@@ -45,7 +66,7 @@ class WalletData(val user1PrivateKey: PrivateKey25519, val user1PublicKey: Publi
           modalButton(id2)(id2)
         )
       ),
-      div(cls:="col-9"),
+      div(cls:="col-9")(transactionHistory.view),
     )
   )
 
