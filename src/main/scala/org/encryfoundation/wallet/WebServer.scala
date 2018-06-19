@@ -6,16 +6,17 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.util.ByteString
-import org.encryfoundation.prismlang.lib.predefined.decode.Base58decode
+import io.circe.parser._
 import org.encryfoundation.wallet.crypto.PrivateKey25519
+import org.encryfoundation.wallet.transaction.Transaction
 import org.encryfoundation.wallet.transaction.box.AssetBox
-import org.encryfoundation.wallet.transaction.{EncryTransaction, Transaction}
+import org.encryfoundation.wallet.transaction.box.AssetBox._
 import scorex.crypto.encode.Base58
 import scorex.crypto.signatures.PrivateKey
 
 import scala.concurrent._
 import scala.io.StdIn
-import scala.util.{Failure, Success}
+import scala.util.Success
 
 object WebServer {
   def main(args: Array[String]): Unit = {
@@ -25,7 +26,6 @@ object WebServer {
     // needed for the future flatMap/onComplete in the end
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-    import org.encryfoundation.wallet.Page._
     import org.encryfoundation.wallet.utils.ExtUtils._
 
     val (_, pub) = PrivateKey25519.generateKeys("1".getBytes)
@@ -42,12 +42,12 @@ object WebServer {
           ).map( uri => Http().singleRequest(
             HttpRequest(uri = uri)
           ) .flatMap(_.entity.dataBytes.runFold(ByteString.empty)(_ ++ _))
-            .map(_.utf8String.trace)
-            //            .map(decode[Seq[AssetBox]])
-            .map(_ => Right(Seq.empty[AssetBox]))
+            .map(_.utf8String)
+            .map(decode[Seq[AssetBox]])
+            //.map(_ => Right(Seq.empty[AssetBox]))
             .map(_.map(_.foldLeft(Seq[AssetBox]()) { case (seq, box) =>
               if (seq.map(_.value).sum < (amount + fee)) seq :+ box else seq
-            }.toIndexedSeq
+            }.toIndexedSeq.trace
             )
             )
           ).getOrElse(Future.failed(new Exception("Empty wallet")))
