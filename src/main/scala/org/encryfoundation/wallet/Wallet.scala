@@ -40,19 +40,21 @@ object Wallet {
   def initWithKey(privateKey: PrivateKey): Wallet = {
     val publicKey = PublicKey @@ provider.generatePublicKey(privateKey)
     val wallet: Wallet = readOrGenerate(publicKey)
-    wallet.store.update(initialVersionKey, Seq.empty, Seq(secretKey -> ByteArrayWrapper(privateKey)))
+    if (wallet.store.get(secretKey).isEmpty)
+      wallet.store.update(initialVersionKey, Seq.empty, Seq(secretKey -> ByteArrayWrapper(privateKey)))
     wallet
   }
 
   def initWithNewKey: Wallet = {
     val keys: (PrivateKey25519, PublicKey25519) = PrivateKey25519.generateKeys(Random.randomBytes())
     val wallet: Wallet = readOrGenerate(keys._2.pubKeyBytes)
-    wallet.store.update(initialVersionKey, Seq.empty, Seq(secretKey -> ByteArrayWrapper(keys._1.privKeyBytes)))
+    if (wallet.store.get(secretKey).isEmpty)
+      wallet.store.update(initialVersionKey, Seq.empty, Seq(secretKey -> ByteArrayWrapper(keys._1.privKeyBytes)))
     wallet
   }
 
   def readOrGenerate(pubKey: PublicKey): Wallet = {
-    val dir: File = new File(s"/keys")
+    val dir: File = new File(s"keys")
     dir.mkdirs()
     val store: LSMStore = new LSMStore(dir, keepVersions = 0)
     Wallet(store, pubKey)
