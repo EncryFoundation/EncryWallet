@@ -49,12 +49,12 @@ object WebServer {
             HttpRequest(uri = nodeUri)
           ) .flatMap(_.entity.dataBytes.runFold(ByteString.empty)(_ ++ _))
             .map(_.utf8String.trace)
-//            .map(decode[Seq[AssetBox]])
+            //            .map(decode[Seq[AssetBox]])
             .map(_ => Right(Seq.empty[AssetBox]))
             .map(_.map(_.foldLeft(Seq[AssetBox]()) { case (seq, box) =>
-                  if (seq.map(_.amount).sum < (amount + fee)) seq :+ box else seq
-                }.toIndexedSeq
-              )
+              if (seq.map(_.amount).sum < (amount + fee)) seq :+ box else seq
+            }.toIndexedSeq
+            )
             )
           onComplete(useboxes){
             case Success(Right(boxes))  =>

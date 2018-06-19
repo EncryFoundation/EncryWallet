@@ -1,6 +1,6 @@
 package org.encryfoundation.wallet.transaction.box
 
-import io.circe.Encoder
+import io.circe.{Decoder, Encoder, HCursor}
 import io.circe.syntax._
 import org.encryfoundation.wallet.transaction.EncryProposition
 import scorex.crypto.authds.ADKey
@@ -30,4 +30,17 @@ object AssetBox {
     "value" -> bx.amount.asJson,
     "tokenId" -> bx.tokenIdOpt.map(id => Base58.encode(id)).asJson
   ).asJson
+
+  implicit val decodeEncryProposition: Decoder[EncryProposition] = (c: HCursor) => for {
+    address <- c.downField("address").as[String]
+  } yield EncryProposition.accountLock(address)
+
+
+  implicit val decodeAssetBox: Decoder[AssetBox] = (c: HCursor) => for {
+    nonce <- c.downField("nonce").as[Long]
+    id <- c.downField("id").as[String]
+    proposition <- c.downField("proposition").as[EncryProposition]
+    amount <- c.downField("value").as[Long]
+  } yield new AssetBox(proposition, nonce, amount)
+
 }
