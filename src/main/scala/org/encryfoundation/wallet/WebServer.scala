@@ -6,10 +6,12 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.util.ByteString
-import io.circe._
+import org.encryfoundation.prismlang.lib.predefined.decode.Base58decode
 import org.encryfoundation.wallet.crypto.PrivateKey25519
+import org.encryfoundation.wallet.transaction.box.AssetBox
 import org.encryfoundation.wallet.transaction.{EncryTransaction, Transaction}
-import org.encryfoundation.wallet.transaction.box.{AssetBox, EncryBox}
+import scorex.crypto.encode.Base58
+import scorex.crypto.signatures.PrivateKey
 
 import scala.concurrent._
 import scala.io.StdIn
@@ -27,7 +29,7 @@ object WebServer {
     import org.encryfoundation.wallet.utils.ExtUtils._
 
     val (pr, pub) = PrivateKey25519.generateKeys("1".getBytes)
-    val walletData = new WalletData( pr, pub,
+    var walletData = new WalletData( None, pub,
       PrivateKey25519.generateKeys("2".getBytes)._2.address
     )
 
@@ -35,15 +37,11 @@ object WebServer {
 
 
     val route =
-      path(""){
-        get {
-          complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, page(jumbModalButton, modal).render))
-        }
-
-      } ~ path("test") {
+      path("test") {
         parameters('recepient.as[String], 'fee.as[Long], 'change.as[Long], 'amount.as[Long]) { (recepient, fee, change, amount) =>
           val nodeUri = Uri(s"http://172.16.10.55:9051/account/${walletData.user1PublicKey}/boxes").trace
           val (prKey, pubKey) = PrivateKey25519.generateKeys("1".getBytes)
+          //Wallet.initWithKey(PrivateKey @@ prKey)
 
           val useboxes: Future[Either[_,IndexedSeq[AssetBox]]] = Http().singleRequest(
             HttpRequest(uri = nodeUri)
@@ -67,8 +65,13 @@ object WebServer {
           }
 
         }
-      } ~ path("test" ) {
-        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render))
+      } ~ {
+        parameters('privateKey.as[String].?) { privateKey =>
+          "Here".trace
+          val wallet: Option[Wallet] = privateKey.flatMap(Base58.decode(_).toOption).map(x => Wallet.initWithKey(PrivateKey @@ x))
+          walletData = walletData.copy(wallet = wallet).trace
+          complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render))
+        }
       }
 
     val bindingFuture = Http().bindAndHandle(route, "localhost", 8080)

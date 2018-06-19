@@ -3,6 +3,7 @@ package org.encryfoundation.wallet
 import scalatags.Text.all._
 import org.encryfoundation.wallet.Page._
 import org.encryfoundation.wallet.crypto.{PrivateKey25519, PublicKey25519}
+import scorex.crypto.encode.Base58
 
 
 case class TransactionM(address: String, amount: Long, fee: Long, change: Long){}
@@ -24,14 +25,19 @@ case class TransactionHistory(transactions: Seq[TransactionM] = Seq.empty){
   )
 }
 
-class WalletData(val user1PrivateKey: PrivateKey25519, val user1PublicKey: PublicKey25519, val user2: String,
+case class WalletData(
+                     wallet: Option[Wallet],
+//                   user1PrivateKey: PrivateKey25519,
+                   user1PublicKey: PublicKey25519,
+                   user2: String,
                  transactionHistory: TransactionHistory = TransactionHistory()) {
   //val transactionForm =
+  val secretKey = wallet.map(_.getSecret.privKeyBytes).map(Base58.encode(_)).getOrElse("noKey").toString
   lazy val transactionFormInner = Seq(
     div( cls:="form-group")(
       label(`for`:="exampleCurrencyInput")("Private key:"),
       input(tpe:="text", cls:="form-control", id:="exampleCurrencyInput", name:="prKey", disabled,
-        value:=user1PrivateKey.toString)
+        value:=secretKey)
     ),
     div( cls:="form-group")(
       label(`for`:="exampleCurrencyInput")("Fee"),
@@ -53,9 +59,11 @@ class WalletData(val user1PrivateKey: PrivateKey25519, val user1PublicKey: Publi
 
   val id1 = "transaction1"
   val id2 = "transaction2"
+  val settingsId = "accountSettings"
   def view = page(layout,
-    modal( id1, form(transactionFormInner)(submitButton)),
-    modal( id2, form(transactionFormInner)(contractInput,submitButton)),
+    modal( "Transfer", id1, form(transactionFormInner)(submitButton)),
+    modal( "Transfer with contract", id2, form(transactionFormInner)(contractInput,submitButton)),
+    modal("Account Settings", settingsId, accountSettingsForm)
   )
 
   lazy val layout = div(cls:="container-fluid")(
@@ -66,19 +74,27 @@ class WalletData(val user1PrivateKey: PrivateKey25519, val user1PublicKey: Publi
           modalButton(id1)(id1),
           modalButton(id2)(id2),
           button(tpe:="button", cls:="btn btn-outline-warning", attr("data-toggle"):="modal",
-            attr("data-target"):=s"#")("Login")
+            attr("data-target"):=s"#$settingsId")("Account Settings")
         ),
       ),
       div(cls:="col-9")(transactionHistory.view),
     )
   )
 
-  def modal(modalId: String, formBody: Modifier): Modifier =
+  val accountSettingsForm = form(
+    div( cls:="form-group")(
+      label(`for`:="privateKeyInput")(s"Private key: ${secretKey}"),
+      input(tpe:="text", cls:="form-control", id:="privateKeyInput", placeholder:="Generate New Key or input", name:="privateKey")
+    ),
+    button(cls:="btn btn-outline-warning", tpe:="submit")("Set Private Key")
+  )
+
+  def modal(title: String, modalId: String, formBody: Modifier): Modifier =
     div(cls:="modal", id:=modalId)(
       div(cls:="modal-dialog")(
         div(cls:="modal-content")(
           div(cls:="modal-header")(
-            h4(cls:="modal-title")("Transfer"),
+            h4(cls:="modal-title")(title),
             button(tpe:="button", cls:="close", attr("data-dissmiss"):="modal")(raw("&times;"))
           ),
           div(cls:="modal-body")(formBody),
