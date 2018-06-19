@@ -1,4 +1,5 @@
-import scalatags.Text
+package org.encryfoundation.wallet
+
 import scalatags.Text.all._
 
 object Page {
