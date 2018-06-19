@@ -2,7 +2,7 @@ package org.encryfoundation.wallet
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.{HttpEntity, _}
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.util.ByteString
@@ -34,11 +34,13 @@ object WebServer {
     import io.circe.syntax._
 
 
+    val nodeHost = "http://172.16.10.58:9051"
+
     val route =
       path("") {
         parameters('fee.as[Long], 'amount.as[Long],'recepient.as[String]) { (fee, amount, recepient) =>
           val useboxes = walletData.wallet.map(_.account.address).map(
-            address => Uri(s"http://172.16.10.58:9051/account/$address/boxes")
+            address => Uri(s"$nodeHost/account/$address/boxes")
           ).map( uri => Http().singleRequest(
             HttpRequest(uri = uri)
           ) .flatMap(_.entity.dataBytes.runFold(ByteString.empty)(_ ++ _))
@@ -53,14 +55,20 @@ object WebServer {
           ).getOrElse(Future.failed(new Exception("Empty wallet")))
           onComplete(useboxes){
             case Success(Right(boxes))  =>
-              walletData.wallet.map(wallet =>
+              val sendData = walletData.wallet.map(wallet =>
                 Transaction.defaultPaymentTransactionScratch(
                   wallet.getSecret, fee, System.currentTimeMillis, boxes, recepient, amount, None)
                     .asJson.trace)
-              complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render))
-            case x => complete(StatusCodes.OK).trace(x)
+                .map(  json =>
+                  HttpRequest(HttpMethods.POST, Uri(s"$nodeHost/transactions/send"),
+                    entity = HttpEntity(ContentTypes.`text/html(UTF-8)`, json.toString))
+//                    entity = HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render)
+                ).map(x => Http().singleRequest(request = x)).get
+              onComplete(sendData) { x =>
+                complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render))
+              }
+            case x => complete(StatusCodes.ExpectationFailed).trace(x)
           }
-
         }
       } ~ {
         path("") {
