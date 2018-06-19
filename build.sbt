@@ -19,6 +19,13 @@ resolvers ++= Seq("Sonatype Releases" at "https://oss.sonatype.org/content/repos
 val akkaVersion = "10.0.9"
 val circeVersion = "0.9.3"
 
+val testingDependencies = Seq(
+  "com.typesafe.akka" %% "akka-testkit" % "2.4.+" % "test",
+  "com.typesafe.akka" %% "akka-http-testkit" % akkaVersion % "test",
+  "org.scalatest" %% "scalatest" % "3.0.3" % "test",
+  "org.scalacheck" %% "scalacheck" % "1.13.+" % "test"
+)
+
 libraryDependencies ++= Seq (
   "com.typesafe.akka" %% "akka-http" % akkaVersion,
   "com.lihaoyi" %% "scalatags" % "0.6.7",
@@ -28,4 +35,4 @@ libraryDependencies ++= Seq (
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,
-)
+) ++ testingDependencies

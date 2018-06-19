@@ -1,11 +1,32 @@
+import io.circe._
 import org.encryfoundation.wallet
 import org.encryfoundation.wallet.transaction.EncryProposition
 import org.encryfoundation.wallet.transaction.box.AssetBox
+import org.scalatest._
+import org.encryfoundation.wallet.utils.ExtUtils._
 
-class JsonSerializerTest {
+class JsonSerializerTest  extends PropSpec with Matchers{
 //  val a = AssetBox(EncryProposition())
+
+  implicit val decodeEncryProposition: Decoder[EncryProposition] = (c: HCursor) => for {
+    address <- c.downField("address").as[String]
+  } yield EncryProposition.accountLock(address)
+
+
+  implicit val decodeAssetBox: Decoder[AssetBox] = (c: HCursor) => for {
+    nonce <- c.downField("nonce").as[Long]
+    id <- c.downField("id").as[String]
+    proposition <- c.downField("proposition").as[EncryProposition]
+    amount <- c.downField("value").as[Long]
+  } yield new AssetBox(proposition, nonce, amount)
+
+
   val abExample = AssetBox(EncryProposition.accountLock("4NhqE33ps1mdFwiKsTXEeRHZikmvU4ha3UkJqphyeRvS3RV4Vx"),
     -1423773885618135344L, 1969300, None)
+
+  import io.circe._, io.circe.parser._
+  import io.circe._, io.circe.syntax._
+
   val json1 =
     """
       |{
@@ -20,6 +41,9 @@ class JsonSerializerTest {
       |    "value" : 1969300
       |  }
     """.stripMargin
+
+  decode[AssetBox](json1).trace
+
   val json =
     """
       |[
@@ -124,4 +148,7 @@ class JsonSerializerTest {
       |  }
       |]
     """.stripMargin
+
+  decode[Seq[AssetBox]](json).trace
+
 }
