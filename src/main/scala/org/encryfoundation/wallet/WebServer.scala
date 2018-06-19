@@ -67,12 +67,13 @@ object WebServer {
         }
       } ~ {
         parameters('privateKey.as[String].?) { privateKey =>
-          "Here".trace
           val wallet: Option[Wallet] = privateKey.flatMap(Base58.decode(_).toOption).map(x => Wallet.initWithKey(PrivateKey @@ x))
-          walletData = walletData.copy(wallet = wallet).trace
+          if(wallet.isDefined) walletData = walletData.copy(wallet = wallet).trace
           complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render))
         }
-      }
+      } ~ complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render))
+
+
 
     val bindingFuture = Http().bindAndHandle(route, "localhost", 8080)
 
