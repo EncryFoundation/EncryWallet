@@ -6,129 +6,109 @@ import org.scalatest._
 
 class JsonSerializerTest  extends PropSpec with Matchers{
 
+  property("Asset Boxes from node"){}
+
   property("Asset box decoder test") {
 
     val json1 =
       """
-        |{
-        |    "nonce" : -1423773885618135344,
-        |    "id" : "8Qh1Q7RUSopoGGfVRYvCJfJkf4nEuRYdMtXty7SCgzA",
-        |    "tokenId" : null,
-        |    "type" : 1,
-        |    "proposition" : {
-        |      "typeId" : 2,
-        |      "address" : "4NhqE33ps1mdFwiKsTXEeRHZikmvU4ha3UkJqphyeRvS3RV4Vx"
+        |    {
+        |      "nonce" : 2570520101091082810,
+        |      "id" : "8GgKiSczkS1GPa2h38SxWQt4KkEt6bGd5dx1V8yRvnb",
+        |      "tokenId" : null,
+        |      "type" : 1,
+        |      "proposition" : {
+        |        "script" : "SNpbTW2noppcART1wHe6mHLqYtajiiWwFvXbnaP35kZShimrfKEjoXDpsbmrNc3ToVLQHXcwfGzG5XdKHPdXXQUgQud42N6h4M4UKttcwxJT5GfurTQJDq4gKCdVVqJknFrfvDLr5azFacz8217Gsmj2hge1m1B7mahDHRzZ3Y471pwHrDGspbiuyQCvvd7jiWMupmxKJ8483wVjjXUFck4Qg94SoYJmnubjNAuwv1DJmg"
+        |      },
+        |      "value" : 1989800
         |    },
-        |    "value" : 1969300
-        |  }
       """.stripMargin
 
     decode[AssetBox](json1).trace
 
     val json =
-      """
-        |[
-        |  {
-        |    "nonce" : -1423773885618135344,
-        |    "id" : "8Qh1Q7RUSopoGGfVRYvCJfJkf4nEuRYdMtXty7SCgzA",
-        |    "tokenId" : null,
-        |    "type" : 1,
-        |    "proposition" : {
-        |      "typeId" : 2,
-        |      "address" : "4NhqE33ps1mdFwiKsTXEeRHZikmvU4ha3UkJqphyeRvS3RV4Vx"
+      """[
+        |    {
+        |      "nonce" : -8506939166499002754,
+        |      "id" : "8fkABbU9oR6MJyuQFp2usiXGc8fdUufjY1XYEqeuUYN",
+        |      "tokenId" : null,
+        |      "type" : 1,
+        |      "proposition" : {
+        |        "script" : "SNpbTW2noppcART1wHe6mHLqYtajiiWwFvXbnaP35kZShimrfKEjoXDpsbmrNc3ToVLQHXcwfGzG5XdKHPdXXQUgQud42N6h4M4UKttcwxJT5GfurTQJDq4gKCdVVqJknFrfvDLr5azFacz8217Gsmj2hge1m1B7mahDHRzZ3Y471pwHrDGspbiuyQCvvd7jiWMupmxKJ8483wVjjXUFck4Qg94SoYJmnubjNAuwv1DJmg"
+        |      },
+        |      "value" : 1969700
         |    },
-        |    "value" : 1969300
-        |  },
-        |  {
-        |    "nonce" : -1273373567252329492,
-        |    "id" : "5Du8D2UVd9qmqGHpne4H1LzuHE19d1qaXz4L8aEzmVR",
-        |    "tokenId" : null,
-        |    "type" : 1,
-        |    "proposition" : {
-        |      "typeId" : 2,
-        |      "address" : "4NhqE33ps1mdFwiKsTXEeRHZikmvU4ha3UkJqphyeRvS3RV4Vx"
+        |    {
+        |      "nonce" : 7542729214514099406,
+        |      "id" : "8Lraq7YnZL3Me2KTGgxuAT4cCaGuQtdGEd2Xy2uvBR8",
+        |      "tokenId" : null,
+        |      "type" : 1,
+        |      "proposition" : {
+        |        "script" : "SNpbTW2noppcART1wHe6mHLqYtajiiWwFvXbnaP35kZShimrfKEjoXDpsbmrNc3ToVLQHXcwfGzG5XdKHPdXXQUgQud42N6h4M4UKttcwxJT5GfurTQJDq4gKCdVVqJknFrfvDLr5azFacz8217Gsmj2hge1m1B7mahDHRzZ3Y471pwHrDGspbiuyQCvvd7jiWMupmxKJ8483wVjjXUFck4Qg94SoYJmnubjNAuwv1DJmg"
+        |      },
+        |      "value" : 1989800
         |    },
-        |    "value" : 2159400
-        |  },
-        |  {
-        |    "nonce" : -7187492925374998615,
-        |    "id" : "6sa2vdX6iihkxqdvwd1rBxmQT1RCYXQo3sTb2bKnZrK",
-        |    "tokenId" : null,
-        |    "type" : 1,
-        |    "proposition" : {
-        |      "typeId" : 2,
-        |      "address" : "4NhqE33ps1mdFwiKsTXEeRHZikmvU4ha3UkJqphyeRvS3RV4Vx"
+        |    {
+        |      "nonce" : 2903136069779126945,
+        |      "id" : "5Emjt8HtPpm99n4kigxybJWw5phfFshBpskMb6TguCT",
+        |      "tokenId" : null,
+        |      "type" : 1,
+        |      "proposition" : {
+        |        "script" : "SNpbTW2noppcART1wHe6mHLqYtajiiWwFvXbnaP35kZShimrfKEjoXDpsbmrNc3ToVLQHXcwfGzG5XdKHPdXXQUgQud42N6h4M4UKttcwxJT5GfurTQJDq4gKCdVVqJknFrfvDLr5azFacz8217Gsmj2hge1m1B7mahDHRzZ3Y471pwHrDGspbiuyQCvvd7jiWMupmxKJ8483wVjjXUFck4Qg94SoYJmnubjNAuwv1DJmg"
+        |      },
+        |      "value" : 2009900
         |    },
-        |    "value" : 2009500
-        |  },
-        |  {
-        |    "nonce" : 647665066005771743,
-        |    "id" : "6eGdJYzijm6zsH7hveM2nnhx6LCiGYST3NNbtH38LPu",
-        |    "tokenId" : null,
-        |    "type" : 1,
-        |    "proposition" : {
-        |      "typeId" : 2,
-        |      "address" : "4NhqE33ps1mdFwiKsTXEeRHZikmvU4ha3UkJqphyeRvS3RV4Vx"
+        |    {
+        |      "nonce" : -2684592946267107158,
+        |      "id" : "7W9YdQgm6UdpKfhy7JJ3P4yLUNN32ERPG6yBDsEwWoH",
+        |      "tokenId" : null,
+        |      "type" : 1,
+        |      "proposition" : {
+        |        "script" : "SNpbTW2noppcART1wHe6mHLqYtajiiWwFvXbnaP35kZShimrfKEjoXDpsbmrNc3ToVLQHXcwfGzG5XdKHPdXXQUgQud42N6h4M4UKttcwxJT5GfurTQJDq4gKCdVVqJknFrfvDLr5azFacz8217Gsmj2hge1m1B7mahDHRzZ3Y471pwHrDGspbiuyQCvvd7jiWMupmxKJ8483wVjjXUFck4Qg94SoYJmnubjNAuwv1DJmg"
+        |      },
+        |      "value" : 2030000
         |    },
-        |    "value" : 2189600
-        |  },
-        |  {
-        |    "nonce" : 4257005958711236845,
-        |    "id" : "579Q7ufbmVSXCi8g98HUR5XprkpFH7KujDXaZ4ZjSaQ",
-        |    "tokenId" : null,
-        |    "type" : 1,
-        |    "proposition" : {
-        |      "typeId" : 2,
-        |      "address" : "4NhqE33ps1mdFwiKsTXEeRHZikmvU4ha3UkJqphyeRvS3RV4Vx"
+        |    {
+        |      "nonce" : 2948104228829592896,
+        |      "id" : "4w2niUKhtgJNmr3ykC5yDT1XoSxwL9xpevKsQuZ1Muf",
+        |      "tokenId" : null,
+        |      "type" : 1,
+        |      "proposition" : {
+        |        "script" : "SNpbTW2noppcART1wHe6mHLqYtajiiWwFvXbnaP35kZShimrfKEjoXDpsbmrNc3ToVLQHXcwfGzG5XdKHPdXXQUgQud42N6h4M4UKttcwxJT5GfurTQJDq4gKCdVVqJknFrfvDLr5azFacz8217Gsmj2hge1m1B7mahDHRzZ3Y471pwHrDGspbiuyQCvvd7jiWMupmxKJ8483wVjjXUFck4Qg94SoYJmnubjNAuwv1DJmg"
+        |      },
+        |      "value" : 2009900
         |    },
-        |    "value" : 3008300
-        |  },
-        |  {
-        |    "nonce" : 3701934156165221680,
-        |    "id" : "5xxxir8RTdgxoQSri3TXaRk3WFJj6abuQgQFcAqC5Lc",
-        |    "tokenId" : null,
-        |    "type" : 1,
-        |    "proposition" : {
-        |      "typeId" : 2,
-        |      "address" : "4NhqE33ps1mdFwiKsTXEeRHZikmvU4ha3UkJqphyeRvS3RV4Vx"
+        |    {
+        |      "nonce" : 2570520101091082810,
+        |      "id" : "8GgKiSczkS1GPa2h38SxWQt4KkEt6bGd5dx1V8yRvnb",
+        |      "tokenId" : null,
+        |      "type" : 1,
+        |      "proposition" : {
+        |        "script" : "SNpbTW2noppcART1wHe6mHLqYtajiiWwFvXbnaP35kZShimrfKEjoXDpsbmrNc3ToVLQHXcwfGzG5XdKHPdXXQUgQud42N6h4M4UKttcwxJT5GfurTQJDq4gKCdVVqJknFrfvDLr5azFacz8217Gsmj2hge1m1B7mahDHRzZ3Y471pwHrDGspbiuyQCvvd7jiWMupmxKJ8483wVjjXUFck4Qg94SoYJmnubjNAuwv1DJmg"
+        |      },
+        |      "value" : 1989800
         |    },
-        |    "value" : 1979300
-        |  },
-        |  {
-        |    "nonce" : -7406367754727313836,
-        |    "id" : "7dMcGDkCik7t3rD6bQMfbygjhtvs38pcUkWxcbmkWBk",
-        |    "tokenId" : null,
-        |    "type" : 1,
-        |    "proposition" : {
-        |      "typeId" : 2,
-        |      "address" : "4NhqE33ps1mdFwiKsTXEeRHZikmvU4ha3UkJqphyeRvS3RV4Vx"
+        |    {
+        |      "nonce" : 2472425844085218219,
+        |      "id" : "8UErsrakKns4Ht48g45eRaCDx5X1HquYv6Tfag2mj3u",
+        |      "tokenId" : null,
+        |      "type" : 1,
+        |      "proposition" : {
+        |        "script" : "SNpbTW2noppcART1wHe6mHLqYtajiiWwFvXbnaP35kZShimrfKEjoXDpsbmrNc3ToVLQHXcwfGzG5XdKHPdXXQUgQud42N6h4M4UKttcwxJT5GfurTQJDq4gKCdVVqJknFrfvDLr5azFacz8217Gsmj2hge1m1B7mahDHRzZ3Y471pwHrDGspbiuyQCvvd7jiWMupmxKJ8483wVjjXUFck4Qg94SoYJmnubjNAuwv1DJmg"
+        |      },
+        |      "value" : 1969700
         |    },
-        |    "value" : 2859400
-        |  },
-        |  {
-        |    "nonce" : 2056611475809368172,
-        |    "id" : "7voXcZhWCb8EBVdGcqGQbs1gNcPBXAZSvhKq7xaFe31",
-        |    "tokenId" : null,
-        |    "type" : 1,
-        |    "proposition" : {
-        |      "typeId" : 2,
-        |      "address" : "4NhqE33ps1mdFwiKsTXEeRHZikmvU4ha3UkJqphyeRvS3RV4Vx"
-        |    },
-        |    "value" : 2169500
-        |  },
-        |  {
-        |    "nonce" : -3674053580581240723,
-        |    "id" : "7h7g99ZtdBF11oHcVLQA1ufbn9Heyf77jPULFJnLk6P",
-        |    "tokenId" : null,
-        |    "type" : 1,
-        |    "proposition" : {
-        |      "typeId" : 2,
-        |      "address" : "4NhqE33ps1mdFwiKsTXEeRHZikmvU4ha3UkJqphyeRvS3RV4Vx"
-        |    },
-        |    "value" : 2039600
-        |  }
-        |]
-      """.stripMargin
+        |    {
+        |      "nonce" : -8365166295327412158,
+        |      "id" : "6uM8Urw9LDvAo6Gm8mAie4sDhRKFhUvSEpb3wnJZ6cK",
+        |      "tokenId" : null,
+        |      "type" : 1,
+        |      "proposition" : {
+        |        "script" : "SNpbTW2noppcART1wHe6mHLqYtajiiWwFvXbnaP35kZShimrfKEjoXDpsbmrNc3ToVLQHXcwfGzG5XdKHPdXXQUgQud42N6h4M4UKttcwxJT5GfurTQJDq4gKCdVVqJknFrfvDLr5azFacz8217Gsmj2hge1m1B7mahDHRzZ3Y471pwHrDGspbiuyQCvvd7jiWMupmxKJ8483wVjjXUFck4Qg94SoYJmnubjNAuwv1DJmg"
+        |      },
+        |      "value" : 2030000
+        |    }
+        |  ]""".stripMargin
 
     decode[Seq[AssetBox]](json).trace
   }

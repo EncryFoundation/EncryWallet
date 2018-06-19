@@ -32,7 +32,7 @@ object AssetBox {
   ).asJson
 
   implicit val decodeEncryProposition: Decoder[EncryProposition] = (c: HCursor) => for {
-    address <- c.downField("address").as[String]
+    address <- c.downField("script").as[String]
   } yield EncryProposition.accountLock(address)
 
 
