@@ -9,6 +9,8 @@ import scala.util.Try
 
 case class Signature25519(signature: Signature) {
 
+  lazy val bytes: Array[Byte] = Signature25519.Serializer.toBytes(this)
+
   def isValid(pubKey: PublicKey25519, message: Array[Byte]): Boolean =
     signature.isEmpty || signature.length == Curve25519.SignatureLength &&
       Curve25519.verify(signature, message, pubKey.pubKeyBytes)

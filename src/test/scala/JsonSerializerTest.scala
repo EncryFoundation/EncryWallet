@@ -1,4 +1,25 @@
+import org.encryfoundation.wallet
+import org.encryfoundation.wallet.transaction.EncryProposition
+import org.encryfoundation.wallet.transaction.box.AssetBox
+
 class JsonSerializerTest {
+//  val a = AssetBox(EncryProposition())
+  val abExample = AssetBox(EncryProposition.accountLock("4NhqE33ps1mdFwiKsTXEeRHZikmvU4ha3UkJqphyeRvS3RV4Vx"),
+    -1423773885618135344L, 1969300, None)
+  val json1 =
+    """
+      |{
+      |    "nonce" : -1423773885618135344,
+      |    "id" : "8Qh1Q7RUSopoGGfVRYvCJfJkf4nEuRYdMtXty7SCgzA",
+      |    "tokenId" : null,
+      |    "type" : 1,
+      |    "proposition" : {
+      |      "typeId" : 2,
+      |      "address" : "4NhqE33ps1mdFwiKsTXEeRHZikmvU4ha3UkJqphyeRvS3RV4Vx"
+      |    },
+      |    "value" : 1969300
+      |  }
+    """.stripMargin
   val json =
     """
       |[
