@@ -25,7 +25,7 @@ object WebServer {
     // needed for the future flatMap/onComplete in the end
     implicit val executionContext = system.dispatcher
 
-    import Page._
+    import org.encryfoundation.wallet.Page._
     import ExtUtils._
 
     val (pr, pub) = PrivateKey25519.generateKeys("1".getBytes)

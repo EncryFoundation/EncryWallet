@@ -2,7 +2,7 @@ import encry.account.Address
 import encry.crypto._
 import scalatags.Text.all._
 
-import Page._
+import org.encryfoundation.wallet.Page._
 
 
 case class Transaction(address: Address, amount: Long, fee: Long, change: Long){}
@@ -66,7 +66,7 @@ class WalletData(val user1PrivateKey: PrivateKey25519, val user1PublicKey: Publi
           modalButton(id1)(id1),
           modalButton(id2)(id2),
           button(tpe:="button", cls:="btn btn-outline-warning", attr("data-toggle"):="modal",
-            attr("data-target"):=s"#")
+            attr("data-target"):=s"#")("Login")
         ),
       ),
       div(cls:="col-9")(transactionHistory.view),
