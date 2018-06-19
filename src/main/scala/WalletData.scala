@@ -44,10 +44,6 @@ case class WalletData(
       input(tpe:="number", cls:="form-control", id:="exampleFeeInput", placeholder:="0", name:="fee")
     ),
     div( cls:="form-group")(
-      label(`for`:="exampleCurrencyInput")("Change"),
-      input(tpe:="number", cls:="form-control", id:="exampleChangeInput", placeholder:="0", name:="change")
-    ),
-    div( cls:="form-group")(
       label(`for`:="exampleCurrencyInput")("Amount"),
       input(tpe:="number", cls:="form-control", id:="exampleAmountInput", placeholder:="0", name:="amount")
     ),

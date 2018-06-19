@@ -15,7 +15,7 @@ import scorex.crypto.signatures.PrivateKey
 
 import scala.concurrent._
 import scala.io.StdIn
-import scala.util.Success
+import scala.util.{Failure, Success}
 
 object WebServer {
   def main(args: Array[String]): Unit = {
@@ -28,23 +28,19 @@ object WebServer {
     import org.encryfoundation.wallet.Page._
     import org.encryfoundation.wallet.utils.ExtUtils._
 
-    val (pr, pub) = PrivateKey25519.generateKeys("1".getBytes)
-    var walletData = new WalletData( None, pub,
-      PrivateKey25519.generateKeys("2".getBytes)._2.address
-    )
+    val (_, pub) = PrivateKey25519.generateKeys("1".getBytes)
+    var walletData = new WalletData( None, pub, "3BxEZq6XcBzMSoDbfmY1V9qoYCwu73G1JnJAToaYEhikQ3bBKK")
 
     import io.circe.syntax._
 
 
     val route =
-      path("test") {
-        parameters('recepient.as[String], 'fee.as[Long], 'change.as[Long], 'amount.as[Long]) { (recepient, fee, change, amount) =>
-          val nodeUri = Uri(s"http://172.16.10.55:9051/account/${walletData.user1PublicKey}/boxes").trace
-          val (prKey, pubKey) = PrivateKey25519.generateKeys("1".getBytes)
-          //Wallet.initWithKey(PrivateKey @@ prKey)
-
-          val useboxes: Future[Either[_,IndexedSeq[AssetBox]]] = Http().singleRequest(
-            HttpRequest(uri = nodeUri)
+      path("") {
+        parameters('fee.as[Long], 'amount.as[Long],'recepient.as[String]) { (fee, amount, recepient) =>
+          val useboxes = walletData.wallet.map(_.account.address).map(
+            address => Uri(s"http://172.16.10.58:9051/account/$address/boxes")
+          ).map( uri => Http().singleRequest(
+            HttpRequest(uri = uri)
           ) .flatMap(_.entity.dataBytes.runFold(ByteString.empty)(_ ++ _))
             .map(_.utf8String.trace)
             //            .map(decode[Seq[AssetBox]])
@@ -54,24 +50,27 @@ object WebServer {
             }.toIndexedSeq
             )
             )
+          ).getOrElse(Future.failed(new Exception("Empty wallet")))
           onComplete(useboxes){
             case Success(Right(boxes))  =>
-              val transaction: EncryTransaction =
+              walletData.wallet.map(wallet =>
                 Transaction.defaultPaymentTransactionScratch(
-                  prKey, fee, System.currentTimeMillis, boxes, recepient, amount, None)
-              transaction.asJson.trace
+                  wallet.getSecret, fee, System.currentTimeMillis, boxes, recepient, amount, None)
+                    .asJson.trace)
               complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render))
             case x => complete(StatusCodes.OK).trace(x)
           }
 
         }
       } ~ {
-        parameters('privateKey.as[String].?) { privateKey =>
-          val wallet: Option[Wallet] = privateKey.flatMap(Base58.decode(_).toOption).map(x => Wallet.initWithKey(PrivateKey @@ x))
-          if(wallet.isDefined) walletData = walletData.copy(wallet = wallet).trace
-          complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render))
+        path("") {
+          parameters('privateKey.as[String].?) { privateKey =>
+            val wallet: Option[Wallet] = privateKey.flatMap(Base58.decode(_).toOption).map(x => Wallet.initWithKey(PrivateKey @@ x))
+            if (wallet.isDefined) walletData = walletData.copy(wallet = wallet).trace
+            complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render))
+          }
         }
-      } ~ complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render))
+      }//~ complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render))
 
 
 
