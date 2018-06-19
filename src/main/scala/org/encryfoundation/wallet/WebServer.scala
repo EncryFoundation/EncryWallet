@@ -29,7 +29,7 @@ object WebServer {
     import org.encryfoundation.wallet.utils.ExtUtils._
 
     val (_, pub) = PrivateKey25519.generateKeys("1".getBytes)
-    var walletData = new WalletData( None, pub, "3BxEZq6XcBzMSoDbfmY1V9qoYCwu73G1JnJAToaYEhikQ3bBKK")
+    var walletData = WalletData( None, pub, "3BxEZq6XcBzMSoDbfmY1V9qoYCwu73G1JnJAToaYEhikQ3bBKK")
 
     import io.circe.syntax._
 
@@ -46,7 +46,6 @@ object WebServer {
           ) .flatMap(_.entity.dataBytes.runFold(ByteString.empty)(_ ++ _))
             .map(_.utf8String)
             .map(decode[Seq[AssetBox]])
-            //.map(_ => Right(Seq.empty[AssetBox]))
             .map(_.map(_.foldLeft(Seq[AssetBox]()) { case (seq, box) =>
               if (seq.map(_.value).sum < (amount + fee)) seq :+ box else seq
             }.toIndexedSeq.trace
@@ -54,27 +53,27 @@ object WebServer {
             )
           ).getOrElse(Future.failed(new Exception("Empty wallet")))
           onComplete(useboxes){
-            case Success(Right(boxes))  =>
+            case Success(Right(boxes)) =>
               val sendData = walletData.wallet.map(wallet =>
                 Transaction.defaultPaymentTransactionScratch(
                   wallet.getSecret, fee, System.currentTimeMillis, boxes, recepient, amount, None)
                     .asJson.trace)
-                .map(  json =>
+                .map( json =>
                   HttpRequest(HttpMethods.POST, Uri(s"$nodeHost/transactions/send"),
-                    entity = HttpEntity(ContentTypes.`text/html(UTF-8)`, json.toString))
+                    entity = HttpEntity(ContentTypes.`application/json`, json.toString))
 //                    entity = HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render)
                 ).map(x => Http().singleRequest(request = x)).get
               onComplete(sendData) { x =>
                 complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render))
               }
-            case x => complete(StatusCodes.ExpectationFailed).trace(x)
+            case x => complete(StatusCodes.ExpectationFailed)
           }
         }
       } ~ {
         path("") {
           parameters('privateKey.as[String].?) { privateKey =>
             val wallet: Option[Wallet] = privateKey.flatMap(Base58.decode(_).toOption).map(x => Wallet.initWithKey(PrivateKey @@ x))
-            if (wallet.isDefined) walletData = walletData.copy(wallet = wallet).trace
+            if (wallet.isDefined) walletData = walletData.copy(wallet = wallet)
             complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render))
           }
         }
