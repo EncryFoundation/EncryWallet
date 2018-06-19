@@ -3,6 +3,7 @@ package org.encryfoundation.wallet
 import scalatags.Text.all._
 import org.encryfoundation.wallet.Page._
 import org.encryfoundation.wallet.crypto.{PrivateKey25519, PublicKey25519}
+import scorex.crypto.encode.Base58
 
 
 case class TransactionM(address: String, amount: Long, fee: Long, change: Long){}
@@ -26,16 +27,17 @@ case class TransactionHistory(transactions: Seq[TransactionM] = Seq.empty){
 
 case class WalletData(
                      wallet: Option[Wallet],
-                   user1PrivateKey: PrivateKey25519,
+//                   user1PrivateKey: PrivateKey25519,
                    user1PublicKey: PublicKey25519,
                    user2: String,
                  transactionHistory: TransactionHistory = TransactionHistory()) {
   //val transactionForm =
+  val secretKey = wallet.map(_.getSecret.privKeyBytes).map(Base58.encode(_)).getOrElse("noKey").toString
   lazy val transactionFormInner = Seq(
     div( cls:="form-group")(
       label(`for`:="exampleCurrencyInput")("Private key:"),
       input(tpe:="text", cls:="form-control", id:="exampleCurrencyInput", name:="prKey", disabled,
-        value:=user1PrivateKey.toString)
+        value:=secretKey)
     ),
     div( cls:="form-group")(
       label(`for`:="exampleCurrencyInput")("Fee"),
@@ -81,7 +83,7 @@ case class WalletData(
 
   val accountSettingsForm = form(
     div( cls:="form-group")(
-      label(`for`:="privateKeyInput")(s"Private key: ${user1PrivateKey}"),
+      label(`for`:="privateKeyInput")(s"Private key: ${secretKey}"),
       input(tpe:="text", cls:="form-control", id:="privateKeyInput", placeholder:="Generate New Key or input", name:="privateKey")
     ),
     button(cls:="btn btn-outline-warning", tpe:="submit")("Set Private Key")

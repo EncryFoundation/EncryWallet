@@ -29,7 +29,7 @@ object WebServer {
     import org.encryfoundation.wallet.utils.ExtUtils._
 
     val (pr, pub) = PrivateKey25519.generateKeys("1".getBytes)
-    var walletData = new WalletData( None, pr, pub,
+    var walletData = new WalletData( None, pub,
       PrivateKey25519.generateKeys("2".getBytes)._2.address
     )
 
@@ -41,6 +41,7 @@ object WebServer {
         parameters('recepient.as[String], 'fee.as[Long], 'change.as[Long], 'amount.as[Long]) { (recepient, fee, change, amount) =>
           val nodeUri = Uri(s"http://172.16.10.55:9051/account/${walletData.user1PublicKey}/boxes").trace
           val (prKey, pubKey) = PrivateKey25519.generateKeys("1".getBytes)
+          //Wallet.initWithKey(PrivateKey @@ prKey)
 
           val useboxes: Future[Either[_,IndexedSeq[AssetBox]]] = Http().singleRequest(
             HttpRequest(uri = nodeUri)
