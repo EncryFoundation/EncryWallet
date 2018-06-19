@@ -95,7 +95,7 @@ object Transaction {
                                          tokenIdOpt: Option[ADKey] = None): EncryTransaction = {
     val pubKey: PublicKey25519 = privKey.publicImage
     val uInputs: IndexedSeq[Input] = useBoxes.map(bx => Input.unsigned(bx.id)).toIndexedSeq
-    val change: Long = useBoxes.map(_.amount).sum - (amount + fee)
+    val change: Long = useBoxes.map(_.value).sum - (amount + fee)
     val directives: IndexedSeq[TransferDirective] = if (change > 0) {
       IndexedSeq(TransferDirective(recipient, amount, tokenIdOpt), TransferDirective(pubKey.address, change, tokenIdOpt))
     } else {

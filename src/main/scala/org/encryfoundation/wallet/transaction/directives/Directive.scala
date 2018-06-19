@@ -38,7 +38,7 @@ object Directive {
           case TransferDirective.TypeId => TransferDirective.jsonDecoder(c)
           //case AssetIssuingDirective.TypeId => AssetIssuingDirective.jsonDecoder(c)
           case ScriptedAssetDirective.TypeId => ScriptedAssetDirective.jsonDecoder(c)
-          case _ => Left(DecodingFailure("Incorrect directive typeID", c.history))
+          case _ => Left(DecodingFailure("Incorrect typeId", c.history))
         }
         case Left(_) => Left(DecodingFailure("None typeId", c.history))
       }

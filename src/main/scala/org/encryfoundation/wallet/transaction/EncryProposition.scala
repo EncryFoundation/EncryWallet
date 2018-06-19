@@ -1,6 +1,6 @@
 package org.encryfoundation.wallet.transaction
 
-import io.circe.Encoder
+import io.circe.{Decoder, Encoder, HCursor}
 import io.circe.syntax._
 import io.iohk.iodb.ByteArrayWrapper
 import org.encryfoundation.prismlang.compiler.{CompiledContract, CompiledContractSerializer}
@@ -13,16 +13,6 @@ import scorex.crypto.hash.{Blake2b256, Digest32}
 import scala.util.Try
 
 case class EncryProposition(contract: CompiledContract) {
-
-//  def canUnlock(ctx: Context, proofs: Seq[Proof]): Boolean = {
-//    val env: List[(Option[String], PValue)] =
-//      if (contract.args.isEmpty) List.empty
-//      else List((None, ctx.transaction.asVal), (None, ctx.state.asVal)) ++ proofs.map(proof => (proof.tagOpt, proof.value))
-//    val args: List[(String, PValue)] = contract.args.map { case (name, tpe) =>
-//      env.find(_._1.contains(name)).orElse(env.find(_._2.tpe == tpe)).map(elt => name -> elt._2)
-//        .getOrElse(throw new Exception("Not enough arguments for contact")) }
-//    Evaluator.initializedWith(args).eval[Boolean](contract.script)
-//  }
 
   lazy val bytes: Array[Byte] = EncryProposition.Serializer.toBytes(this)
 
@@ -46,6 +36,14 @@ object EncryProposition {
   implicit val jsonEncoder: Encoder[EncryProposition] = (p: EncryProposition) => Map(
     "script" -> Base58.encode(p.contract.bytes).asJson
   ).asJson
+
+  implicit val jsonDecoder: Decoder[EncryProposition] = (c: HCursor) => for {
+    script <- c.downField("script").as[String]
+  } yield {
+    val contract: CompiledContract = Base58.decode(script).flatMap(bytes => CompiledContractSerializer.parseBytes(bytes))
+      .getOrElse(throw new Exception("Decoding failed"))
+    EncryProposition(contract)
+  }
 
   def open: EncryProposition = EncryProposition(CompiledContract(List.empty, Ast.Expr.True))
 

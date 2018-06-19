@@ -4,7 +4,7 @@ import org.encryfoundation.wallet.transaction.box.AssetBox._
 import org.encryfoundation.wallet.utils.ExtUtils._
 import org.scalatest._
 
-class JsonSerializerTest  extends PropSpec with Matchers{
+class JsonSerializerTest  extends PropSpec with Matchers {
 
   property("Asset box decoder test") {
 

@@ -52,7 +52,7 @@ object WebServer {
             //            .map(decode[Seq[AssetBox]])
             .map(_ => Right(Seq.empty[AssetBox]))
             .map(_.map(_.foldLeft(Seq[AssetBox]()) { case (seq, box) =>
-              if (seq.map(_.amount).sum < (amount + fee)) seq :+ box else seq
+              if (seq.map(_.value).sum < (amount + fee)) seq :+ box else seq
             }.toIndexedSeq
             )
             )
