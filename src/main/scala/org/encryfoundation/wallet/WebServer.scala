@@ -53,7 +53,7 @@ object WebServer {
           onComplete(useboxes){
             case Success(Right(boxes)) =>
               val sendData = walletData.wallet.map(wallet =>
-                Transaction.scriptedTransactionScratch(
+                Transaction.defaultPaymentTransactionScratch(
                   wallet.getSecret, fee, System.currentTimeMillis, boxes, recepient, amount, None)
                     .asJson.trace)
                 .map( json =>
