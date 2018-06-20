@@ -1,8 +1,3 @@
-name := "Wallet"
-version := "0.1"
-scalaVersion := "2.12.6"
-organization in ThisBuild := "org.encryfoundation"
-
 name := "EncryWallet"
 
 version := "0.0.1"
