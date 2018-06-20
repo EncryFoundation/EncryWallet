@@ -48,14 +48,12 @@ object WebServer {
             .map(decode[Seq[AssetBox]])
             .map(_.map(_.foldLeft(Seq[AssetBox]()) { case (seq, box) =>
               if (seq.map(_.value).sum < (amount + fee)) seq :+ box else seq
-            }.toIndexedSeq.trace
-            )
-            )
+            }.toIndexedSeq.trace))
           ).getOrElse(Future.failed(new Exception("Empty wallet")))
           onComplete(useboxes){
             case Success(Right(boxes)) =>
               val sendData = walletData.wallet.map(wallet =>
-                Transaction.defaultPaymentTransactionScratch(
+                Transaction.scriptedTransactionScratch(
                   wallet.getSecret, fee, System.currentTimeMillis, boxes, recepient, amount, None)
                     .asJson.trace)
                 .map( json =>

@@ -3,10 +3,11 @@ package org.encryfoundation.wallet.transaction
 import com.google.common.primitives.{Bytes, Longs}
 import io.circe.{Decoder, Encoder, HCursor}
 import io.circe.syntax._
+import org.encryfoundation.prismlang.compiler.CompiledContract
 import org.encryfoundation.prismlang.core.wrapped.BoxedValue
 import org.encryfoundation.wallet.crypto.{PrivateKey25519, PublicKey25519, Signature25519}
 import org.encryfoundation.wallet.transaction.box.AssetBox
-import org.encryfoundation.wallet.transaction.directives.{Directive, TransferDirective}
+import org.encryfoundation.wallet.transaction.directives.{Directive, ScriptedAssetDirective, TransferDirective}
 import scorex.crypto.authds.ADKey
 import scorex.crypto.encode.Base58
 import scorex.crypto.hash.{Blake2b256, Digest32}
@@ -86,13 +87,13 @@ object UnsignedEncryTransaction {
 
 object Transaction {
 
-    def defaultPaymentTransactionScratch(privKey: PrivateKey25519,
-                                         fee: Long,
-                                         timestamp: Long,
-                                         useBoxes: IndexedSeq[AssetBox],
-                                         recipient: String,
-                                         amount: Long,
-                                         tokenIdOpt: Option[ADKey] = None): EncryTransaction = {
+  def defaultPaymentTransactionScratch(privKey: PrivateKey25519,
+                                       fee: Long,
+                                       timestamp: Long,
+                                       useBoxes: IndexedSeq[AssetBox],
+                                       recipient: String,
+                                       amount: Long,
+                                       tokenIdOpt: Option[ADKey] = None): EncryTransaction = {
     val pubKey: PublicKey25519 = privKey.publicImage
     val uInputs: IndexedSeq[Input] = useBoxes.map(bx => Input.unsigned(bx.id)).toIndexedSeq
     val change: Long = useBoxes.map(_.value).sum - (amount + fee)
@@ -100,6 +101,28 @@ object Transaction {
       IndexedSeq(TransferDirective(recipient, amount, tokenIdOpt), TransferDirective(pubKey.address, change, tokenIdOpt))
     } else {
       IndexedSeq(TransferDirective(recipient, amount, tokenIdOpt))
+    }
+
+    val uTransaction: UnsignedEncryTransaction = UnsignedEncryTransaction(fee, timestamp, uInputs, directives)
+    val signature: Signature25519 = privKey.sign(uTransaction.messageToSign)
+
+    uTransaction.toSigned(IndexedSeq.empty, Some(Proof(BoxedValue.Signature25519Value(signature.bytes.toList))))
+  }
+
+  def scriptedAssetTransactionScratch(privKey: PrivateKey25519,
+                                      fee: Long,
+                                      timestamp: Long,
+                                      useBoxes: IndexedSeq[AssetBox],
+                                      contract: CompiledContract,
+                                      amount: Long,
+                                      tokenIdOpt: Option[ADKey] = None): EncryTransaction = {
+    val pubKey: PublicKey25519 = privKey.publicImage
+    val uInputs: IndexedSeq[Input] = useBoxes.map(bx => Input.unsigned(bx.id)).toIndexedSeq
+    val change: Long = useBoxes.map(_.value).sum - (amount + fee)
+    val directives: IndexedSeq[Directive] = if (change > 0) {
+      IndexedSeq(ScriptedAssetDirective(contract, amount, tokenIdOpt), TransferDirective(pubKey.address, change, tokenIdOpt))
+    } else {
+      IndexedSeq(ScriptedAssetDirective(contract, amount, tokenIdOpt))
     }
 
     val uTransaction: UnsignedEncryTransaction = UnsignedEncryTransaction(fee, timestamp, uInputs, directives)
