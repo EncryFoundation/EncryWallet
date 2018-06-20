@@ -1,14 +1,15 @@
 package org.encryfoundation.wallet
 
-import scalatags.Text.all._
 import org.encryfoundation.wallet.Page._
-import org.encryfoundation.wallet.crypto.{PrivateKey25519, PublicKey25519}
+import org.encryfoundation.wallet.crypto.PublicKey25519
+import scalatags.Text
+import scalatags.Text.all._
 import scorex.crypto.encode.Base58
 
 
-case class TransactionM(address: String, amount: Long, fee: Long, change: Long){}
+case class TransactionM(address: String, amount: Long, fee: Long, change: Long)
 case class TransactionHistory(transactions: Seq[TransactionM] = Seq.empty){
-  val view = table(cls:="table table-striped")(
+  val view: Text.TypedTag[String] = table(cls:="table table-striped")(
     thead(
       tr(
         th("Address"),
@@ -31,8 +32,7 @@ case class WalletData(
                    user1PublicKey: PublicKey25519,
                    user2: String,
                  transactionHistory: TransactionHistory = TransactionHistory()) {
-  //val transactionForm =
-  val secretKey = wallet.map(_.getSecret.privKeyBytes).map(Base58.encode(_)).getOrElse("noKey").toString
+  val secretKey: String = wallet.map(_.getSecret.privKeyBytes).map(Base58.encode(_)).getOrElse("noKey").toString
   lazy val transactionFormInner = Seq(
     div( cls:="form-group")(
       label(`for`:="exampleCurrencyInput")("Private key:"),
