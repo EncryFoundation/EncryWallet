@@ -9,16 +9,15 @@ import akka.stream.ActorMaterializer
 import akka.util.ByteString
 import io.circe.parser._
 import org.encryfoundation.wallet.crypto.PrivateKey25519
-import org.encryfoundation.wallet.transaction.{EncryTransaction, Transaction}
 import org.encryfoundation.wallet.transaction.box.AssetBox
 import org.encryfoundation.wallet.transaction.box.AssetBox._
+import org.encryfoundation.wallet.transaction.{EncryTransaction, Transaction}
 import scorex.crypto.encode.Base58
 import scorex.crypto.signatures.PrivateKey
 
 import scala.collection.immutable
 import scala.concurrent._
 import scala.io.StdIn
-import scala.util.Success
 
 object WebServer {
   def main(args: Array[String]): Unit = {
@@ -31,7 +30,7 @@ object WebServer {
     import org.encryfoundation.wallet.utils.ExtUtils._
 
     val (_, pub) = PrivateKey25519.generateKeys("1".getBytes)
-    var walletData = new WalletData( None, pub, "3BxEZq6XcBzMSoDbfmY1V9qoYCwu73G1JnJAToaYEhikQ3bBKK")
+    var walletData = WalletData( None, pub, "3BxEZq6XcBzMSoDbfmY1V9qoYCwu73G1JnJAToaYEhikQ3bBKK")
 
     import io.circe.syntax._
 
@@ -49,30 +48,30 @@ object WebServer {
           case (seq, box) =>
             if (seq.map(_.value).sum < amountAndFee) seq :+ box else seq
         }.toIndexedSeq))
-      .flatMap{
-        case Right(x) => Future.successful(x)
-        case Left(e) => Future.failed(e)
-      }
+        .flatMap{
+          case Right(x) => Future.successful(x)
+          case Left(e) => Future.failed(e)
+        }
 
     def sendTransactionsToNode(encryTransaction: EncryTransaction) =
       encryTransaction.asJson.toString
-      .rapply(HttpEntity(ContentTypes.`text/html(UTF-8)`,_))
-      .rapply(HttpRequest(method = HttpMethods.POST, uri = Uri(s"$nodeHost/transactions/send")).withEntity(_))
-      .rapply(Http().singleRequest(_))
-      .map(_.status)
+        .rapply(HttpEntity(ContentTypes.`text/html(UTF-8)`,_))
+        .rapply(HttpRequest(method = HttpMethods.POST, uri = Uri(s"$nodeHost/transactions/send")).withEntity(_))
+        .rapply(Http().singleRequest(_))
+        .map(_.status)
 
     def pageRoute: StandardRoute = complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render))
 
     def sendTransaction (fee: Long, amount: Long, recepient: String): Future[HttpResponse] =
       walletData.wallet.map{ wallet =>
-      getBoxesFromNode(recepient, fee + amount).flatMap{ boxes =>
-        Transaction.defaultPaymentTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, boxes,
-          recepient, amount, None).asJson.toString
-          .rapply(HttpEntity(ContentTypes.`text/html(UTF-8)`,_))
-          .rapply(HttpRequest(method = HttpMethods.POST, uri = Uri(s"$nodeHost/transactions/send")).withEntity(_))
-          .rapply(Http().singleRequest(_))
-      }
-    }.getOrElse(Future.failed(new Exception("Send transaction without wallet")))
+        getBoxesFromNode(recepient, fee + amount).flatMap{ boxes =>
+          Transaction.defaultPaymentTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, boxes,
+            recepient, amount, None).asJson.toString
+            .rapply(HttpEntity(ContentTypes.`text/html(UTF-8)`,_))
+            .rapply(HttpRequest(method = HttpMethods.POST, uri = Uri(s"$nodeHost/transactions/send")).withEntity(_))
+            .rapply(Http().singleRequest(_))
+        }
+      }.getOrElse(Future.failed(new Exception("Send transaction without wallet")))
 
 
     val route =
@@ -90,11 +89,9 @@ object WebServer {
         }
       }//~ complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render))
 
-
-
     val bindingFuture = Http().bindAndHandle(route, "localhost", 8080)
 
-      println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
+    println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
     StdIn.readLine() // let it run until user presses return
     bindingFuture
       .flatMap(_.unbind()) // trigger unbinding from the port
