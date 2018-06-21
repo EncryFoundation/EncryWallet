@@ -84,10 +84,12 @@ object WebServer {
         }
       }.getOrElse(Future.failed(new Exception("Send transaction without wallet")))
 
+    //import org.encryfoundation.prismlang.compiler.
     def sendTransactionScript (fee: Long, amount: Long, src: String): Future[HttpResponse] =
     walletData.wallet.map{ wallet =>
       getBoxesFromNode(wallet.account.address, fee + amount).flatMap{ boxes =>
         val compiled = ???
+//        val compiled = org.encryfoundation.prismlang.parser.Parser.parseExpr(src).map(compileExpr)
         Transaction.scriptedAssetTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, boxes, compiled, amount, None)
           .rapply(sendTransactionsToNode)
       }
@@ -99,7 +101,7 @@ object WebServer {
           onSuccess( sendTransaction(fee,amount,recepient))(_ => pageRoute)
         }
       } ~ path("send"/"contract") {
-        parameters('fee.as[Long], 'amount.as[Long], 'recepient.as[String], 'src.as[String]) { (fee,amount,recepient, src) =>
+        parameters('fee.as[Long], 'amount.as[Long], 'src.as[String]) { (fee,amount, src) =>
           onSuccess( sendTransactionScript(fee,amount,src))(_ => pageRoute)
         }
       } ~ {
