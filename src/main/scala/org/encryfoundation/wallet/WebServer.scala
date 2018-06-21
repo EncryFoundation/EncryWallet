@@ -4,11 +4,11 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpEntity, _}
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.StandardRoute
+import akka.http.scaladsl.server.{Route, StandardRoute}
 import akka.stream.ActorMaterializer
 import akka.util.ByteString
 import io.circe.parser._
-import org.encryfoundation.wallet.crypto.PrivateKey25519
+import org.encryfoundation.wallet.crypto.{PrivateKey25519, PublicKey25519}
 import org.encryfoundation.wallet.transaction.box.AssetBox
 import org.encryfoundation.wallet.transaction.box.AssetBox._
 import org.encryfoundation.wallet.transaction.{EncryTransaction, Transaction}
@@ -43,9 +43,11 @@ object WebServer {
 
     import org.encryfoundation.wallet.utils.ExtUtils._
 
-    val (_, pub) = PrivateKey25519.generateKeys("1".getBytes)
-    var walletData = WalletData( None, pub, "3BxEZq6XcBzMSoDbfmY1V9qoYCwu73G1JnJAToaYEhikQ3bBKK")
-    val nodeHost = "http://172.16.10.58:9051"
+    val (_, pub: PublicKey25519) = PrivateKey25519.generateKeys("1".getBytes)
+    var walletData: WalletData = WalletData( None, pub, "3BxEZq6XcBzMSoDbfmY1V9qoYCwu73G1JnJAToaYEhikQ3bBKK")
+    val nodeHost: String = "http://172.16.10.58:9051"
+
+    val route: Route = sendPaymentTransactionR ~ sendScriptedTransactionR ~ walletSettingsR
 
     def getBoxesFromNode(address: String, amountAndFee: Long): Future[immutable.IndexedSeq[AssetBox]] =
       Uri(s"$nodeHost/account/$address/boxes")
@@ -63,7 +65,7 @@ object WebServer {
           case Left(e) => Future.failed(e)
         }
 
-    def sendTransactionsToNode(encryTransaction: EncryTransaction) =
+    def sendTransactionsToNode(encryTransaction: EncryTransaction): Future[HttpResponse] =
       encryTransaction.asJson.toString
         .rapply(HttpEntity(ContentTypes.`text/html(UTF-8)`,_))
         .rapply(HttpRequest(method = HttpMethods.POST, uri = Uri(s"$nodeHost/transactions/send")).withEntity(_))
@@ -89,26 +91,27 @@ object WebServer {
       }
     }.getOrElse(Future.failed(new Exception("Send transaction without wallet")))
 
-    val route =
-      path("send"/"address") {
-        parameters('fee.as[Long], 'amount.as[Long], 'recepient.as[String]) { (fee,amount,recepient) =>
-          onSuccess( sendTransaction(fee,amount,recepient))(_ => pageRoute)
-        }
-      } ~ path("send"/"contract") {
-        parameters('fee.as[Long], 'amount.as[Long], 'recepient.as[String], 'src.as[String]) { (fee,amount,recepient, src) =>
-          onSuccess( sendTransactionScript(fee,amount,recepient,src))(_ => pageRoute)
-        }
-      } ~ {
-        path("settings") {
-          parameters('privateKey.as[String].?) { privateKey =>
-            val wallet: Option[Wallet] = privateKey.flatMap(Base58.decode(_).toOption).map(x => Wallet.initWithKey(PrivateKey @@ x))
-            if (wallet.isDefined) walletData = walletData.copy(wallet = wallet).trace
-            pageRoute
-          }
-        }
-      }//~ complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render))
+    def sendPaymentTransactionR: Route = path("send"/"address") {
+      parameters('fee.as[Long], 'amount.as[Long], 'recepient.as[String]) { (fee,amount,recepient) =>
+        onSuccess( sendTransaction(fee,amount,recepient))(_ => pageRoute)
+      }
+    }
 
-    val bindingFuture = Http().bindAndHandle(route, "localhost", 8080)
+    def sendScriptedTransactionR: Route = path("send"/"contract") {
+      parameters('fee.as[Long], 'amount.as[Long], 'recepient.as[String], 'src.as[String]) { (fee,amount,recepient, src) =>
+        onSuccess( sendTransactionScript(fee,amount,recepient,src))(_ => pageRoute)
+      }
+    }
+
+    def walletSettingsR: Route = path("settings") {
+      parameters('privateKey.as[String].?) { privateKey =>
+        val wallet: Option[Wallet] = privateKey.flatMap(Base58.decode(_).toOption).map(x => Wallet.initWithKey(PrivateKey @@ x))
+        if (wallet.isDefined) walletData = walletData.copy(wallet = wallet).trace
+        pageRoute
+      }
+    }
+
+    val bindingFuture: Future[Http.ServerBinding] = Http().bindAndHandle(route, "localhost", 8080)
 
     println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
     StdIn.readLine() // let it run until user presses return
