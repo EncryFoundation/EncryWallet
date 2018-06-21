@@ -26,11 +26,7 @@ case class TransactionHistory(transactions: Seq[TransactionM] = Seq.empty){
 }
 
 import org.encryfoundation.wallet.utils.ExtUtils._
-case class WalletData(
-                     wallet: Option[Wallet],
-//                   user1PrivateKey: PrivateKey25519,
-                   user1PublicKey: PublicKey25519,
-                   user2: String,
+case class WalletData( wallet: Option[Wallet], user2: String,
                  transactionHistory: TransactionHistory = TransactionHistory()) {
   def secretKey: String = wallet.map(_.getSecret.privKeyBytes).map(Base58.encode(_)).getOrElse("noKey").toString.trace
 
