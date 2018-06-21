@@ -25,47 +25,56 @@ case class TransactionHistory(transactions: Seq[TransactionM] = Seq.empty){
   )
 }
 
+import org.encryfoundation.wallet.utils.ExtUtils._
 case class WalletData(
                      wallet: Option[Wallet],
 //                   user1PrivateKey: PrivateKey25519,
                    user1PublicKey: PublicKey25519,
                    user2: String,
                  transactionHistory: TransactionHistory = TransactionHistory()) {
-  val secretKey: String = wallet.map(_.getSecret.privKeyBytes).map(Base58.encode(_)).getOrElse("noKey").toString
+  def secretKey: String = wallet.map(_.getSecret.privKeyBytes).map(Base58.encode(_)).getOrElse("noKey").toString.trace
 
 
   lazy val privateKeyInput = div( cls:="form-group")(
-    label(`for`:="exampleCurrencyInput")("Private key:"),
-    input(tpe:="text", cls:="form-control", id:="exampleCurrencyInput", name:="prKey", disabled,
-      value:=secretKey)
+    label(`for`:="exampleCurrencyInput")("Private key: ", secretKey),
+//    input(tpe:="text", cls:="form-control", id:="exampleCurrencyInput", name:="prKey", disabled,
+//      value:=secretKey)
   )
   lazy val feeInput = div( cls:="form-group")(
-    label(`for`:="exampleCurrencyInput")("Fee"),
-    input(tpe:="number", cls:="form-control", id:="exampleFeeInput", placeholder:="0", name:="fee")
+    label(cls:="col-sm-3")(`for`:="exampleCurrencyInput")("Fee"),
+    input(cls:="col-sm-9")(tpe:="number", cls:="form-control", id:="exampleFeeInput", placeholder:="0", name:="fee")
   )
   lazy val amountInput = div( cls:="form-group")(
-    label(`for`:="exampleCurrencyInput")("Amount"),
-    input(tpe:="number", cls:="form-control", id:="exampleAmountInput", placeholder:="0", name:="amount")
+    label(cls:="col-sm-3")(`for`:="exampleCurrencyInput")("Amount"),
+    input(cls:="col-sm-9")(tpe:="number", cls:="form-control", id:="exampleAmountInput", placeholder:="0", name:="amount")
+  )
+  lazy val feeAndAmount = div( cls:="form-group")(
+    div(
+      label(cls:="col-sm-2")(`for`:="exampleCurrencyInput", attr("controlLabel").empty)("Fee"),
+      input(cls:="col-sm-2")(tpe:="number", cls:="form-control", id:="exampleFeeInput", size:=5, placeholder:="0", name:="fee"),
+      label(cls:="col-sm-2")(`for`:="exampleCurrencyInput")("Amount"),
+      input(cls:="col-sm-2")(tpe:="number", cls:="form-control", id:="exampleAmountInput", size:=5, placeholder:="0", name:="amount")
+    )
   )
   lazy val addressInput = div( cls:="form-group")(
     label(`for`:="exampleAddressInput")("Address"),
     input(tpe:="text", cls:="form-control", id:="exampleAddressInput", name:="recepient", value:=user2.toString),
   )
   lazy val publicKeyInput = div( cls:="form-group")(
-    label(`for`:="exampleAddressInput")("Public Key"),
-    input(tpe:="text", cls:="form-control", id:="exampleAddressInput")(
-      value:=wallet.map(_.account.pubKey).map(Base58.encode).getOrElse("-").toString),
+    label(`for`:="exampleAddressInput")("Public Key: ", wallet.map(_.account.pubKey).map(Base58.encode).getOrElse("-").toString),
+//    input(tpe:="text", cls:="form-control", id:="exampleAddressInput")(
+//      value:=wallet.map(_.account.pubKey).map(Base58.encode).getOrElse("-").toString),
   )
-  val contractInput = div( cls:="form-group")(
+  lazy val contractInput = div( cls:="form-group")(
     label(`for`:="exampleContractInput")("Contract"),
-    textarea(tpe:="text", cls:="form-control", id:="exampleContractInput", placeholder:="ScriptCode",name:="src"),
+    textarea(tpe:="text", rows:=12, cls:="form-control", id:="exampleContractInput", placeholder:="ScriptCode",name:="src"),
   )
 
 
   val id1 = "transaction1"
   val id2 = "transaction2"
   val settingsId = "accountSettings"
-  def view = page(layout,
+  lazy val view = page(layout,
     modal( "Transfer", id1, form(action:="/send/address")(
       privateKeyInput, feeInput, amountInput, addressInput, submitButton)),
     modal( "Transfer with contract", id2, form(action:="/send/contract")(
@@ -88,7 +97,7 @@ case class WalletData(
     )
   )
 
-  val accountSettingsForm = form(
+  lazy val accountSettingsForm = form(
     div( cls:="form-group")(
       label(`for`:="privateKeyInput")(s"Private key: ${secretKey}"),
       input(tpe:="text", cls:="form-control", id:="privateKeyInput", placeholder:="Generate New Key or input", name:="privateKey")

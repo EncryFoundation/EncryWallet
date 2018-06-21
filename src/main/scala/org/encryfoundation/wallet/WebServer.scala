@@ -48,30 +48,33 @@ object WebServer {
 
     val (_, pub: PublicKey25519) = PrivateKey25519.generateKeys("1".getBytes)
     var walletData: WalletData = WalletData( None, pub, "3BxEZq6XcBzMSoDbfmY1V9qoYCwu73G1JnJAToaYEhikQ3bBKK")
-    val nodeHost: String = "http://172.16.10.57:9051"
+    val nodeHost: String = "http://172.16.10.58:9051"
 
 
     def getBoxesFromNode(address: String, amountAndFee: Long): Future[immutable.IndexedSeq[AssetBox]] =
       Uri(s"$nodeHost/account/$address/boxes".trace)
+        //.trace("Address").trace(address)
         .rapply(uri => HttpRequest(uri = uri))
         .rapply(Http().singleRequest(_))
         .flatMap(_.entity.dataBytes.runFold(ByteString.empty)(_ ++ _))
-        .map(_.utf8String.trace)
+        .map(_.utf8String)
 //        .map(_ => "{}")
         .map(decode[Seq[AssetBox]])
-        .map(_ => Right(Seq.empty[AssetBox]))
+//        .map(_ => Right(Seq.empty[AssetBox]))
         .map(_.map(_.foldLeft(Seq[AssetBox]()) {
           case (seq, box) =>
-            if (seq.map(_.value).sum < amountAndFee) seq :+ box else seq
+            if (seq.map(_.value).sum.trace("Sum").trace < amountAndFee.trace) seq :+ box else seq
         }.toIndexedSeq))
         .flatMap{
           case Right(x) => Future.successful(x)
-          case Left(e) => Future.failed(e)
+          case Left(e) => Future.failed(e.trace("Cant get boxes."))
         }
 
     def sendTransactionsToNode(encryTransaction: EncryTransaction): Future[HttpResponse] =
       encryTransaction.asJson.toString
-        .rapply(HttpEntity(ContentTypes.`text/html(UTF-8)`,_))
+          .trace("Send2Node")
+      .trace
+        .rapply(HttpEntity(ContentTypes.`application/json`,_))
         .rapply(HttpRequest(method = HttpMethods.POST, uri = Uri(s"$nodeHost/transactions/send")).withEntity(_))
         .rapply(Http().singleRequest(_))
 
@@ -95,7 +98,7 @@ object WebServer {
       }
     }.getOrElse(Future.failed(new Exception("Send transaction without wallet")))
 
-    def pageRoute: StandardRoute = complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render))
+    def pageRoute: StandardRoute = complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.trace.view.render))
 
     def sendPaymentTransactionR: Route = path("send"/"address") {
       parameters('fee.as[Long], 'amount.as[Long], 'recepient.as[String]) { (fee,amount,recepient) =>
@@ -111,13 +114,14 @@ object WebServer {
 
     def walletSettingsR: Route = path("settings") {
       parameters('privateKey.as[String].?) { privateKey =>
-        val wallet: Option[Wallet] = privateKey.flatMap(Base58.decode(_).toOption).map(x => Wallet.initWithKey(PrivateKey @@ x))
-        if (wallet.isDefined) walletData = walletData.copy(wallet = wallet).trace
-        pageRoute
+        val wallet: Option[Wallet] = privateKey.trace.flatMap(Base58.decode(_).toOption)
+          .map(x => Wallet.initWithKey(PrivateKey @@ x.traceWith(Base58.encode)))
+        if (wallet.isDefined) walletData = walletData.copy(wallet = wallet.trace("Settings").traceWith(_.map(_.account)))
+        pageRoute.trace(walletData)
       }
     }
 
-    val route: Route = sendPaymentTransactionR ~ sendScriptedTransactionR ~ walletSettingsR ~ path(""){ pageRoute}
+    val route: Route = sendPaymentTransactionR ~ sendScriptedTransactionR ~ walletSettingsR// ~ path(""){ pageRoute}
   def main(args: Array[String]): Unit = {
     val bindingFuture: Future[Http.ServerBinding] = Http().bindAndHandle(route, "localhost", 8080)
     println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
