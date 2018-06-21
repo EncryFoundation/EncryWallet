@@ -58,15 +58,12 @@ object Page {
     ),
   )
 
-  val contractInput = div( cls:="form-group")(
-    label(`for`:="exampleContractInput")("Contract"),
-    textarea(tpe:="text", cls:="form-control", id:="exampleContractInput", placeholder:="ScriptCode",name:="recepient"),
-  )
+
 
   lazy val submitButton = button(tpe:="submit", cls:="btn btn-primary")("Submit")
-
-  lazy val transactionForm1 = form(transactionFormInner)(submitButton)
-  lazy val transactionForm2 = form(transactionFormInner)(contractInput, submitButton)
+//
+//  lazy val transactionForm1 = form(transactionFormInner)(submitButton)
+//  lazy val transactionForm2 = form(transactionFormInner)(contractInput, submitButton)
 
   lazy val buttonGroup =
     div(cls:="btn-group-vertical")(
@@ -103,45 +100,26 @@ object Page {
     button(tpe:="submit", cls:="btn btn-primary")("Submit")
   )
 
-  lazy val example = page(layout,modal,modal2)
-
-  lazy val modal: Modifier =
-    div(cls:="modal", id:="myModal")(
-      div(cls:="modal-dialog")(
-        div(cls:="modal-content")(
-          div(cls:="modal-header")(
-            h4(cls:="modal-title")("Transfer"),
-            button(tpe:="button", cls:="close", attr("data-dissmiss"):="modal")(raw("&times;"))
-          ),
-          div(cls:="modal-body")(transactionForm1),
-//          div(cls:="modal-footer")(
-//            button(tpe:="button",cls:="btn btn-primary")("Save changes"),
-//            button(tpe:="button",cls:="btn btn-secondary", attr("data-dissmiss"):="modal")("Close"),
-//          )
-        )
-      )
-    )
-
   def numberInput(inputName: String, idPrefix: String) = div( cls:="form-group")(
     label(`for`:=s"$idPrefix${inputName.capitalize}Input")(inputName.capitalize),
     input(tpe:="number", cls:="form-control", id:=s"$idPrefix${inputName.capitalize}Input", placeholder:="0",
       name :=s"${inputName.toLowerCase}")
   )
 
-  lazy val modal2: Modifier =
-    div(cls:="modal", id:="myModal2")(
-      div(cls:="modal-dialog")(
-        div(cls:="modal-content")(
-          div(cls:="modal-header")(
-            h4(cls:="modal-title")("Transfer"),
-            button(tpe:="button", cls:="close", attr("data-dissmiss"):="modal")(raw("&times;"))
-          ),
-          div(cls:="modal-body")(transactionForm2),
-          //          div(cls:="modal-footer")(
-          //            button(tpe:="button",cls:="btn btn-primary")("Save changes"),
-          //            button(tpe:="button",cls:="btn btn-secondary", attr("data-dissmiss"):="modal")("Close"),
-          //          )
-        )
-      )
-    )
+//  lazy val modal2: Modifier =
+//    div(cls:="modal", id:="myModal2")(
+//      div(cls:="modal-dialog")(
+//        div(cls:="modal-content")(
+//          div(cls:="modal-header")(
+//            h4(cls:="modal-title")("Transfer"),
+//            button(tpe:="button", cls:="close", attr("data-dissmiss"):="modal")(raw("&times;"))
+//          ),
+//          div(cls:="modal-body")(transactionForm2),
+//          //          div(cls:="modal-footer")(
+//          //            button(tpe:="button",cls:="btn btn-primary")("Save changes"),
+//          //            button(tpe:="button",cls:="btn btn-secondary", attr("data-dissmiss"):="modal")("Close"),
+//          //          )
+//        )
+//      )
+//    )
 }

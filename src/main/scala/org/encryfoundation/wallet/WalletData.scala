@@ -32,32 +32,44 @@ case class WalletData(
                    user2: String,
                  transactionHistory: TransactionHistory = TransactionHistory()) {
   val secretKey: String = wallet.map(_.getSecret.privKeyBytes).map(Base58.encode(_)).getOrElse("noKey").toString
-  lazy val transactionFormInner = Seq(
-    div( cls:="form-group")(
-      label(`for`:="exampleCurrencyInput")("Private key:"),
-      input(tpe:="text", cls:="form-control", id:="exampleCurrencyInput", name:="prKey", disabled,
-        value:=secretKey)
-    ),
-    div( cls:="form-group")(
-      label(`for`:="exampleCurrencyInput")("Fee"),
-      input(tpe:="number", cls:="form-control", id:="exampleFeeInput", placeholder:="0", name:="fee")
-    ),
-    div( cls:="form-group")(
-      label(`for`:="exampleCurrencyInput")("Amount"),
-      input(tpe:="number", cls:="form-control", id:="exampleAmountInput", placeholder:="0", name:="amount")
-    ),
-    div( cls:="form-group")(
-      label(`for`:="exampleAddressInput")("Address"),
-      input(tpe:="text", cls:="form-control", id:="exampleAddressInput", name:="recepient", value:=user2.toString),
-    ),
+
+
+  lazy val privateKeyInput = div( cls:="form-group")(
+    label(`for`:="exampleCurrencyInput")("Private key:"),
+    input(tpe:="text", cls:="form-control", id:="exampleCurrencyInput", name:="prKey", disabled,
+      value:=secretKey)
   )
+  lazy val feeInput = div( cls:="form-group")(
+    label(`for`:="exampleCurrencyInput")("Fee"),
+    input(tpe:="number", cls:="form-control", id:="exampleFeeInput", placeholder:="0", name:="fee")
+  )
+  lazy val amountInput = div( cls:="form-group")(
+    label(`for`:="exampleCurrencyInput")("Amount"),
+    input(tpe:="number", cls:="form-control", id:="exampleAmountInput", placeholder:="0", name:="amount")
+  )
+  lazy val addressInput = div( cls:="form-group")(
+    label(`for`:="exampleAddressInput")("Address"),
+    input(tpe:="text", cls:="form-control", id:="exampleAddressInput", name:="recepient", value:=user2.toString),
+  )
+  lazy val publicKeyInput = div( cls:="form-group")(
+    label(`for`:="exampleAddressInput")("Public Key"),
+    input(tpe:="text", cls:="form-control", id:="exampleAddressInput")(
+      value:=wallet.map(_.account.pubKey).map(Base58.encode).getOrElse("-").toString),
+  )
+  val contractInput = div( cls:="form-group")(
+    label(`for`:="exampleContractInput")("Contract"),
+    textarea(tpe:="text", cls:="form-control", id:="exampleContractInput", placeholder:="ScriptCode",name:="src"),
+  )
+
 
   val id1 = "transaction1"
   val id2 = "transaction2"
   val settingsId = "accountSettings"
   def view = page(layout,
-    modal( "Transfer", id1, form(action:="/send/address")(transactionFormInner)(submitButton)),
-    modal( "Transfer with contract", id2, form(action:="/send/contract")(transactionFormInner)(contractInput,submitButton)),
+    modal( "Transfer", id1, form(action:="/send/address")(
+      privateKeyInput, feeInput, amountInput, addressInput, submitButton)),
+    modal( "Transfer with contract", id2, form(action:="/send/contract")(
+      privateKeyInput, publicKeyInput, feeInput, amountInput, contractInput, submitButton)),
     modal("Account Settings", settingsId, accountSettingsForm(action:="/settings"))
   )
 

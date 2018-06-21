@@ -1,6 +1,7 @@
 package org.encryfoundation.wallet
 
 import akka.actor.ActorSystem
+import akka.actor.Status.Success
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpEntity, _}
 import akka.http.scaladsl.server.Directives._
@@ -20,6 +21,8 @@ import scala.collection.immutable
 import scala.concurrent._
 import scala.io.StdIn
 import io.circe.syntax._
+import org.encryfoundation.wallet.utils.ExtUtils._
+
 
 
 case class TransactionWrapper(privKey: PrivateKey25519,
@@ -35,27 +38,28 @@ case class TransactionWrapper(privKey: PrivateKey25519,
 }
 
 object WebServer {
-  def main(args: Array[String]): Unit = {
+  import org.encryfoundation.wallet.utils.ExtUtils._
 
     implicit val system: ActorSystem = ActorSystem("my-system")
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-    import org.encryfoundation.wallet.utils.ExtUtils._
 
 
     val (_, pub: PublicKey25519) = PrivateKey25519.generateKeys("1".getBytes)
     var walletData: WalletData = WalletData( None, pub, "3BxEZq6XcBzMSoDbfmY1V9qoYCwu73G1JnJAToaYEhikQ3bBKK")
-    val nodeHost: String = "http://172.16.10.58:9051"
+    val nodeHost: String = "http://172.16.10.57:9051"
 
 
     def getBoxesFromNode(address: String, amountAndFee: Long): Future[immutable.IndexedSeq[AssetBox]] =
-      Uri(s"$nodeHost/account/$address/boxes")
+      Uri(s"$nodeHost/account/$address/boxes".trace)
         .rapply(uri => HttpRequest(uri = uri))
         .rapply(Http().singleRequest(_))
         .flatMap(_.entity.dataBytes.runFold(ByteString.empty)(_ ++ _))
-        .map(_.utf8String)
+        .map(_.utf8String.trace)
+//        .map(_ => "{}")
         .map(decode[Seq[AssetBox]])
+        .map(_ => Right(Seq.empty[AssetBox]))
         .map(_.map(_.foldLeft(Seq[AssetBox]()) {
           case (seq, box) =>
             if (seq.map(_.value).sum < amountAndFee) seq :+ box else seq
@@ -84,8 +88,8 @@ object WebServer {
     def sendTransactionScript (fee: Long, amount: Long, src: String): Future[HttpResponse] =
     walletData.wallet.map{ wallet =>
       getBoxesFromNode(wallet.account.address, fee + amount).flatMap{ boxes =>
-        val compiled = ???
-//        val compiled = org.encryfoundation.prismlang.parser.Parser.parseExpr(src).map(compileExpr)
+//        val compiled = ???
+        val compiled = org.encryfoundation.prismlang.compiler.PCompiler.compile(src.trace("Contract:").trace).trace.get
         Transaction.scriptedAssetTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, boxes, compiled, amount, None)
           .rapply(sendTransactionsToNode)
       }
@@ -114,9 +118,8 @@ object WebServer {
     }
 
     val route: Route = sendPaymentTransactionR ~ sendScriptedTransactionR ~ walletSettingsR ~ path(""){ pageRoute}
-
+  def main(args: Array[String]): Unit = {
     val bindingFuture: Future[Http.ServerBinding] = Http().bindAndHandle(route, "localhost", 8080)
-
     println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
     StdIn.readLine() // let it run until user presses return
     bindingFuture
