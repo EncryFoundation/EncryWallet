@@ -77,16 +77,16 @@ object WebServer {
 
     def sendTransaction (fee: Long, amount: Long, recepient: String): Future[HttpResponse] =
       walletData.wallet.map{ wallet =>
-        getBoxesFromNode(recepient, fee + amount).flatMap{ boxes =>
+        getBoxesFromNode(wallet.account.address, fee + amount).flatMap{ boxes =>
           //new TransactionWrapper(wallet.getSecret, fee, System.currentTimeMillis, recepient, amount))
           Transaction.defaultPaymentTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, boxes, recepient, amount, None)
             .rapply(sendTransactionsToNode)
         }
       }.getOrElse(Future.failed(new Exception("Send transaction without wallet")))
 
-    def sendTransactionScript (fee: Long, amount: Long, recepient: String, src: String): Future[HttpResponse] =
+    def sendTransactionScript (fee: Long, amount: Long, src: String): Future[HttpResponse] =
     walletData.wallet.map{ wallet =>
-      getBoxesFromNode(recepient, fee + amount).flatMap{ boxes =>
+      getBoxesFromNode(wallet.account.address, fee + amount).flatMap{ boxes =>
         val compiled = ???
         Transaction.scriptedAssetTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, boxes, compiled, amount, None)
           .rapply(sendTransactionsToNode)
@@ -100,7 +100,7 @@ object WebServer {
         }
       } ~ path("send"/"contract") {
         parameters('fee.as[Long], 'amount.as[Long], 'recepient.as[String], 'src.as[String]) { (fee,amount,recepient, src) =>
-          onSuccess( sendTransactionScript(fee,amount,recepient,src))(_ => pageRoute)
+          onSuccess( sendTransactionScript(fee,amount,src))(_ => pageRoute)
         }
       } ~ {
         path("settings") {
