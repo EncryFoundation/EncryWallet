@@ -113,7 +113,7 @@ object WebServer {
       }
     }
 
-    val route: Route = sendPaymentTransactionR ~ sendScriptedTransactionR ~ walletSettingsR
+    val route: Route = sendPaymentTransactionR ~ sendScriptedTransactionR ~ walletSettingsR ~ path(""){ pageRoute}
 
     val bindingFuture: Future[Http.ServerBinding] = Http().bindAndHandle(route, "localhost", 8080)
 

@@ -6,7 +6,6 @@ import scalatags.Text
 import scalatags.Text.all._
 import scorex.crypto.encode.Base58
 
-
 case class TransactionM(address: String, amount: Long, fee: Long, change: Long)
 case class TransactionHistory(transactions: Seq[TransactionM] = Seq.empty){
   val view: Text.TypedTag[String] = table(cls:="table table-striped")(
@@ -57,9 +56,9 @@ case class WalletData(
   val id2 = "transaction2"
   val settingsId = "accountSettings"
   def view = page(layout,
-    modal( "Transfer", id1, form(transactionFormInner)(submitButton)),
-    modal( "Transfer with contract", id2, form(transactionFormInner)(contractInput,submitButton)),
-    modal("Account Settings", settingsId, accountSettingsForm)
+    modal( "Transfer", id1, form(action:="/send/address")(transactionFormInner)(submitButton)),
+    modal( "Transfer with contract", id2, form(action:="/send/contract")(transactionFormInner)(contractInput,submitButton)),
+    modal("Account Settings", settingsId, accountSettingsForm(action:="/settings"))
   )
 
   lazy val layout = div(cls:="container-fluid")(
