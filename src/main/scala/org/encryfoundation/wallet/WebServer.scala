@@ -44,7 +44,7 @@ object WebServer {
   val nodeHost: String = "http://172.16.10.58:9051"
 
   def getBoxesFromNode(address: String, amountAndFee: Long): Future[immutable.IndexedSeq[AssetBox]] =
-    Uri(s"$nodeHost/account/$address/boxes".trace)
+    Uri(s"$nodeHost/state/boxes/$address".trace)
       //.trace("Address").trace(address)
       .rapply(uri => HttpRequest(uri = uri))
       .rapply(Http().singleRequest(_))
