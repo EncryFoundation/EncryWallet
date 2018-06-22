@@ -2,10 +2,10 @@ package org.encryfoundation.wallet
 
 import akka.http.scaladsl.model.{StatusCodes, Uri}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import org.scalatest.{Matchers, PropSpec}
 import org.encryfoundation.wallet.utils.ExtUtils._
+import org.scalatest.{Matchers, PropSpec}
 
-class WalletTest extends PropSpec with Matchers with ScalatestRouteTest  {
+class RouteTest extends PropSpec with Matchers with ScalatestRouteTest  {
 
   property("a") {
     Get()
@@ -53,8 +53,6 @@ class WalletTest extends PropSpec with Matchers with ScalatestRouteTest  {
       response.status == StatusCodes.OK
     }
   }
-
-
 
 //  property("jsonTransaction"){
 //    Post("/send") ~> WebServer.route ~> check {

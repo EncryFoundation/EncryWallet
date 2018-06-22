@@ -1,3 +1,5 @@
+package org.encryfoundation.wallet
+
 import io.circe.parser._
 import org.encryfoundation.wallet.transaction.box.AssetBox
 import org.encryfoundation.wallet.transaction.box.AssetBox._

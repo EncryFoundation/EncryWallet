@@ -2,7 +2,7 @@ name := "EncryWallet"
 
 version := "0.0.1"
 
-organization := "org.encryfoundation"
+organization := "org.org.encryfoundation"
 
 scalaVersion := "2.12.6"
 

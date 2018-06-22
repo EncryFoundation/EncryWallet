@@ -32,7 +32,7 @@ object WebServer {
   val nodeHost: String = "http://172.16.10.58:9051"
 
   def getBoxesFromNode(address: String, amountAndFee: Long): Future[immutable.IndexedSeq[AssetBox]] =
-    Uri(s"$nodeHost/state/boxes/$address".trace)
+    Uri(s"$nodeHost/state/boxes/$address")
       .rapply(uri => HttpRequest(uri = uri))
       .rapply(Http().singleRequest(_))
       .flatMap(_.entity.dataBytes.runFold(ByteString.empty)(_ ++ _))
@@ -49,7 +49,7 @@ object WebServer {
   def sendTransactionsToNode(encryTransaction: EncryTransaction): Future[HttpResponse] =
     encryTransaction.asJson.toString
       .trace("Send2Node")
-      .rapply(HttpEntity(ContentTypes.`application/json`,_))
+      .rapply(HttpEntity(ContentTypes.`application/json`, _))
       .rapply(HttpRequest(method = HttpMethods.POST, uri = Uri(s"$nodeHost/transactions/send")).withEntity(_))
       .rapply(Http().singleRequest(_))
 
