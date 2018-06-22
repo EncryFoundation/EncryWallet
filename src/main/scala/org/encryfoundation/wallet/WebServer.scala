@@ -98,6 +98,12 @@ object WebServer {
     }
   }
 
+  def sendPaymentTransactionWithBoxR: Route = path("send"/"address") {
+    parameters('fee.as[Long], 'amount.as[Long], 'recepient.as[String], 'box.as[String]) { (fee,amount,recepient, box) =>
+      onSuccess( sendTransaction(fee,amount,recepient))(_ => pageRoute)
+    }
+  }
+
   def sendScriptedTransactionR: Route = path("send"/"contract") {
     parameters('fee.as[Long], 'amount.as[Long], 'src.as[String]) { (fee,amount, src) =>
       onSuccess( sendTransactionScript(fee,amount,src))(_ => pageRoute)

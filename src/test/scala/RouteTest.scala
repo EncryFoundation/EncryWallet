@@ -33,6 +33,12 @@ class WalletTest extends PropSpec with Matchers with ScalatestRouteTest  {
     }
   }
 
+  property("ss") {
+    Get("/send/withBox?fee=100&amount=1000&boxId=&")~> WebServer.route ~> check {
+      response.status == StatusCodes.OK
+    }
+  }
+
 //  property("jsonTransaction"){
 //    Post("/send") ~> WebServer.route ~> check {
 //      response.status == StatusCodes.OK
