@@ -130,4 +130,26 @@ object Transaction {
 
     uTransaction.toSigned(IndexedSeq.empty, Some(Proof(BoxedValue.Signature25519Value(signature.bytes.toList))))
   }
+
+  def specialTransactionScratch(privKey: PrivateKey25519,
+                                fee: Long,
+                                timestamp: Long,
+                                useBoxes: IndexedSeq[ADKey],
+                                recipient: String,
+                                amount: Long,
+                                change: Long,
+                                tokenIdOpt: Option[ADKey] = None): EncryTransaction = {
+    val pubKey: PublicKey25519 = privKey.publicImage
+    val uInputs: IndexedSeq[Input] = useBoxes.map(bx => Input.unsigned(bx)).toIndexedSeq
+    val directives: IndexedSeq[TransferDirective] = if (change > 0) {
+      IndexedSeq(TransferDirective(recipient, amount, tokenIdOpt), TransferDirective(pubKey.address, change, tokenIdOpt))
+    } else {
+      IndexedSeq(TransferDirective(recipient, amount, tokenIdOpt))
+    }
+
+    val uTransaction: UnsignedEncryTransaction = UnsignedEncryTransaction(fee, timestamp, uInputs, directives)
+    val signature: Signature25519 = privKey.sign(uTransaction.messageToSign)
+
+    uTransaction.toSigned(IndexedSeq.empty, Some(Proof(BoxedValue.Signature25519Value(signature.bytes.toList))))
+  }
 }
