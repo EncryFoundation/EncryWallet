@@ -37,12 +37,17 @@ case class WalletData( wallet: Option[Wallet], user2: String,
 //      value:=secretKey)
   )
   lazy val feeInput = div( cls:="form-group")(
-    label(cls:="col-sm-3")(`for`:="exampleCurrencyInput")("Fee"),
+    label(cls:="col-sm-3")(`for`:="exampleFeeInput")("Fee"),
     input(cls:="col-sm-9")(tpe:="number", cls:="form-control", id:="exampleFeeInput", placeholder:="0", name:="fee")
   )
   lazy val amountInput = div( cls:="form-group")(
-    label(cls:="col-sm-3")(`for`:="exampleCurrencyInput")("Amount"),
+    label(cls:="col-sm-3")(`for`:="exampleAmountInput")("Amount"),
     input(cls:="col-sm-9")(tpe:="number", cls:="form-control", id:="exampleAmountInput", placeholder:="0", name:="amount")
+  )
+
+  lazy val changeInput = div( cls:="form-group")(
+    label(cls:="col-sm-3")(`for`:="exampleChangeInput")("change"),
+    input(cls:="col-sm-9")(tpe:="number", cls:="form-control", id:="exampleChangeInput", placeholder:="0", name:="change")
   )
   lazy val feeAndAmount = div( cls:="form-group")(
     div(
@@ -51,6 +56,10 @@ case class WalletData( wallet: Option[Wallet], user2: String,
       label(cls:="col-sm-2")(`for`:="exampleCurrencyInput")("Amount"),
       input(cls:="col-sm-2")(tpe:="number", cls:="form-control", id:="exampleAmountInput", size:=5, placeholder:="0", name:="amount")
     )
+  )
+  lazy val boxIdInput = div( cls:="form-group")(
+    label(`for`:="exampleAddressInput")("BoxId"),
+    input(tpe:="text", cls:="form-control", id:="exampleAddressInput", name:="boxId", value:=user2.toString),
   )
   lazy val addressInput = div( cls:="form-group")(
     label(`for`:="exampleAddressInput")("Address"),
@@ -70,12 +79,16 @@ case class WalletData( wallet: Option[Wallet], user2: String,
   val id1 = "transaction1"
   val id2 = "transaction2"
   val settingsId = "accountSettings"
+  val boxTransactionId = "Send With Box"
   lazy val view = page(layout,
     modal( "Transfer", id1, form(action:="/send/address")(
       privateKeyInput, feeInput, amountInput, addressInput, submitButton)),
     modal( "Transfer with contract", id2, form(action:="/send/contract")(
       privateKeyInput, publicKeyInput, feeInput, amountInput, contractInput, submitButton)),
-    modal("Account Settings", settingsId, accountSettingsForm(action:="/settings"))
+    modal("Account Settings", settingsId, accountSettingsForm(action:="/settings")),
+    modal( "Transfer with fixed BoxId", boxTransactionId, form(action:="/send/withbox")(
+      privateKeyInput, publicKeyInput, boxIdInput, feeInput, amountInput, changeInput, addressInput, submitButton)),
+
   )
 
   lazy val layout = div(cls:="container-fluid")(
@@ -85,8 +98,9 @@ case class WalletData( wallet: Option[Wallet], user2: String,
         div(cls:="btn-group-vertical")(
           modalButton(id1)(id1),
           modalButton(id2)(id2),
+          modalButton(boxTransactionId)(boxTransactionId),
           button(tpe:="button", cls:="btn btn-outline-warning", attr("data-toggle"):="modal",
-            attr("data-target"):=s"#$settingsId")("Account Settings")
+            attr("data-target"):=s"#$settingsId")("Account Settings"),
         ),
       ),
       div(cls:="col-9")(transactionHistory.view),
