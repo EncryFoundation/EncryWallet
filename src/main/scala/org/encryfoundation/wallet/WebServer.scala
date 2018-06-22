@@ -14,6 +14,7 @@ import org.encryfoundation.wallet.transaction.box.AssetBox
 import org.encryfoundation.wallet.transaction.box.AssetBox._
 import org.encryfoundation.wallet.transaction.{EncryTransaction, Transaction}
 import org.encryfoundation.wallet.utils.ExtUtils._
+import scorex.crypto.authds.ADKey
 import scorex.crypto.encode.Base58
 import scorex.crypto.signatures.PrivateKey
 
@@ -60,7 +61,14 @@ object WebServer {
       }
     }.getOrElse(Future.failed(new Exception("Send transaction without wallet")))
 
-  def sendTransactionScript (fee: Long, amount: Long, src: String): Future[HttpResponse] =
+  def sendTransactionWithBox(fee: Long, amount: Long, recipient: String, boxId: String, change: Long) =
+    walletData.wallet.map { wallet =>
+      Transaction.specialTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, IndexedSeq(ADKey @@ Base58.decode(boxId).get),
+        recipient, amount, change, None)
+        .rapply(sendTransactionsToNode)
+    }.getOrElse(Future.failed(new Exception("Send transaction without wallet")))
+
+    def sendTransactionScript (fee: Long, amount: Long, src: String): Future[HttpResponse] =
     walletData.wallet.map { wallet =>
       getBoxesFromNode(wallet.account.address, fee + amount).flatMap { boxes =>
         val compiled: CompiledContract = org.encryfoundation.prismlang.compiler.PCompiler.compile(src).get
@@ -74,8 +82,15 @@ object WebServer {
   def mainR: Route = path("") { mainView }
 
   def sendPaymentTransactionR: Route = path("send"/"address") {
-    parameters('fee.as[Long], 'amount.as[Long], 'recepient.as[String]) { (fee,amount,recepient) =>
-      onSuccess( sendTransaction(fee,amount,recepient))(_ => mainView)
+    parameters('fee.as[Long], 'amount.as[Long], 'recipient.as[String]) { (fee,amount,recipient) =>
+      onSuccess( sendTransaction(fee,amount,recipient))(_ => mainView)
+    }
+  }
+
+  def sendPaymentTransactionWithBoxR: Route = path("send"/"withbox") {
+    parameters('fee.as[Long], 'amount.as[Long], 'recipient.as[String], 'boxId.as[String], 'change.as[Long]) {
+      (fee,amount,recipient, boxId, change) =>
+        onSuccess( sendTransactionWithBox(fee,amount,recipient, boxId, change))(_ => mainView)
     }
   }
 
@@ -94,7 +109,7 @@ object WebServer {
     }
   }
 
-  val route: Route = sendPaymentTransactionR ~ sendScriptedTransactionR ~ walletSettingsR ~ mainR
+  val route: Route = sendPaymentTransactionR ~ sendScriptedTransactionR ~ walletSettingsR ~ sendPaymentTransactionWithBoxR ~ mainR
 
   def main(args: Array[String]): Unit = {
     val bindingFuture: Future[Http.ServerBinding] = Http().bindAndHandle(route, "localhost", 8080)

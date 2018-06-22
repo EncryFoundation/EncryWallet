@@ -54,7 +54,7 @@ object Page {
     ),
     div( cls:="form-group")(
       label(`for`:="exampleAddressInput")("Address"),
-      input(tpe:="text", cls:="form-control", id:="exampleAddressInput", placeholder:="Enter address here",name:="recepient"),
+      input(tpe:="text", cls:="form-control", id:="exampleAddressInput", placeholder:="Enter address here",name:="recipient"),
     ),
   )
 

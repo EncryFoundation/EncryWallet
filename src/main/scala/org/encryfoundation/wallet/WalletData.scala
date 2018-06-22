@@ -54,7 +54,7 @@ case class WalletData( wallet: Option[Wallet], user2: String,
   )
   lazy val addressInput = div( cls:="form-group")(
     label(`for`:="exampleAddressInput")("Address"),
-    input(tpe:="text", cls:="form-control", id:="exampleAddressInput", name:="recepient", value:=user2.toString),
+    input(tpe:="text", cls:="form-control", id:="exampleAddressInput", name:="recipient", value:=user2.toString),
   )
   lazy val publicKeyInput = div( cls:="form-group")(
     label(`for`:="exampleAddressInput")("Public Key: ", wallet.map(_.account.pubKey).map(Base58.encode).getOrElse("-").toString),
