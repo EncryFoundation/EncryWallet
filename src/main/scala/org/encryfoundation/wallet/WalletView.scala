@@ -6,7 +6,8 @@ import scalatags.Text.all._
 import scorex.crypto.encode.Base58
 
 case class TransactionM(address: String, amount: Long, fee: Long, change: Long)
-case class TransactionHistory(transactions: Seq[TransactionM] = Seq.empty){
+
+case class TransactionHistory(transactions: Seq[TransactionM] = Seq.empty) {
   val view: Text.TypedTag[String] = table(cls:="table table-striped")(
     thead(
       tr(
@@ -24,12 +25,13 @@ case class TransactionHistory(transactions: Seq[TransactionM] = Seq.empty){
   )
 }
 
-case class WalletView(wallet: Option[Wallet], user2: String,
+case class WalletView(wallet: Option[Wallet],
+                      user2: String,
                       transactionHistory: TransactionHistory = TransactionHistory()) {
   def secretKey: String = wallet.map(_.getSecret.privKeyBytes).map(Base58.encode(_)).getOrElse("noKey").toString//.trace
 
   lazy val privateKeyInput: Text.TypedTag[String] = div( cls:="form-group")(
-    label(`for`:="exampleCurrencyInput")("Private key: ", secretKey),
+    label(`for`:="exampleCurrencyInput")("Private key: ", secretKey)
   )
   lazy val feeInput: Text.TypedTag[String] = div( cls:="form-group")(
     label(cls:="col-sm-3")(`for`:="exampleFeeInput")("Fee"),
@@ -54,39 +56,41 @@ case class WalletView(wallet: Option[Wallet], user2: String,
   )
   lazy val boxIdInput: Text.TypedTag[String] = div( cls:="form-group")(
     label(`for`:="exampleAddressInput")("BoxId"),
-    input(tpe:="text", cls:="form-control", id:="exampleAddressInput", name:="boxId", value:=user2.toString),
+    input(tpe:="text", cls:="form-control", id:="exampleAddressInput", name:="boxId", value:=user2.toString)
   )
   lazy val addressInput: Text.TypedTag[String] = div( cls:="form-group")(
     label(`for`:="exampleAddressInput")("Address"),
-    input(tpe:="text", cls:="form-control", id:="exampleAddressInput", name:="recipient", value:=user2.toString),
+    input(tpe:="text", cls:="form-control", id:="exampleAddressInput", name:="recipient", value:=user2.toString)
   )
   lazy val publicKeyLabel: Text.TypedTag[String] = div( cls:="form-group")(
-    label(`for`:="exampleAddressInput")("Public Key: ", wallet.map(_.account.pubKey).map(Base58.encode).getOrElse("-").toString),
+    label(`for`:="exampleAddressInput")("Public Key: ", wallet.map(_.account.pubKey).map(Base58.encode).getOrElse("-").toString)
   )
 
   lazy val publicKeyInput: Text.TypedTag[String] = div( cls:="form-group")(
     label(`for`:="exampleAddressInput")("Public Key"),
     input(tpe:="text", cls:="form-control", id:="exampleAddressInput")(
-      value:=wallet.map(_.account.pubKey).map(Base58.encode).getOrElse("-").toString),
+      value:=wallet.map(_.account.pubKey).map(Base58.encode).getOrElse("-").toString)
   )
 
   lazy val contractInput: Text.TypedTag[String] = div( cls:="form-group")(
     label(`for`:="exampleContractInput")("Contract"),
-    textarea(tpe:="text", rows:=12, cls:="form-control", id:="exampleContractInput", placeholder:="ScriptCode",name:="src"),
+    textarea(tpe:="text", rows:=12, cls:="form-control", id:="exampleContractInput", placeholder:="ScriptCode",name:="src")
   )
 
-  val addressSendId = "SendToAddress"
-  val boxSendId = "SendWithContract"
-  val boxTransactionId = "SendWithBox"
-  val settingsId = "accountSettings"
+  val addressSendId: String = "SendToAddress"
+  val boxSendId: String = "SendWithContract"
+  val boxTransactionId: String = "SendWithBox"
+  val settingsId: String = "accountSettings"
 
-  lazy val modals: Seq[Text.all.Modifier] = Seq( modal( "Transfer", addressSendId, form(action:="/send/address")(
-    privateKeyInput, feeInput, amountInput, addressInput, submitButton)),
-  modal( "Transfer with contract", boxSendId, form(action:="/send/contract")(
-    privateKeyInput, publicKeyLabel, feeInput, amountInput, contractInput, submitButton)),
-  modal("Account Settings", settingsId, accountSettingsForm(action:="/settings")),
-  modal( "Transfer with fixed BoxId", boxTransactionId, form(action:="/send/withbox")(
-    privateKeyInput, publicKeyLabel, boxIdInput, feeInput, amountInput, changeInput, addressInput, submitButton))
+  lazy val modals: Seq[Text.all.Modifier] = Seq(
+    modal( "Transfer", addressSendId, form(action:="/send/address")(
+      privateKeyInput, feeInput, amountInput, addressInput, submitButton)),
+    modal( "Transfer with contract", boxSendId, form(action:="/send/contract")(
+      privateKeyInput, publicKeyLabel, feeInput, amountInput, contractInput, submitButton)),
+    modal("Account Settings", settingsId, accountSettingsForm(action:="/settings")),
+    modal( "Transfer with fixed BoxId", boxTransactionId, form(action:="/send/withbox")(
+      privateKeyInput, publicKeyLabel, boxIdInput, feeInput, amountInput, changeInput, addressInput, submitButton)
+    )
   )
 
   lazy val view: Text.TypedTag[String] = page(layout)(modals)
@@ -103,12 +107,11 @@ case class WalletView(wallet: Option[Wallet], user2: String,
             attr("data-target"):=s"#$settingsId")("Account Settings"),
         ),
       ),
-      div(cls:="col-9")(transactionHistory.view),
+      div(cls:="col-9")(transactionHistory.view)
     )
   )
 
-  def modalLink(modalId: String): Text.TypedTag[String] = a(attr("data-toggle"):="modal",
-    attr("data-target"):=s"#$modalId")
+  def modalLink(modalId: String): Text.TypedTag[String] = a(attr("data-toggle"):="modal", attr("data-target"):=s"#$modalId")
 
   lazy val accountSettingsForm: Text.TypedTag[String] = form(
     div( cls:="form-group")(
@@ -126,7 +129,7 @@ case class WalletView(wallet: Option[Wallet], user2: String,
             h4(cls:="modal-title")(title),
             button(tpe:="button", cls:="close", attr("data-dissmiss"):="modal")(raw("&times;"))
           ),
-          div(cls:="modal-body")(formBody),
+          div(cls:="modal-body")(formBody)
         )
       )
     )
@@ -138,12 +141,11 @@ case class WalletView(wallet: Option[Wallet], user2: String,
         li(cls:="nav-item")(modalLink(addressSendId)(cls:="nav-link", style:="cursor:pointer")("Simple transaction")),
         li(cls:="nav-item")(modalLink(boxSendId)(cls:="nav-link", style:="cursor:pointer")("Scripted transaction")),
         li(cls:="nav-item")(modalLink(boxTransactionId)(cls:="nav-link", style:="cursor:pointer")("Special transaction")),
-        li(cls:="nav-item")(modalLink(settingsId)(cls:="nav-link", style:="cursor:pointer")("Settings")),
+        li(cls:="nav-item")(modalLink(settingsId)(cls:="nav-link", style:="cursor:pointer")("Settings"))
       )
     )
 
-  def mainContainer(inner: Modifier*): Text.TypedTag[String] =
-    div(cls:="container")(div(cls:="row")(div(cls:="col-12")(inner)))
+  def mainContainer(inner: Modifier*): Text.TypedTag[String] = div(cls:="container")(div(cls:="row")(div(cls:="col-12")(inner)))
 
   def view2: Text.TypedTag[String] = page(navBar, mainContainer(transactionHistory.view), modals)
 }
