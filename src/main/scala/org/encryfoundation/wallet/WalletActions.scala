@@ -5,7 +5,7 @@ import akka.http.scaladsl.model._
 import akka.util.ByteString
 import io.circe.parser.decode
 import io.circe.syntax._
-import org.encryfoundation.prismlang.compiler.PCompiler.compile
+
 import org.encryfoundation.wallet.Implicits._
 import org.encryfoundation.wallet.transaction.box.AssetBox
 import org.encryfoundation.wallet.transaction.{EncryTransaction, Transaction}
@@ -24,7 +24,10 @@ trait WalletActions {
     .map{_ => walletData = walletData.copy(error = None)}
     .recover{case fail => walletData = walletData.copy(error = Some(fail.toString)) }
 
-  def getBoxesFromNode(address: String, amountAndFee: Long): Future[immutable.IndexedSeq[AssetBox]] =
+  def withWallet[T](f: Wallet => Future[T]): Future[T] =
+    walletData.wallet.map(f).getOrElse(Future.failed(new Exception("Send transaction without wallet")))
+
+  def getBoxesFromNode(address: String, amountAndFee: Long): Future[IndexedSeq[AssetBox]] =
     Uri(s"$nodeHost/state/boxes/$address".trace)
       .rapply(uri => HttpRequest(uri = uri))
       .rapply(Http().singleRequest(_))
@@ -34,10 +37,7 @@ trait WalletActions {
       .map(_.map(_.foldLeft(Seq[AssetBox]()) { case (seq, box) =>
         if (seq.map(_.value).sum < amountAndFee) seq :+ box else seq
       }.toIndexedSeq))
-      .flatMap {
-        case Right(x) => Future.successful(x)
-        case Left(e) => Future.failed(e)
-      }
+      .flatMap(_.fold(Future.failed, Future.successful))
 
   def sendTransactionsToNode(encryTransaction: EncryTransaction): Future[HttpResponse] =
     encryTransaction.asJson.toString
@@ -46,28 +46,29 @@ trait WalletActions {
       .rapply(Http().singleRequest(_))
 
   def sendTransaction (fee: Long, amount: Long, recipient: String): Future[HttpResponse] =
-    walletData.wallet.map { wallet =>
-      getBoxesFromNode(wallet.account.address, fee + amount).flatMap { boxes =>
-        Transaction.defaultPaymentTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, boxes, recipient, amount, None)
-          .rapply(sendTransactionsToNode)
+    withWallet { wallet =>
+      getBoxesFromNode(wallet.account.address, fee + amount).flatMap {
+        Transaction.defaultPaymentTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, _,
+          recipient, amount, None).rapply(sendTransactionsToNode)
       }
-    }.getOrElse(Future.failed(new Exception("Send transaction without wallet")))
+    }
 
   def sendTransactionWithBox(fee: Long, amount: Long, recipient: String, boxId: String, change: Long): Future[HttpResponse] =
-    walletData.wallet.map { wallet =>
+    withWallet { wallet =>
       Base58.decode(boxId)
         .map(id => IndexedSeq(ADKey @@ id))
         .map(Transaction.specialTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, _, recipient, amount, change, None))
         .map(sendTransactionsToNode)
         .fold(Future.failed, x => x)
-    }.getOrElse(Future.failed(new Exception("Send transaction without wallet")))
+    }
 
-  def sendTransactionWithScript(fee: Long, amount: Long, src: String): Future[HttpResponse] =
-    walletData.wallet.map { wallet =>
+  import org.encryfoundation.prismlang.compiler.PCompiler.compile
+  def sendTransactionWithScript (fee: Long, amount: Long, src: String): Future[HttpResponse] =
+    withWallet { wallet =>
       getBoxesFromNode(wallet.account.address, fee + amount).flatMap { boxes =>
         compile(src).map(
           Transaction.scriptedAssetTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, boxes, _, amount, None)
         ).map(sendTransactionsToNode).fold(Future.failed, x => x)
       }
-    }.getOrElse(Future.failed(new Exception("Send transaction without wallet")))
+    }
 }
