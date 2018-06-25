@@ -36,12 +36,11 @@ trait WalletActions {
       }.toIndexedSeq))
       .flatMap {
         case Right(x) => Future.successful(x)
-        case Left(e) => Future.failed(e.trace("Cant get boxes."))
+        case Left(e) => Future.failed(e)
       }
 
   def sendTransactionsToNode(encryTransaction: EncryTransaction): Future[HttpResponse] =
     encryTransaction.asJson.toString
-      .trace("Send2Node")
       .rapply(HttpEntity(ContentTypes.`application/json`,_))
       .rapply(HttpRequest(method = HttpMethods.POST, uri = Uri(s"$nodeHost/transactions/send")).withEntity(_))
       .rapply(Http().singleRequest(_))
