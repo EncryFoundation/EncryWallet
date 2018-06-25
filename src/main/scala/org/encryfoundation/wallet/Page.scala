@@ -1,11 +1,12 @@
 package org.encryfoundation.wallet
 
+import scalatags.Text
 import scalatags.Text.all._
 
 object Page {
 
   lazy val integrity: Attr = attr("integrity")
-  lazy val crossorigin = attr("crossorigin")
+  lazy val crossorigin: Attr = attr("crossorigin")
   def page(el: Modifier*) = html(
     head(
       script(src:="https://code.jquery.com/jquery-3.2.1.slim.min.js",
@@ -24,13 +25,13 @@ object Page {
     body(el)
   )
 
-  lazy val submitButton = button(tpe:="submit", cls:="btn btn-primary")("Submit")
+  lazy val submitButton: Text.TypedTag[String] = button(tpe:="submit", cls:="btn btn-primary")("Submit")
 
   def modalButton(modalId: String) = button(tpe:="button", cls:="btn btn-outline-primary", attr("data-toggle"):="modal",
     attr("data-target"):=s"#$modalId")
 
 
-  def numberInput(inputName: String, idPrefix: String) = div( cls:="form-group")(
+  def numberInput(inputName: String, idPrefix: String): Text.TypedTag[String] = div( cls:="form-group")(
     label(`for`:=s"$idPrefix${inputName.capitalize}Input")(inputName.capitalize),
     input(tpe:="number", cls:="form-control", id:=s"$idPrefix${inputName.capitalize}Input", placeholder:="0",
       name :=s"${inputName.toLowerCase}")
