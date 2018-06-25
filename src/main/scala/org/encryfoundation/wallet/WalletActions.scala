@@ -50,7 +50,7 @@ trait WalletActions {
       }
     }.getOrElse(Future.failed(new Exception("Send transaction without wallet")))
 
-  def sendTransactionWithBox(fee: Long, amount: Long, recipient: String, boxId: String, change: Long) =
+  def sendTransactionWithBox(fee: Long, amount: Long, recipient: String, boxId: String, change: Long): Future[HttpResponse] =
     walletData.wallet.map { wallet =>
       Transaction.specialTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, IndexedSeq(ADKey @@ Base58.decode(boxId).get),
         recipient, amount, change, None)
