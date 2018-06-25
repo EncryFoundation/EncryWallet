@@ -29,7 +29,6 @@ case class WalletView(wallet: Option[Wallet], user2: String,
                       transactionHistory: TransactionHistory = TransactionHistory()) {
   def secretKey: String = wallet.map(_.getSecret.privKeyBytes).map(Base58.encode(_)).getOrElse("noKey").toString//.trace
 
-
   lazy val privateKeyInput = div( cls:="form-group")(
     label(`for`:="exampleCurrencyInput")("Private key: ", secretKey),
   )
@@ -78,20 +77,23 @@ case class WalletView(wallet: Option[Wallet], user2: String,
   )
 
 
+
+
   val addressSendId = "SendToAddress"
   val boxSendId = "SendWithContract"
   val boxTransactionId = "SendWithBox"
   val settingsId = "accountSettings"
-  lazy val view = page(layout,
-    modal( "Transfer", addressSendId, form(action:="/send/address")(
-      privateKeyInput, feeInput, amountInput, addressInput, submitButton)),
-    modal( "Transfer with contract", boxSendId, form(action:="/send/contract")(
-      privateKeyInput, publicKeyLabel, feeInput, amountInput, contractInput, submitButton)),
-    modal("Account Settings", settingsId, accountSettingsForm(action:="/settings")),
-    modal( "Transfer with fixed BoxId", boxTransactionId, form(action:="/send/withbox")(
-      privateKeyInput, publicKeyLabel, boxIdInput, feeInput, amountInput, changeInput, addressInput, submitButton)),
 
+  lazy val modals = Seq( modal( "Transfer", addressSendId, form(action:="/send/address")(
+    privateKeyInput, feeInput, amountInput, addressInput, submitButton)),
+  modal( "Transfer with contract", boxSendId, form(action:="/send/contract")(
+    privateKeyInput, publicKeyLabel, feeInput, amountInput, contractInput, submitButton)),
+  modal("Account Settings", settingsId, accountSettingsForm(action:="/settings")),
+  modal( "Transfer with fixed BoxId", boxTransactionId, form(action:="/send/withbox")(
+    privateKeyInput, publicKeyLabel, boxIdInput, feeInput, amountInput, changeInput, addressInput, submitButton))
   )
+
+  lazy val view = page(layout)(modals)
 
   lazy val layout = div(cls:="container-fluid")(
     div(cls:="row")(
@@ -108,6 +110,9 @@ case class WalletView(wallet: Option[Wallet], user2: String,
       div(cls:="col-9")(transactionHistory.view),
     )
   )
+
+  def modalLink(modalId: String) = a(attr("data-toggle"):="modal",
+    attr("data-target"):=s"#$modalId")
 
   lazy val accountSettingsForm = form(
     div( cls:="form-group")(
@@ -129,4 +134,25 @@ case class WalletView(wallet: Option[Wallet], user2: String,
         )
       )
     )
+
+  def navBar =
+    tag("nav")(cls:="navbar navbar-expand-lg navbar-light bg-light")(
+      ul(cls:="nav nav-pills nav-fill")(
+        li(cls:="nav-item")(a(cls:="nav-link disabled")("WALLET")),
+        li(cls:="nav-item")(modalLink(addressSendId)(cls:="nav-link active")("Simple transaction")),
+        li(cls:="nav-item")(modalLink(boxSendId)(cls:="nav-link")("Scripted transaction")),
+        li(cls:="nav-item")(modalLink(boxTransactionId)(cls:="nav-link")("Special transaction")),
+        li(cls:="nav-item")(modalLink(settingsId)(cls:="nav-link")("Settings")),
+      )
+    )
+
+  def mainContainer(inner: Modifier*) =
+    div(cls:="container")(div(cls:="row")(div(cls:="col-12")(inner)))
+
+  def view2 = page(navBar, mainContainer(transactionHistory.view), modals )
+
+//  def testPage = form(
+//    div(cls:="form-group")(
+//      input()
+//    ))
 }

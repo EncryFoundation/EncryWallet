@@ -14,7 +14,7 @@ import scala.io.StdIn
 
 object WebServer extends WalletActions {
 
-  def mainView: StandardRoute = complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view.render))
+  def mainView: StandardRoute = complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, walletData.view2.render))
 
   def mainR: Route = path("") { mainView }
 
