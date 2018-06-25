@@ -1,6 +1,5 @@
 package org.encryfoundation.wallet
 
-import org.encryfoundation.wallet.Page._
 import scalatags.Text
 import scalatags.Text.all._
 import scorex.crypto.encode.Base58
@@ -25,14 +24,7 @@ case class TransactionHistory(transactions: Seq[TransactionM] = Seq.empty) {
   )
 }
 
-case class WalletView(wallet: Option[Wallet], user2: String,
-                      transactionHistory: TransactionHistory = TransactionHistory(),
-                      error: Option[String] = None) {
-  def secretKey: String = wallet.map(_.getSecret.privKeyBytes).map(Base58.encode(_)).getOrElse("noKey").toString//.trace
-
-  lazy val privateKeyInput: Text.TypedTag[String] = div( cls:="form-group")(
-    label(`for`:="exampleCurrencyInput")("Private key: ", secretKey)
-  )
+object WalletView {
   lazy val feeInput: Text.TypedTag[String] = div( cls:="form-group")(
     label(cls:="col-sm-3")(`for`:="exampleFeeInput")("Fee"),
     input(cls:="col-sm-9")(tpe:="number", cls:="form-control", id:="exampleFeeInput", placeholder:="0", name:="fee")
@@ -54,6 +46,20 @@ case class WalletView(wallet: Option[Wallet], user2: String,
       input(cls:="col-sm-2")(tpe:="number", cls:="form-control", id:="exampleAmountInput", size:=5, placeholder:="0", name:="amount")
     )
   )
+}
+
+import WalletView._
+
+case class WalletView(wallet: Option[Wallet], user2: String,
+                      transactionHistory: TransactionHistory = TransactionHistory(),
+                      error: Option[String] = None) {
+
+  def secretKey: String = wallet.map(_.getSecret.privKeyBytes).map(Base58.encode(_)).getOrElse("noKey").toString//.trace
+
+  lazy val privateKeyInput: Text.TypedTag[String] = div( cls:="form-group")(
+    label(`for`:="exampleCurrencyInput")("Private key: ", secretKey)
+  )
+
   lazy val boxIdInput: Text.TypedTag[String] = div( cls:="form-group")(
     label(`for`:="exampleAddressInput")("BoxId"),
     input(tpe:="text", cls:="form-control", id:="exampleAddressInput", name:="boxId", value:=user2.toString)
@@ -81,6 +87,38 @@ case class WalletView(wallet: Option[Wallet], user2: String,
   val boxSendId: String = "SendWithContract"
   val boxTransactionId: String = "SendWithBox"
   val settingsId: String = "accountSettings"
+
+  lazy val integrity: Attr = attr("integrity")
+  lazy val crossorigin: Attr = attr("crossorigin")
+  def page(el: Modifier*) = html(
+    head(
+      script(src:="https://code.jquery.com/jquery-3.2.1.slim.min.js",
+        integrity:="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN",
+        crossorigin:="anonymous"),
+      script(src:="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js",
+        integrity:="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q",
+        crossorigin:="anonymous"),
+      script(src:="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js",
+        integrity:="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl",
+        crossorigin:="anonymous"),
+      link(rel:="stylesheet", href:="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css",
+        integrity:="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm",
+        crossorigin:="anonymous")
+    ),
+    body(el)
+  )
+
+  lazy val submitButton: Text.TypedTag[String] = button(tpe:="submit", cls:="btn btn-primary")("Submit")
+
+  def modalButton(modalId: String) = button(tpe:="button", cls:="btn btn-outline-primary", attr("data-toggle"):="modal",
+    attr("data-target"):=s"#$modalId")
+
+
+  def numberInput(inputName: String, idPrefix: String): Text.TypedTag[String] = div( cls:="form-group")(
+    label(`for`:=s"$idPrefix${inputName.capitalize}Input")(inputName.capitalize),
+    input(tpe:="number", cls:="form-control", id:=s"$idPrefix${inputName.capitalize}Input", placeholder:="0",
+      name :=s"${inputName.toLowerCase}")
+  )
 
   lazy val modals: Seq[Text.all.Modifier] = Seq(
     modal( "Transfer", addressSendId, form(action:="/send/address")(
@@ -137,7 +175,7 @@ case class WalletView(wallet: Option[Wallet], user2: String,
   def navBar: Text.TypedTag[String] =
     tag("nav")(cls:="navbar navbar-expand-lg navbar-light bg-light")(
       ul(cls:="nav nav-pills nav-fill")(
-        li(cls:="nav-item")(a(cls:="nav-link disabled", style:="cursor:pointer")("WALLET")),
+        li(cls:="nav-item")(a(cls:="nav-link disabled", style:="cursor:pointer")(h3("WALLET"))),
         li(cls:="nav-item")(modalLink(addressSendId)(cls:="nav-link", style:="cursor:pointer")("Simple transaction")),
         li(cls:="nav-item")(modalLink(boxSendId)(cls:="nav-link", style:="cursor:pointer")("Scripted transaction")),
         li(cls:="nav-item")(modalLink(boxTransactionId)(cls:="nav-link", style:="cursor:pointer")("Special transaction")),

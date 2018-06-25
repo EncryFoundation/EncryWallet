@@ -5,7 +5,6 @@ import akka.http.scaladsl.model._
 import akka.util.ByteString
 import io.circe.parser.decode
 import io.circe.syntax._
-import org.encryfoundation.prismlang.compiler.CompiledContract
 import org.encryfoundation.wallet.Implicits._
 import org.encryfoundation.wallet.transaction.box.AssetBox
 import org.encryfoundation.wallet.transaction.{EncryTransaction, Transaction}
@@ -59,7 +58,7 @@ trait WalletActions {
         .map(id => IndexedSeq(ADKey @@ id))
         .map(Transaction.specialTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, _, recipient, amount, change, None))
         .map(sendTransactionsToNode)
-        .fold(Future.failed(_), x => x)
+        .fold(Future.failed, x => x)
     }.getOrElse(Future.failed(new Exception("Send transaction without wallet")))
 
   import org.encryfoundation.prismlang.compiler.PCompiler.compile
@@ -68,7 +67,7 @@ trait WalletActions {
       getBoxesFromNode(wallet.account.address, fee + amount).flatMap { boxes =>
         compile(src).map(
           Transaction.scriptedAssetTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, boxes, _, amount, None)
-        ).map(sendTransactionsToNode).fold(Future.failed(_), x => x)
+        ).map(sendTransactionsToNode).fold(Future.failed, x => x)
       }
     }.getOrElse(Future.failed(new Exception("Send transaction without wallet")))
 }
