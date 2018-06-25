@@ -1,7 +1,6 @@
 package org.encryfoundation.wallet
 
 import org.encryfoundation.wallet.Page._
-import org.encryfoundation.wallet.crypto.PublicKey25519
 import scalatags.Text
 import scalatags.Text.all._
 import scorex.crypto.encode.Base58
@@ -26,15 +25,13 @@ case class TransactionHistory(transactions: Seq[TransactionM] = Seq.empty){
 }
 
 import org.encryfoundation.wallet.utils.ExtUtils._
-case class WalletData( wallet: Option[Wallet], user2: String,
-                 transactionHistory: TransactionHistory = TransactionHistory()) {
-  def secretKey: String = wallet.map(_.getSecret.privKeyBytes).map(Base58.encode(_)).getOrElse("noKey").toString.trace
+case class WalletView(wallet: Option[Wallet], user2: String,
+                      transactionHistory: TransactionHistory = TransactionHistory()) {
+  def secretKey: String = wallet.map(_.getSecret.privKeyBytes).map(Base58.encode(_)).getOrElse("noKey").toString//.trace
 
 
   lazy val privateKeyInput = div( cls:="form-group")(
     label(`for`:="exampleCurrencyInput")("Private key: ", secretKey),
-//    input(tpe:="text", cls:="form-control", id:="exampleCurrencyInput", name:="prKey", disabled,
-//      value:=secretKey)
   )
   lazy val feeInput = div( cls:="form-group")(
     label(cls:="col-sm-3")(`for`:="exampleFeeInput")("Fee"),
@@ -65,29 +62,34 @@ case class WalletData( wallet: Option[Wallet], user2: String,
     label(`for`:="exampleAddressInput")("Address"),
     input(tpe:="text", cls:="form-control", id:="exampleAddressInput", name:="recipient", value:=user2.toString),
   )
-  lazy val publicKeyInput = div( cls:="form-group")(
+  lazy val publicKeyLabel = div( cls:="form-group")(
     label(`for`:="exampleAddressInput")("Public Key: ", wallet.map(_.account.pubKey).map(Base58.encode).getOrElse("-").toString),
-//    input(tpe:="text", cls:="form-control", id:="exampleAddressInput")(
-//      value:=wallet.map(_.account.pubKey).map(Base58.encode).getOrElse("-").toString),
   )
+
+  lazy val publicKeyInput = div( cls:="form-group")(
+    label(`for`:="exampleAddressInput")("Public Key"),
+    input(tpe:="text", cls:="form-control", id:="exampleAddressInput")(
+      value:=wallet.map(_.account.pubKey).map(Base58.encode).getOrElse("-").toString),
+  )
+
   lazy val contractInput = div( cls:="form-group")(
     label(`for`:="exampleContractInput")("Contract"),
     textarea(tpe:="text", rows:=12, cls:="form-control", id:="exampleContractInput", placeholder:="ScriptCode",name:="src"),
   )
 
 
-  val id1 = "transaction1"
-  val id2 = "transaction2"
+  val addressSendId = "SendToAddress"
+  val boxSendId = "SendWithContract"
+  val boxTransactionId = "SendWithBox"
   val settingsId = "accountSettings"
-  val boxTransactionId = "Send With Box"
   lazy val view = page(layout,
-    modal( "Transfer", id1, form(action:="/send/address")(
+    modal( "Transfer", addressSendId, form(action:="/send/address")(
       privateKeyInput, feeInput, amountInput, addressInput, submitButton)),
-    modal( "Transfer with contract", id2, form(action:="/send/contract")(
-      privateKeyInput, publicKeyInput, feeInput, amountInput, contractInput, submitButton)),
+    modal( "Transfer with contract", boxSendId, form(action:="/send/contract")(
+      privateKeyInput, publicKeyLabel, feeInput, amountInput, contractInput, submitButton)),
     modal("Account Settings", settingsId, accountSettingsForm(action:="/settings")),
     modal( "Transfer with fixed BoxId", boxTransactionId, form(action:="/send/withbox")(
-      privateKeyInput, publicKeyInput, boxIdInput, feeInput, amountInput, changeInput, addressInput, submitButton)),
+      privateKeyInput, publicKeyLabel, boxIdInput, feeInput, amountInput, changeInput, addressInput, submitButton)),
 
   )
 
@@ -96,8 +98,8 @@ case class WalletData( wallet: Option[Wallet], user2: String,
       div(cls:="col-3")(
         h1("Encry Wallet"),
         div(cls:="btn-group-vertical")(
-          modalButton(id1)(id1),
-          modalButton(id2)(id2),
+          modalButton(addressSendId)(addressSendId),
+          modalButton(boxSendId)(boxSendId),
           modalButton(boxTransactionId)(boxTransactionId),
           button(tpe:="button", cls:="btn btn-outline-warning", attr("data-toggle"):="modal",
             attr("data-target"):=s"#$settingsId")("Account Settings"),
@@ -124,10 +126,6 @@ case class WalletData( wallet: Option[Wallet], user2: String,
             button(tpe:="button", cls:="close", attr("data-dissmiss"):="modal")(raw("&times;"))
           ),
           div(cls:="modal-body")(formBody),
-          //          div(cls:="modal-footer")(
-          //            button(tpe:="button",cls:="btn btn-primary")("Save changes"),
-          //            button(tpe:="button",cls:="btn btn-secondary", attr("data-dissmiss"):="modal")("Close"),
-          //          )
         )
       )
     )
