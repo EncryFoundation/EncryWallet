@@ -20,20 +20,20 @@ object WebServer extends WalletActions {
 
   def sendPaymentTransactionR: Route = path("send"/"address") {
     parameters('fee.as[Long], 'amount.as[Long], 'recipient.as[String]) { (fee,amount,recipient) =>
-      onSuccess( sendTransaction(fee,amount,recipient).rapply(walletWithError))(mainView)
+      onSuccess( walletWithError(sendTransaction(fee,amount,recipient)))(mainView)
     }
   }
 
   def sendPaymentTransactionWithBoxR: Route = path("send"/"withbox") {
     parameters('fee.as[Long], 'amount.as[Long], 'recipient.as[String], 'boxId.as[String], 'change.as[Long]) {
       (fee,amount,recipient, boxId, change) =>
-        onSuccess( sendTransactionWithBox(fee,amount,recipient, boxId, change).rapply(walletWithError))(mainView)
+        onSuccess(walletWithError(sendTransactionWithBox(fee,amount,recipient, boxId, change)))(mainView)
     }
   }
 
   def sendScriptedTransactionR: Route = path("send"/"contract") {
     parameters('fee.as[Long], 'amount.as[Long], 'src.as[String]) { (fee, amount, src) =>
-      onSuccess( sendTransactionScript(fee, amount, src).rapply(walletWithError))(mainView)
+      onSuccess(walletWithError(sendTransactionScript(fee, amount, src)))(mainView)
     }
   }
 
