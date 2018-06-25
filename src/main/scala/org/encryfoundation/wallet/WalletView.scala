@@ -25,9 +25,9 @@ case class TransactionHistory(transactions: Seq[TransactionM] = Seq.empty) {
   )
 }
 
-case class WalletView(wallet: Option[Wallet],
-                      user2: String,
-                      transactionHistory: TransactionHistory = TransactionHistory()) {
+case class WalletView(wallet: Option[Wallet], user2: String,
+                      transactionHistory: TransactionHistory = TransactionHistory(),
+                      error: Option[String] = None) {
   def secretKey: String = wallet.map(_.getSecret.privKeyBytes).map(Base58.encode(_)).getOrElse("noKey").toString//.trace
 
   lazy val privateKeyInput: Text.TypedTag[String] = div( cls:="form-group")(
@@ -127,7 +127,7 @@ case class WalletView(wallet: Option[Wallet],
         div(cls:="modal-content")(
           div(cls:="modal-header")(
             h4(cls:="modal-title")(title),
-            button(tpe:="button", cls:="close", attr("data-dissmiss"):="modal")(raw("&times;"))
+            button(tpe:="button", cls:="close", attr("data-dismiss"):="modal")(raw("&times;"))
           ),
           div(cls:="modal-body")(formBody)
         )
