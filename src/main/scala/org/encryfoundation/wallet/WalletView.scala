@@ -147,5 +147,11 @@ case class WalletView(wallet: Option[Wallet],
 
   def mainContainer(inner: Modifier*): Text.TypedTag[String] = div(cls:="container")(div(cls:="row")(div(cls:="col-12")(inner)))
 
-  def view2: Text.TypedTag[String] = page(navBar, mainContainer(transactionHistory.view), modals)
+  def alert = error.map(div(cls:="alert alert-warning", role:="alert")(_)).getOrElse(div())
+  def alert2 = error.map(
+    div(cls:="alert alert-warning alert-dismissible fade show fixed-bottom", role:="alert")(_)(
+      button(tpe:="button",cls:="close", attr("data-dismiss"):="alert", attr("aria-label"):="Close")(raw("&times")))
+  ).getOrElse(div())
+
+  def view2: Text.TypedTag[String] = page(navBar, mainContainer(transactionHistory.view), modals, alert2)
 }

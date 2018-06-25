@@ -20,25 +20,26 @@ object WebServer extends WalletActions {
 
   def sendPaymentTransactionR: Route = path("send"/"address") {
     parameters('fee.as[Long], 'amount.as[Long], 'recipient.as[String]) { (fee,amount,recipient) =>
-      onSuccess( sendTransaction(fee,amount,recipient))(_ => mainView)
+      onSuccess( walletWithError(sendTransaction(fee,amount,recipient)))(mainView)
     }
   }
 
   def sendPaymentTransactionWithBoxR: Route = path("send"/"withbox") {
     parameters('fee.as[Long], 'amount.as[Long], 'recipient.as[String], 'boxId.as[String], 'change.as[Long]) {
       (fee,amount,recipient, boxId, change) =>
-        onSuccess( sendTransactionWithBox(fee,amount,recipient, boxId, change))(_ => mainView)
+        onSuccess(walletWithError(sendTransactionWithBox(fee,amount,recipient, boxId, change)))(mainView)
     }
   }
 
   def sendScriptedTransactionR: Route = path("send"/"contract") {
     parameters('fee.as[Long], 'amount.as[Long], 'src.as[String]) { (fee, amount, src) =>
-      onSuccess( sendTransactionScript(fee, amount, src))(_ => mainView)
+      onSuccess(walletWithError(sendTransactionScript(fee, amount, src)))(mainView)
     }
   }
 
   def walletSettingsR: Route = path("settings") {
     parameters('privateKey.as[String].?) { privateKey =>
+      walletData = walletData.copy(error = None)
       val wallet: Option[Wallet] = privateKey.trace.flatMap(Base58.decode(_).toOption)
         .map(x => Wallet.initWithKey(PrivateKey @@ x))
       if (wallet.isDefined) walletData = walletData.copy(wallet = wallet)
@@ -50,6 +51,7 @@ object WebServer extends WalletActions {
 
   def main(args: Array[String]): Unit = {
     val bindingFuture: Future[Http.ServerBinding] = Http().bindAndHandle(route, "localhost", 8080)
+    println("Running...")
     StdIn.readLine()
     bindingFuture
       .flatMap(_.unbind())
