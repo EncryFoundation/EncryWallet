@@ -51,7 +51,6 @@ object WebServer extends WalletActions {
 
   def main(args: Array[String]): Unit = {
     val bindingFuture: Future[Http.ServerBinding] = Http().bindAndHandle(route, "localhost", 8080)
-    println("Running...")
     StdIn.readLine()
     bindingFuture
       .flatMap(_.unbind())
