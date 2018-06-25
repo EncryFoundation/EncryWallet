@@ -3,9 +3,9 @@ package org.encryfoundation.wallet
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.util.ByteString
+import com.typesafe.config.ConfigFactory
 import io.circe.parser.decode
 import io.circe.syntax._
-
 import org.encryfoundation.wallet.Implicits._
 import org.encryfoundation.wallet.transaction.box.AssetBox
 import org.encryfoundation.wallet.transaction.{EncryTransaction, Transaction}
@@ -15,10 +15,12 @@ import scorex.crypto.encode.Base58
 
 import scala.collection.immutable
 import scala.concurrent.Future
+import scala.util.Try
 
 trait WalletActions {
   var walletData: WalletView = WalletView(None, "3BxEZq6XcBzMSoDbfmY1V9qoYCwu73G1JnJAToaYEhikQ3bBKK")
-  val nodeHost: String = "http://172.16.10.58:9051"
+  val config = ConfigFactory.load()
+  val nodeHost: String = config.getString("wallet.node.host")
 
   def walletWithError: Future[_] => Future[Unit] = _
     .map{_ => walletData = walletData.copy(error = None)}
