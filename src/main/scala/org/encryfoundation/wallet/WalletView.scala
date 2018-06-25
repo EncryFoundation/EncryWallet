@@ -125,7 +125,7 @@ case class WalletView(wallet: Option[Wallet], user2: String,
         div(cls:="modal-content")(
           div(cls:="modal-header")(
             h4(cls:="modal-title")(title),
-            button(tpe:="button", cls:="close", attr("data-dissmiss"):="modal")(raw("&times;"))
+            button(tpe:="button", cls:="close", attr("data-dismiss"):="modal")(raw("&times;"))
           ),
           div(cls:="modal-body")(formBody),
         )
