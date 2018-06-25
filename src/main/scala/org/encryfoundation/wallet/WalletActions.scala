@@ -55,17 +55,20 @@ trait WalletActions {
 
   def sendTransactionWithBox(fee: Long, amount: Long, recipient: String, boxId: String, change: Long): Future[HttpResponse] =
     walletData.wallet.map { wallet =>
-      Transaction.specialTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, IndexedSeq(ADKey @@ Base58.decode(boxId).get),
-        recipient, amount, change, None)
-        .rapply(sendTransactionsToNode)
+      Base58.decode(boxId)
+        .map(id => IndexedSeq(ADKey @@ id))
+        .map(Transaction.specialTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, _, recipient, amount, change, None))
+        .map(sendTransactionsToNode)
+        .fold(Future.failed(_), x => x)
     }.getOrElse(Future.failed(new Exception("Send transaction without wallet")))
 
+  import org.encryfoundation.prismlang.compiler.PCompiler.compile
   def sendTransactionScript (fee: Long, amount: Long, src: String): Future[HttpResponse] =
     walletData.wallet.map { wallet =>
       getBoxesFromNode(wallet.account.address, fee + amount).flatMap { boxes =>
-        val compiled: CompiledContract = org.encryfoundation.prismlang.compiler.PCompiler.compile(src).get
-        Transaction.scriptedAssetTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, boxes, compiled, amount, None)
-          .rapply(sendTransactionsToNode)
+        compile(src).map(
+          Transaction.scriptedAssetTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, boxes, _, amount, None)
+        ).map(sendTransactionsToNode).fold(Future.failed(_), x => x)
       }
     }.getOrElse(Future.failed(new Exception("Send transaction without wallet")))
 }
