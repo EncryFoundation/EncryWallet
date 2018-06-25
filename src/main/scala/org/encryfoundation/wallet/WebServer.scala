@@ -33,7 +33,7 @@ object WebServer extends WalletActions {
 
   def sendScriptedTransactionR: Route = path("send"/"contract") {
     parameters('fee.as[Long], 'amount.as[Long], 'src.as[String]) { (fee, amount, src) =>
-      onSuccess(walletWithError(sendTransactionScript(fee, amount, src)))(mainView)
+      onSuccess(walletWithError(sendTransactionWithScript(fee, amount, src)))(mainView)
     }
   }
 
