@@ -135,24 +135,19 @@ case class WalletView(wallet: Option[Wallet], user2: String,
       )
     )
 
-  def navBar =
+  def navBar: Text.TypedTag[String] =
     tag("nav")(cls:="navbar navbar-expand-lg navbar-light bg-light")(
       ul(cls:="nav nav-pills nav-fill")(
-        li(cls:="nav-item")(a(cls:="nav-link disabled")("WALLET")),
-        li(cls:="nav-item")(modalLink(addressSendId)(cls:="nav-link active")("Simple transaction")),
-        li(cls:="nav-item")(modalLink(boxSendId)(cls:="nav-link")("Scripted transaction")),
-        li(cls:="nav-item")(modalLink(boxTransactionId)(cls:="nav-link")("Special transaction")),
-        li(cls:="nav-item")(modalLink(settingsId)(cls:="nav-link")("Settings")),
+        li(cls:="nav-item")(a(cls:="nav-link disabled", style:="cursor:pointer")("WALLET")),
+        li(cls:="nav-item")(modalLink(addressSendId)(cls:="nav-link", style:="cursor:pointer")("Simple transaction")),
+        li(cls:="nav-item")(modalLink(boxSendId)(cls:="nav-link", style:="cursor:pointer")("Scripted transaction")),
+        li(cls:="nav-item")(modalLink(boxTransactionId)(cls:="nav-link", style:="cursor:pointer")("Special transaction")),
+        li(cls:="nav-item")(modalLink(settingsId)(cls:="nav-link", style:="cursor:pointer")("Settings")),
       )
     )
 
   def mainContainer(inner: Modifier*) =
     div(cls:="container")(div(cls:="row")(div(cls:="col-12")(inner)))
 
-  def view2 = page(navBar, mainContainer(transactionHistory.view), modals )
-
-//  def testPage = form(
-//    div(cls:="form-group")(
-//      input()
-//    ))
+  def view2: Text.TypedTag[String] = page(navBar, mainContainer(transactionHistory.view), modals)
 }
