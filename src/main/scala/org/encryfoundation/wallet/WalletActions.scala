@@ -20,6 +20,10 @@ trait WalletActions {
   var walletData: WalletView = WalletView(None, "3BxEZq6XcBzMSoDbfmY1V9qoYCwu73G1JnJAToaYEhikQ3bBKK")
   val nodeHost: String = "http://172.16.10.58:9051"
 
+  def walletWithError[T]: Future[T] => Future[Unit] = _
+    .map{_ => walletData = walletData.copy(error = None)}
+    .recover{case fail => walletData = walletData.copy(error = Some(fail.toString)) }
+
   def getBoxesFromNode(address: String, amountAndFee: Long): Future[immutable.IndexedSeq[AssetBox]] =
     Uri(s"$nodeHost/state/boxes/$address".trace)
       .rapply(uri => HttpRequest(uri = uri))
