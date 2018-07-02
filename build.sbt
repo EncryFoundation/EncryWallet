@@ -24,7 +24,7 @@ val testingDependencies = Seq(
 libraryDependencies ++= Seq (
   "com.typesafe.akka" %% "akka-http" % akkaVersion,
   "com.lihaoyi" %% "scalatags" % "0.6.7",
-  "com.github.oskin1" %% "prism" % "0.1.9",
+  "com.github.oskin1" %% "prism" % "0.2.2",
   "org.scorexfoundation" %% "scrypto" % "2.1.1",
   "org.scorexfoundation" %% "iodb" % "0.3.2",
   "io.circe" %% "circe-core" % circeVersion,
