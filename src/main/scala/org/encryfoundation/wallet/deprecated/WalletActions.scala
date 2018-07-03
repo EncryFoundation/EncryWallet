@@ -3,7 +3,7 @@ package org.encryfoundation.wallet.deprecated
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.util.ByteString
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
 import io.circe.parser.decode
 import io.circe.syntax._
 import org.encryfoundation.wallet.Wallet
@@ -18,7 +18,7 @@ import scala.concurrent.Future
 
 trait WalletActions {
   var walletData: WalletView = WalletView(None, "3BxEZq6XcBzMSoDbfmY1V9qoYCwu73G1JnJAToaYEhikQ3bBKK")
-  val config = ConfigFactory.load()
+  val config: Config = ConfigFactory.load()
   val nodeHost: String = config.getString("wallet.node.host")
 
   def walletWithError: Future[_] => Future[Unit] = _

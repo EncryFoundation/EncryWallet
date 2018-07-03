@@ -62,12 +62,4 @@ trait ApiRoute extends FailFastCirceSupport with PredefinedFromEntityUnmarshalle
   implicit class OkJsonOptResp(fn: Future[Option[Json]]) {
     def okJson(): Route = toJsonOptionalResponse(fn)
   }
-
-//  lazy val withAuth: Directive0 = optionalHeaderValueByName(apiKeyHeaderName).flatMap {
-//    case _ if settings.apiKeyHash.isEmpty => pass
-//    case None => reject(AuthorizationFailedRejection)
-//    case Some(key) =>
-//      if (settings.apiKeyHash.exists(_.toCharArray.sameElements(Blake2b256(key)))) pass
-//      else reject(AuthorizationFailedRejection)
-//  }
 }
