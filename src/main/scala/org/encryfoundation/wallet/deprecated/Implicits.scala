@@ -1,4 +1,4 @@
-package org.encryfoundation.wallet
+package org.encryfoundation.wallet.deprecated
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer

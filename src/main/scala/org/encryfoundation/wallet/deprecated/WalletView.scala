@@ -1,5 +1,6 @@
-package org.encryfoundation.wallet
+package org.encryfoundation.wallet.deprecated
 
+import org.encryfoundation.wallet.Wallet
 import scalatags.Text
 import scalatags.Text.all._
 import scorex.crypto.encode.Base58

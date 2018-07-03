@@ -21,13 +21,19 @@ val testingDependencies = Seq(
   "org.scalacheck" %% "scalacheck" % "1.13.+" % "test"
 )
 
-libraryDependencies ++= Seq (
-  "com.typesafe.akka" %% "akka-http" % akkaVersion,
-  "com.lihaoyi" %% "scalatags" % "0.6.7",
-  "com.github.oskin1" %% "prism" % "0.2.2",
-  "org.scorexfoundation" %% "scrypto" % "2.1.1",
-  "org.scorexfoundation" %% "iodb" % "0.3.2",
+val apiDependencies = Seq(
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,
-) ++ testingDependencies
+  "com.typesafe.akka" %% "akka-http" % akkaVersion,
+  "de.heikoseeberger" %% "akka-http-circe" % "1.20.1"
+)
+
+libraryDependencies ++= Seq (
+  "com.google.guava" % "guava" % "21.+",
+  "com.iheart" %% "ficus" % "1.4.2",
+  "com.lihaoyi" %% "scalatags" % "0.6.7",
+  "com.github.oskin1" %% "prism" % "0.2.2",
+  "org.scorexfoundation" %% "scrypto" % "2.1.1",
+  "org.scorexfoundation" %% "iodb" % "0.3.2"
+) ++ testingDependencies ++ apiDependencies

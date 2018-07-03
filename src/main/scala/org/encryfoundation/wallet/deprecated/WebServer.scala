@@ -1,13 +1,11 @@
-package org.encryfoundation.wallet
+package org.encryfoundation.wallet.deprecated
 
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpEntity, _}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Route, StandardRoute}
-import org.encryfoundation.wallet.Implicits._
-import org.encryfoundation.wallet.utils.ExtUtils._
-import scorex.crypto.encode.Base58
-import scorex.crypto.signatures.PrivateKey
+import org.encryfoundation.wallet.Wallet
+import org.encryfoundation.wallet.deprecated.Implicits._
 
 import scala.concurrent._
 import scala.io.StdIn
@@ -40,8 +38,7 @@ object WebServer extends WalletActions {
   def walletSettingsR: Route = path("settings") {
     parameters('privateKey.as[String].?) { privateKey =>
       walletData = walletData.copy(error = None)
-      val wallet: Option[Wallet] = privateKey.trace.flatMap(Base58.decode(_).toOption)
-        .map(x => Wallet.initWithKey(PrivateKey @@ x))
+      val wallet: Option[Wallet] = privateKey.map(org.encryfoundation.wallet.actions.WalletActions.restoreFromSeed)
       if (wallet.isDefined) walletData = walletData.copy(wallet = wallet)
       mainView
     }
