@@ -121,9 +121,9 @@ object Transaction {
     val uInputs: IndexedSeq[Input] = useBoxes.map(bx => Input.unsigned(bx.id, AccountLockedContract(Account(pubKey.address)))).toIndexedSeq
     val change: Long = useBoxes.map(_.value).sum - (amount + fee)
     val directives: IndexedSeq[Directive] = if (change > 0) {
-      IndexedSeq(ScriptedAssetDirective(contract, amount, tokenIdOpt), TransferDirective(pubKey.address, change, tokenIdOpt))
+      IndexedSeq(ScriptedAssetDirective(contract.hash, amount, tokenIdOpt), TransferDirective(pubKey.address, change, tokenIdOpt))
     } else {
-      IndexedSeq(ScriptedAssetDirective(contract, amount, tokenIdOpt))
+      IndexedSeq(ScriptedAssetDirective(contract.hash, amount, tokenIdOpt))
     }
 
     val uTransaction: UnsignedEncryTransaction = UnsignedEncryTransaction(fee, timestamp, uInputs, directives)

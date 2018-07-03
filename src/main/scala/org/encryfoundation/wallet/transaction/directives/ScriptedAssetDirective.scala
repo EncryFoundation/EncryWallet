@@ -1,30 +1,28 @@
 package org.encryfoundation.wallet.transaction.directives
 
-import com.google.common.primitives.{Bytes, Ints, Longs, Shorts}
-import io.circe.{Decoder, Encoder, HCursor}
+import com.google.common.primitives.{Bytes, Ints, Longs}
 import io.circe.syntax._
-import org.encryfoundation.prismlang.compiler.{CompiledContract, CompiledContractSerializer}
+import io.circe.{Decoder, Encoder, HCursor}
+import org.encryfoundation.prismlang.compiler.CompiledContract.ContractHash
 import org.encryfoundation.wallet.transaction.EncryProposition
 import org.encryfoundation.wallet.transaction.box.{AssetBox, EncryBox}
 import scorex.crypto.authds
 import scorex.crypto.authds.ADKey
-import scorex.crypto.encode.Base58
+import scorex.crypto.encode.Base16
 import scorex.crypto.hash.Digest32
 
 import scala.util.Try
 
-case class ScriptedAssetDirective(contract: CompiledContract,
+case class ScriptedAssetDirective(contractHash: ContractHash,
                                   amount: Long,
                                   tokenIdOpt: Option[ADKey] = None) extends Directive {
 
   override val typeId: Byte = ScriptedAssetDirective.TypeId
 
   override def boxes(digest: Digest32, idx: Int): Seq[EncryBox] =
-    Seq(AssetBox(EncryProposition(contract), EncryBox.nonceFromDigest(digest ++ Ints.toByteArray(idx)), amount))
+    Seq(AssetBox(EncryProposition(contractHash), EncryBox.nonceFromDigest(digest ++ Ints.toByteArray(idx)), amount))
 
-  override val cost: Long = 4
-
-  override lazy val isValid: Boolean = amount > 0 && contract.bytes.lengthCompare(Short.MaxValue) <= 0
+  override lazy val isValid: Boolean = amount > 0
 
   lazy val isIntrinsic: Boolean = tokenIdOpt.isEmpty
 }
@@ -35,39 +33,33 @@ object ScriptedAssetDirective {
 
   implicit val jsonEncoder: Encoder[ScriptedAssetDirective] = (d: ScriptedAssetDirective) => Map(
     "typeId" -> d.typeId.asJson,
-    "contract" -> Base58.encode(d.contract.bytes).asJson,
+    "contractHash" -> Base16.encode(d.contractHash).asJson,
     "amount" -> d.amount.asJson,
-    "tokenId" -> d.tokenIdOpt.map(id => Base58.encode(id)).asJson
+    "tokenId" -> d.tokenIdOpt.map(id => Base16.encode(id)).asJson
   ).asJson
 
   implicit val jsonDecoder: Decoder[ScriptedAssetDirective] = (c: HCursor) => for {
-    contractBytes <- c.downField("contract").as[String]
+    contractHash <- c.downField("contractHash").as[String]
     amount <- c.downField("amount").as[Long]
     tokenIdOpt <- c.downField("tokenId").as[Option[String]]
-  } yield {
-    val contract: CompiledContract = Base58.decode(contractBytes).flatMap(CompiledContractSerializer.parseBytes)
-      .getOrElse(throw new Exception("Decoding failed"))
-    ScriptedAssetDirective(contract, amount, tokenIdOpt.flatMap(id => Base58.decode(id).map(ADKey @@ _).toOption))
-  }
+  } yield Base16.decode(contractHash)
+    .map(ch => ScriptedAssetDirective(ch, amount, tokenIdOpt.flatMap(id => Base16.decode(id).map(ADKey @@ _).toOption)))
+    .getOrElse(throw new Exception("Decoding failed"))
 
   object Serializer {
     def toBytes(obj: ScriptedAssetDirective): Array[Byte] =
       Bytes.concat(
-        Shorts.toByteArray(obj.contract.bytes.length.toShort),
-        obj.contract.bytes,
+        obj.contractHash,
         Longs.toByteArray(obj.amount),
         obj.tokenIdOpt.getOrElse(Array.empty)
       )
-
-    def parseBytes(bytes: Array[Byte]): Try[ScriptedAssetDirective] = {
-      val scriptLen: Short = Shorts.fromByteArray(bytes.take(2))
-      CompiledContractSerializer.parseBytes(bytes.slice(2, scriptLen)).map { contract =>
-        val amount: Long = Longs.fromByteArray(bytes.slice(scriptLen + 2, scriptLen + 2 + 8))
-        val tokenIdOpt: Option[authds.ADKey] = if ((bytes.length - (scriptLen + 2 + 8)) == 32) {
-          Some(ADKey @@ bytes.takeRight(32))
-        } else None
-        ScriptedAssetDirective(contract, amount, tokenIdOpt)
-      }
+    def parseBytes(bytes: Array[Byte]): Try[ScriptedAssetDirective] = Try {
+      val contractHash: ContractHash = bytes.take(32)
+      val amount: Long = Longs.fromByteArray(bytes.slice(32, 32 + 8))
+      val tokenIdOpt: Option[authds.ADKey] = if ((bytes.length - (32 + 8)) == 32) {
+        Some(ADKey @@ bytes.takeRight(32))
+      } else None
+      ScriptedAssetDirective(contractHash, amount, tokenIdOpt)
     }
   }
 }

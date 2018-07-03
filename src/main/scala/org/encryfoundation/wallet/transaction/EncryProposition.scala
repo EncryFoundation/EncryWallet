@@ -1,7 +1,7 @@
 package org.encryfoundation.wallet.transaction
 
-import io.circe.Encoder
 import io.circe.syntax._
+import io.circe.{Decoder, Encoder, HCursor}
 import io.iohk.iodb.ByteArrayWrapper
 import org.encryfoundation.prismlang.compiler.CompiledContract.ContractHash
 import org.encryfoundation.wallet.account.Account
@@ -27,6 +27,11 @@ object EncryProposition {
   implicit val jsonEncoder: Encoder[EncryProposition] = (p: EncryProposition) => Map(
     "contractHash" -> Base16.encode(p.contractHash).asJson
   ).asJson
+
+  implicit val jsonDecoder: Decoder[EncryProposition] = (c: HCursor) => for {
+    contractHash <- c.downField("contractHash").as[String]
+  } yield Base16.decode(contractHash).map(EncryProposition.apply)
+    .getOrElse(throw new Exception("Decoding failed"))
 
   def open: EncryProposition = EncryProposition(OpenContract.contract.hash)
   def heightLocked(height: Int): EncryProposition = EncryProposition(HeightLockedContract(height).contract.hash)
