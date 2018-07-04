@@ -12,6 +12,15 @@ import scorex.crypto.encode.Base16
 import scorex.crypto.hash.Blake2b256
 import scorex.crypto.signatures.{PrivateKey, PublicKey}
 
+case class WalletInfo(wallet: Wallet, balance: Long)
+
+object WalletInfo {
+  implicit val jsonEncoder: Encoder[WalletInfo] = (wi: WalletInfo) => Map(
+    "wallet" -> wi.wallet.asJson,
+    "balance" -> wi.balance.asJson
+  ).asJson
+}
+
 case class Wallet(pubKey: PublicKey) {
 
   import Wallet._

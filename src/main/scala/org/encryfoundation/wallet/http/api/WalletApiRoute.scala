@@ -10,7 +10,7 @@ case class WalletApiRoute(implicit val context: ActorRefFactory) extends ApiRout
   import org.encryfoundation.wallet.actions.WalletActions._
 
   override def route: Route = pathPrefix("wallet") {
-    createNewWalletR ~ restoreWalletFromSecretR ~ getAllWalletsR
+    createNewWalletR ~ restoreWalletFromSecretR ~ getAllWalletsR ~ getAllWalletsInfoR
   }
 
   def createNewWalletR: Route = pathPrefix("create") {
@@ -32,5 +32,9 @@ case class WalletApiRoute(implicit val context: ActorRefFactory) extends ApiRout
 
   def getAllWalletsR: Route = (pathPrefix("all") & get) {
     toJsonResponse(loadAll.asJson)
+  }
+
+  def getAllWalletsInfoR: Route = (pathPrefix("all" / "info") & get) {
+    toJsonResponse(loadAllWithExtendedInfo.map(_.asJson))
   }
 }
