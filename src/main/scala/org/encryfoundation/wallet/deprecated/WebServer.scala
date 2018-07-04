@@ -38,7 +38,7 @@ object WebServer extends WalletActions {
   def walletSettingsR: Route = path("settings") {
     parameters('privateKey.as[String].?) { privateKey =>
       walletData = walletData.copy(error = None)
-      val wallet: Option[Wallet] = privateKey.map(org.encryfoundation.wallet.actions.WalletActions.restoreFromSeed)
+      val wallet: Option[Wallet] = privateKey.flatMap(org.encryfoundation.wallet.actions.WalletActions.restoreFromSecret)
       if (wallet.isDefined) walletData = walletData.copy(wallet = wallet)
       mainView
     }

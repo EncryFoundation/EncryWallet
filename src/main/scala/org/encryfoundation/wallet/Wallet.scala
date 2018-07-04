@@ -2,10 +2,13 @@ package org.encryfoundation.wallet
 
 import java.lang.reflect.Constructor
 
+import io.circe.Encoder
+import io.circe.syntax._
 import io.iohk.iodb.ByteArrayWrapper
 import org.encryfoundation.wallet.account.Account
 import org.encryfoundation.wallet.crypto.PrivateKey25519
 import org.whispersystems.curve25519.OpportunisticCurve25519Provider
+import scorex.crypto.encode.Base16
 import scorex.crypto.hash.Blake2b256
 import scorex.crypto.signatures.{PrivateKey, PublicKey}
 
@@ -17,11 +20,16 @@ case class Wallet(pubKey: PublicKey) {
 
   def getSecret: PrivateKey25519 = WalletApp.store.get(secretKey(pubKey)) match {
     case Some(ByteArrayWrapper(d)) => PrivateKey25519(PrivateKey @@ d, PublicKey @@ provider.generatePublicKey(d))
-    case _ => throw new Error("Secret not found")
+    case _ => throw new Exception("Secret not found")
   }
 }
 
 object Wallet {
+
+  implicit val jsonEncoder: Encoder[Wallet] = (w: Wallet) => Map(
+    "pubKey" -> Base16.encode(w.pubKey).asJson,
+    "address" -> w.account.address.asJson
+  ).asJson
 
   val walletsKey: ByteArrayWrapper = ByteArrayWrapper(Blake2b256.hash("wallets"))
 
