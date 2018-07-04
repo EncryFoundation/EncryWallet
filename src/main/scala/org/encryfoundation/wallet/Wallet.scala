@@ -8,7 +8,7 @@ import io.iohk.iodb.ByteArrayWrapper
 import org.encryfoundation.wallet.account.Account
 import org.encryfoundation.wallet.crypto.PrivateKey25519
 import org.whispersystems.curve25519.OpportunisticCurve25519Provider
-import scorex.crypto.encode.Base16
+import scorex.crypto.encode.Base58
 import scorex.crypto.hash.Blake2b256
 import scorex.crypto.signatures.{PrivateKey, PublicKey}
 
@@ -36,7 +36,7 @@ case class Wallet(pubKey: PublicKey) {
 object Wallet {
 
   implicit val jsonEncoder: Encoder[Wallet] = (w: Wallet) => Map(
-    "pubKey" -> Base16.encode(w.pubKey).asJson,
+    "pubKey" -> Base58.encode(w.pubKey).asJson,
     "address" -> w.account.address.asJson
   ).asJson
 

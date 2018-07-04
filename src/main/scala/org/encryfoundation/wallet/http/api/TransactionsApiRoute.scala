@@ -14,7 +14,7 @@ case class TransactionsApiRoute(implicit val context: ActorRefFactory) extends A
     sendPaymentTransactionR ~ sendScriptedTransactionR
   }
 
-  def sendPaymentTransactionR: Route = (path("send" / "payment") & hexString) { walletId =>
+  def sendPaymentTransactionR: Route = (path("send" / "payment") & bs58String) { walletId =>
     post(entity(as[PaymentTransactionRequest]) { r =>
       complete {
         fromId(walletId).map { w =>
@@ -25,7 +25,7 @@ case class TransactionsApiRoute(implicit val context: ActorRefFactory) extends A
     })
   }
 
-  def sendScriptedTransactionR: Route = (path("send" / "scripted") & hexString) { walletId =>
+  def sendScriptedTransactionR: Route = (path("send" / "scripted") & bs58String) { walletId =>
     post(entity(as[ScriptedTransactionRequest]) { r =>
       complete {
         fromId(walletId).map { w =>
