@@ -30,7 +30,7 @@ object NetworkActions {
   def commitTransaction(tx: EncryTransaction): Future[HttpResponse] =
     Http().singleRequest(HttpRequest(
       method = HttpMethods.POST,
-      uri = Uri(s"${settings.explorerAddress}/transactions//send"),
+      uri = Uri(s"${settings.explorerAddress}/transactions/send"),
       entity = HttpEntity(ContentTypes.`application/json`, tx.asJson.toString)
     ))
 }
