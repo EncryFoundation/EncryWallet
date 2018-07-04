@@ -56,4 +56,6 @@ object WalletActions {
       requestUtxos(w.account.address).map(bxs => WalletInfo(w, bxs.map(_.value).sum))
     })
   }.getOrElse(Future.failed(new Exception("Storage is not initialised")))
+
+  def fromId(id: String): Option[Wallet] = Base58.decode(id).map(id => Wallet(PublicKey @@ id)).toOption
 }

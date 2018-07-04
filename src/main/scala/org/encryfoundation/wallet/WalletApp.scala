@@ -8,7 +8,7 @@ import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.Directives._
 import io.iohk.iodb.LSMStore
-import org.encryfoundation.wallet.http.api.{ApiRoute, WalletApiRoute}
+import org.encryfoundation.wallet.http.api.{ApiRoute, TransactionsApiRoute, WalletApiRoute}
 import org.encryfoundation.wallet.settings.WalletAppSettings
 
 import scala.concurrent._
@@ -24,7 +24,8 @@ object WalletApp extends App {
   val bindAddress: InetSocketAddress = settings.restApi.bindAddress
 
   val routes: Seq[ApiRoute] = Seq(
-    WalletApiRoute()
+    WalletApiRoute(),
+    TransactionsApiRoute()
   )
 
   Http().bindAndHandle(routes.map(_.route).reduce(_ ~ _), bindAddress.getAddress.getHostAddress, bindAddress.getPort)

@@ -10,7 +10,7 @@ import io.circe.Json
 import org.encryfoundation.wallet.WalletApp
 import org.encryfoundation.wallet.crypto.Base58Check
 import scorex.crypto.authds.ADKey
-import scorex.crypto.encode.Base16
+import scorex.crypto.encode.{Base16, Base58}
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.Try
@@ -35,8 +35,12 @@ trait ApiRoute extends FailFastCirceSupport with PredefinedFromEntityUnmarshalle
 
   val paging: Directive[(Int, Int)] = parameters("offset".as[Int] ? 0, "limit".as[Int] ? 50)
 
-  val modifierId: Directive1[String] = pathPrefix(Segment).flatMap { h =>
+  val hexString: Directive1[String] = pathPrefix(Segment).flatMap { h =>
     if (Base16.decode(h).isSuccess) provide(h) else reject
+  }
+
+  val bs58String: Directive1[String] = pathPrefix(Segment).flatMap { h =>
+    if (Base58.decode(h).isSuccess) provide(h) else reject
   }
 
   val height: Directive1[Int] = pathPrefix(Segment).flatMap { hs =>
