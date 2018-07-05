@@ -1,4 +1,4 @@
-package org.encryfoundation.wallet
+package org.encryfoundation.wallet.deprecated
 
 import scalatags.Text
 import scalatags.Text.all._

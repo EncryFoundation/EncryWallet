@@ -8,8 +8,6 @@ trait Directive {
 
   val typeId: Byte
 
-  val cost: Long
-
   val isValid: Boolean
 
   lazy val bytes: Array[Byte] = this match {

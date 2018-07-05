@@ -1,25 +1,24 @@
-package org.encryfoundation.wallet
+package org.encryfoundation.wallet.deprecated
 
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.util.ByteString
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
 import io.circe.parser.decode
 import io.circe.syntax._
-import org.encryfoundation.wallet.Implicits._
+import org.encryfoundation.wallet.Wallet
+import org.encryfoundation.wallet.deprecated.Implicits._
 import org.encryfoundation.wallet.transaction.box.AssetBox
 import org.encryfoundation.wallet.transaction.{EncryTransaction, Transaction}
 import org.encryfoundation.wallet.utils.ExtUtils._
 import scorex.crypto.authds.ADKey
 import scorex.crypto.encode.Base58
 
-import scala.collection.immutable
 import scala.concurrent.Future
-import scala.util.Try
 
 trait WalletActions {
   var walletData: WalletView = WalletView(None, "3BxEZq6XcBzMSoDbfmY1V9qoYCwu73G1JnJAToaYEhikQ3bBKK")
-  val config = ConfigFactory.load()
+  val config: Config = ConfigFactory.load()
   val nodeHost: String = config.getString("wallet.node.host")
 
   def walletWithError: Future[_] => Future[Unit] = _
@@ -47,7 +46,7 @@ trait WalletActions {
       .rapply(HttpRequest(method = HttpMethods.POST, uri = Uri(s"$nodeHost/transactions/send")).withEntity(_))
       .rapply(Http().singleRequest(_))
 
-  def sendTransaction (fee: Long, amount: Long, recipient: String): Future[HttpResponse] =
+  def sendTransaction(fee: Long, amount: Long, recipient: String): Future[HttpResponse] =
     withWallet { wallet =>
       getBoxesFromNode(wallet.account.address, fee + amount).flatMap {
         Transaction.defaultPaymentTransactionScratch(wallet.getSecret, fee, System.currentTimeMillis, _,

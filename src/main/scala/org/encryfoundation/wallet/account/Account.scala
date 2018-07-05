@@ -9,6 +9,8 @@ import scala.util.Try
 /** Represents the owner of the Public/Private key pair. */
 case class Account(address: String) {
 
+  lazy val bytes: Array[Byte] = Account.Serializer.toBytes(this)
+
   lazy val isValid: Boolean = Base58Check.decode(address).map(bytes =>
     if (bytes.length != PublicKey25519.Length) throw new Exception("Invalid address")
   ).isSuccess
