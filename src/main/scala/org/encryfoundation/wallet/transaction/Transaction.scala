@@ -117,7 +117,7 @@ object Transaction {
     val pubKey: PublicKey25519 = privKey.publicImage
     val uInputs: IndexedSeq[Input] = useBoxes.map(bx => Input.unsigned(bx.id, AccountLockedContract(Account(pubKey.address)))).toIndexedSeq
     val change: Long = useBoxes.map(_.value).sum - (amount + fee)
-    val assetDirective = ScriptedAssetDirective(contract.hash, amount, tokenIdOpt)
+    val assetDirective: ScriptedAssetDirective = ScriptedAssetDirective(contract.hash, amount, tokenIdOpt)
     val directives: IndexedSeq[Directive] =
       if (change > 0) IndexedSeq(assetDirective, TransferDirective(pubKey.address, change, tokenIdOpt))
       else IndexedSeq(assetDirective)
@@ -138,7 +138,7 @@ object Transaction {
                                 tokenIdOpt: Option[ADKey] = None): EncryTransaction = {
     val pubKey: PublicKey25519 = privKey.publicImage
     val uInputs: IndexedSeq[Input] = useBoxes.map(id => Input.unsigned(id, AccountLockedContract(Account(pubKey.address)))).toIndexedSeq
-    val transferDirective = TransferDirective(recipient, amount, tokenIdOpt)
+    val transferDirective: TransferDirective = TransferDirective(recipient, amount, tokenIdOpt)
     val directives: IndexedSeq[TransferDirective] =
       if (change > 0) IndexedSeq(transferDirective, TransferDirective(pubKey.address, change, tokenIdOpt))
       else IndexedSeq(transferDirective)
