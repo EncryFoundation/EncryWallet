@@ -26,7 +26,7 @@ object WalletActions {
         Seq.empty,
         Seq(
           secretKey(publicKey) -> ByteArrayWrapper(keys._1.privKeyBytes),
-          walletsKey -> ByteArrayWrapper((loadAll.map(_.pubKey) :+ publicKey).foldLeft(Array.empty[Byte])(_ ++ _))
+          walletsKey -> ByteArrayWrapper(loadAll.flatMap(_.pubKey).toArray ++ publicKey)
         )
       )
     Wallet(publicKey)
@@ -40,7 +40,7 @@ object WalletActions {
         Seq.empty,
         Seq(
           secretKey(publicKey) -> ByteArrayWrapper(privateKey),
-          walletsKey -> ByteArrayWrapper((loadAll.map(_.pubKey) :+ publicKey).foldLeft(Array.empty[Byte])(_ ++ _))
+          walletsKey -> ByteArrayWrapper(loadAll.flatMap(_.pubKey).toArray ++ publicKey)
         )
       )
     Wallet(publicKey)
