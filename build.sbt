@@ -1,39 +1,15 @@
-name := "EncryWallet"
+name := """wallet"""
+organization := "com.encry"
 
-version := "0.0.1"
+version := "1.0-SNAPSHOT"
 
-organization := "org.org.encryfoundation"
+lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.12.6"
 
-resolvers ++= Seq("Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/",
-  "SonaType" at "https://oss.sonatype.org/content/groups/public",
-  "Typesafe maven releases" at "http://repo.typesafe.com/typesafe/maven-releases/",
-  "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/")
-
-val akkaVersion = "10.0.9"
-val circeVersion = "0.9.3"
-
-val testingDependencies = Seq(
-  "com.typesafe.akka" %% "akka-testkit" % "2.4.+" % "test",
-  "com.typesafe.akka" %% "akka-http-testkit" % akkaVersion % "test",
-  "org.scalatest" %% "scalatest" % "3.0.3" % "test",
-  "org.scalacheck" %% "scalacheck" % "1.13.+" % "test"
-)
-
-val apiDependencies = Seq(
-  "io.circe" %% "circe-core" % circeVersion,
-  "io.circe" %% "circe-generic" % circeVersion,
-  "io.circe" %% "circe-parser" % circeVersion,
-  "com.typesafe.akka" %% "akka-http" % akkaVersion,
-  "de.heikoseeberger" %% "akka-http-circe" % "1.20.1"
-)
+libraryDependencies += guice
 
 libraryDependencies ++= Seq (
-  "com.google.guava" % "guava" % "21.+",
-  "com.iheart" %% "ficus" % "1.4.2",
-  "com.lihaoyi" %% "scalatags" % "0.6.7",
-  "com.github.oskin1" %% "prism" % "0.2.2",
-  "org.scorexfoundation" %% "scrypto" % "2.1.1",
-  "org.scorexfoundation" %% "iodb" % "0.3.2"
-) ++ testingDependencies ++ apiDependencies
+  "javax.xml.bind" % "jaxb-api" % "2.1",
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
+)
