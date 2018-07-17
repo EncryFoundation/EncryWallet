@@ -11,7 +11,7 @@ import io.iohk.iodb.ByteArrayWrapper
 import play.api.libs.circe.Circe
 import scorex.crypto.encode.Base58
 import scorex.crypto.hash.Blake2b256
-import scala.util.Random
+import scala.util.{Random, Try}
 
 @Singleton
 class WalletController @Inject()(cc: ControllerComponents) extends AbstractController(cc) with Circe {
@@ -21,7 +21,7 @@ class WalletController @Inject()(cc: ControllerComponents) extends AbstractContr
   }
 
   def createNewWallet(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
-    request.body.asText map { seed => //TODO check length otherwise we can get ArrayIndexOutOfBoundsException
+    request.body.asText map { seed =>
       val keys: (PrivateKey25519, PublicKey25519) = PrivateKey25519.generateKeys(Blake2b256.hash(seed.getBytes()))
       val publicKey: PublicKey = keys._2.pubKeyBytes
       if (LSMStorage.store.get(Wallet.secretKey(publicKey)).isEmpty)
@@ -42,7 +42,7 @@ class WalletController @Inject()(cc: ControllerComponents) extends AbstractContr
 
   def restoreFromSecret(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
     request.body.asText flatMap { secret =>
-      Base58.decode(secret).toOption map { privateKey =>
+      Base58.decode(secret) flatMap { privateKey => Try {
         val publicKey: PublicKey = PublicKey @@ Wallet.provider.generatePublicKey(privateKey)
         if (LSMStorage.store.get(Wallet.secretKey(publicKey)).isEmpty)
           LSMStorage.store.update(
@@ -54,7 +54,7 @@ class WalletController @Inject()(cc: ControllerComponents) extends AbstractContr
             )
           )
         Wallet(publicKey)
-      }
+      } } toOption
     } match {
         case Some(_) => Ok
         case None    => BadRequest
