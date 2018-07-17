@@ -56,9 +56,9 @@ class WalletController @Inject()(cc: ControllerComponents) extends AbstractContr
         Wallet(publicKey)
       } } toOption
     } match {
-        case Some(_) => Ok
-        case None    => BadRequest
-      }
+      case Some(_) => Ok
+      case None    => BadRequest
+    }
   }
 
 
