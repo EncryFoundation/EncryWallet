@@ -6,7 +6,6 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.stream.Materializer
 import akka.util.ByteString
-import play.api.mvc.ControllerComponents
 import io.circe.parser.decode
 import io.circe.syntax._
 import settings.WalletAppSettings
@@ -15,7 +14,7 @@ import models.EncryTransaction
 
 import scala.concurrent.Future
 
-class ExplorerService @Inject()(implicit val system: ActorSystem, implicit val materializer: Materializer, settings: WalletAppSettings, cc: ControllerComponents) {
+class ExplorerService @Inject()(implicit val system: ActorSystem, implicit val materializer: Materializer, settings: WalletAppSettings) {
 
   import system.dispatcher
 

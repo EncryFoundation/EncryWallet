@@ -6,6 +6,7 @@
 # An example controller showing a sample home page
 GET     /                           controllers.HomeController.index
 GET     /wallet/all                 controllers.WalletController.getAll
+GET     /wallet/all/info            controllers.WalletController.getAllWithInfo
 POST    /wallet/create              controllers.WalletController.createNewWallet
 POST    /wallet/restore/withSecret  controllers.WalletController.restoreFromSecret
 
