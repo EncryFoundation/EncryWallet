@@ -16,11 +16,11 @@ import scala.util.Random
 @Singleton
 class WalletController @Inject()(cc: ControllerComponents) extends AbstractController(cc) with Circe {
 
-  def getAll() = Action { implicit request: Request[AnyContent] =>
+  def getAll(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
     Ok(loadAll.asJson)
   }
 
-  def createNewWallet() = Action { implicit request: Request[AnyContent] =>
+  def createNewWallet(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
     request.body.asText map { seed => //TODO check length otherwise we can get ArrayIndexOutOfBoundsException
       val keys: (PrivateKey25519, PublicKey25519) = PrivateKey25519.generateKeys(Blake2b256.hash(seed.getBytes()))
       val publicKey: PublicKey = keys._2.pubKeyBytes
@@ -40,7 +40,7 @@ class WalletController @Inject()(cc: ControllerComponents) extends AbstractContr
     }
   }
 
-  def restoreFromSecret() = Action { implicit request: Request[AnyContent] =>
+  def restoreFromSecret(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
     request.body.asText flatMap { secret =>
       Base58.decode(secret).toOption map { privateKey =>
         val publicKey: PublicKey = PublicKey @@ Wallet.provider.generatePublicKey(privateKey)
@@ -62,7 +62,7 @@ class WalletController @Inject()(cc: ControllerComponents) extends AbstractContr
   }
 
 
-  private def loadAll  = LSMStorage.store.get(Wallet.walletsKey).map { r =>
+  private def loadAll: Seq[Wallet] = LSMStorage.store.get(Wallet.walletsKey).map { r =>
     r.data.sliding(32, 32).map(k => Wallet(PublicKey @@ k)).toList
   }.getOrElse(List.empty)
 

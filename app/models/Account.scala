@@ -18,11 +18,6 @@ case class Account(address: String) {
   lazy val pubKey: PublicKey = Account.pubKeyFromAddress(address)
     .getOrElse(throw new Exception("Invalid address"))
 
-  override def equals(obj: scala.Any): Boolean = obj match {
-    case acc: Account if acc.address == address => true
-    case _ => false
-  }
-
   override def toString: String = address
 }
 
