@@ -1,7 +1,6 @@
 package models
 
 import java.lang.reflect.Constructor
-
 import io.circe.Encoder
 import io.circe.syntax._
 import io.iohk.iodb.ByteArrayWrapper

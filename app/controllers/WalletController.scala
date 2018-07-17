@@ -11,7 +11,6 @@ import io.iohk.iodb.ByteArrayWrapper
 import play.api.libs.circe.Circe
 import scorex.crypto.encode.Base58
 import scorex.crypto.hash.Blake2b256
-
 import scala.util.Random
 
 @Singleton

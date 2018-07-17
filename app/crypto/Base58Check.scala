@@ -2,7 +2,6 @@ package crypto
 
 import scorex.crypto.encode.Base58
 import scorex.crypto.hash.Blake2b256
-
 import scala.util.{Failure, Success, Try}
 
 object Base58Check {

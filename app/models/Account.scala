@@ -1,7 +1,6 @@
 package models
 
 import scala.util.Try
-
 import scorex.crypto.encode.Base58
 import scorex.crypto.signatures.PublicKey
 

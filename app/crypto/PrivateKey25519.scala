@@ -2,7 +2,6 @@ package crypto
 
 import com.google.common.primitives.Bytes
 import scorex.crypto.signatures.{Curve25519, PrivateKey, PublicKey}
-
 import scala.util.Try
 
 case class PrivateKey25519(privKeyBytes: PrivateKey, publicKeyBytes: PublicKey) {
