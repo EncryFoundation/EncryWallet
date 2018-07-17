@@ -4,6 +4,7 @@ import javax.inject.Inject
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers.Host
 import akka.stream.Materializer
 import akka.util.ByteString
 import io.circe.parser.decode
@@ -21,8 +22,9 @@ class ExplorerService @Inject()(implicit val system: ActorSystem, implicit val m
   def requestUtxos(address: String): Future[IndexedSeq[AssetBox]] =
     Http().singleRequest(HttpRequest(
       method = HttpMethods.GET,
-      uri = s"${settings.explorerAddress}/transactions/$address/outputs/unspent"
-    )).flatMap(_.entity.dataBytes.runFold(ByteString.empty)(_ ++ _))
+      uri = s"/transactions/$address/outputs/unspent"
+    ).withEffectiveUri(false, Host(settings.explorerAddress)))
+      .flatMap(_.entity.dataBytes.runFold(ByteString.empty)(_ ++ _))
       .map(_.utf8String)
       .map(decode[Seq[AssetBox]])
       .map(_.map(_.toIndexedSeq))

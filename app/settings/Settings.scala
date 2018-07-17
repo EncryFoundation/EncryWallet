@@ -26,4 +26,4 @@ object WalletAppSettings  {
     new InetSocketAddress(split(0), split(1).toInt)
   }
 
-} Q
+}
