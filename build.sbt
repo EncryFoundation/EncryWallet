@@ -13,6 +13,7 @@ libraryDependencies += guice
 
 libraryDependencies ++= Seq (
   "javax.xml.bind" % "jaxb-api" % "2.1",
+  "com.dripower" %% "play-circe" % "2609.1" exclude("io.circe", "*"),
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-parser" % circeVersion,

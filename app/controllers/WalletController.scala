@@ -8,16 +8,17 @@ import scorex.crypto.signatures.PublicKey
 import storage.LSMStorage
 import io.circe.syntax._
 import io.iohk.iodb.ByteArrayWrapper
+import play.api.libs.circe.Circe
 import scorex.crypto.encode.Base58
 import scorex.crypto.hash.Blake2b256
 
-import scala.util.{Failure, Random, Success}
+import scala.util.Random
 
 @Singleton
-class WalletController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
+class WalletController @Inject()(cc: ControllerComponents) extends AbstractController(cc) with Circe {
 
   def getAll() = Action { implicit request: Request[AnyContent] =>
-    Ok(loadAll.asJson.toString)
+    Ok(loadAll.asJson)
   }
 
   def createNewWallet() = Action { implicit request: Request[AnyContent] =>
