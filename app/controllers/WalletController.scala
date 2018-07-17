@@ -23,7 +23,7 @@ class WalletController @Inject()(implicit ec: ExecutionContext, es: ExplorerServ
     Ok(loadAll.asJson)
   }
 
-  def getAllWithInfo() = Action.async { implicit request: Request[AnyContent] =>
+  def getAllWithInfo(): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
     LSMStorage.store.get(Wallet.walletsKey).map { r =>
       val wallets: List[Wallet] = r.data.sliding(32, 32).map(k => Wallet(PublicKey @@ k)).toList
       Future.sequence(wallets.map { w =>

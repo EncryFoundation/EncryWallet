@@ -22,13 +22,11 @@ libraryDependencies ++= Seq (
   "org.scorexfoundation" %% "iodb" % "0.3.2",
   "com.iheart" %% "ficus" % "1.4.3",
   "com.github.oskin1" %% "prism" % "0.2.2",
-//  "org.slf4j" % "slf4j-api" % "1.7.25", //"1.8.0-beta2",
-//  "ch.qos.logback" % "logback-classic" % "1.2.3", //"1.3.0-alpha4"
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
 ) map ( _ exclude("ch.qos.logback", "*") exclude("ch.qos.logback", "*") )
 
 
 libraryDependencies ++= Seq (
-  "org.slf4j" % "slf4j-api" % "1.7.25", //"1.8.0-beta2",
-  "ch.qos.logback" % "logback-classic" % "1.2.3" //"1.3.0-alpha4"
+  "org.slf4j" % "slf4j-api" % "1.7.25",
+  "ch.qos.logback" % "logback-classic" % "1.2.3"
 )

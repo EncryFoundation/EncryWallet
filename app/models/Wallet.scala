@@ -13,21 +13,23 @@ import scorex.crypto.signatures.PublicKey
 case class WalletInfo(wallet: Wallet, balance: Long)
 
 object WalletInfo {
+
   implicit val jsonEncoder: Encoder[WalletInfo] = (wi: WalletInfo) => Map(
     "wallet" -> wi.wallet.asJson,
     "balance" -> wi.balance.asJson
   ).asJson
+
 }
 
 case class Wallet(pubKey: PublicKey) {
-
-  import Wallet._
 
   val account: Account = Account(pubKey)
 
 }
 
 object Wallet {
+
+  def fromId(id: String): Option[Wallet] = Base58.decode(id).map(id => Wallet(PublicKey @@ id)).toOption
 
   implicit val jsonEncoder: Encoder[Wallet] = (w: Wallet) => Map(
     "pubKey" -> Base58.encode(w.pubKey).asJson,

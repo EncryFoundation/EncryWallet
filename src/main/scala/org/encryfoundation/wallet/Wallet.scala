@@ -35,6 +35,8 @@ case class Wallet(pubKey: PublicKey) {
 
 object Wallet {
 
+  def fromId(id: String): Option[Wallet] = Base58.decode(id).map(id => Wallet(PublicKey @@ id)).toOption
+
   implicit val jsonEncoder: Encoder[Wallet] = (w: Wallet) => Map(
     "pubKey" -> Base58.encode(w.pubKey).asJson,
     "address" -> w.account.address.asJson
