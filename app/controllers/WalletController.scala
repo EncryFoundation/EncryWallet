@@ -34,7 +34,7 @@ class WalletController @Inject()(cc: ControllerComponents) extends AbstractContr
         )
       Wallet(publicKey)
     } match {
-      case Success(_) => Ok
+      case Success(wallet) => Ok(wallet.asJson)
       case _ => InternalServerError
     }
   }
@@ -57,7 +57,7 @@ class WalletController @Inject()(cc: ControllerComponents) extends AbstractContr
         }
       }.toOption
     } match {
-      case Some(_) => Ok
+      case Some(wallet) => Ok(wallet.asJson)
       case None => BadRequest
     }
   }
