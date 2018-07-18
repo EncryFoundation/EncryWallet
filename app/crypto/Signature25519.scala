@@ -34,6 +34,8 @@ object Signature25519 {
 
   object Serializer {
     def toBytes(obj: Signature25519): Array[Byte] = obj.signature
+
     def parseBytes(bytes: Array[Byte]): Try[Signature25519] = Try(Signature25519(Signature @@ bytes))
   }
+
 }

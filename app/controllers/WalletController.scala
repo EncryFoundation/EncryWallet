@@ -39,8 +39,8 @@ class WalletController @Inject()(cc: ControllerComponents) extends AbstractContr
   }
 
   def restoreFromSecret(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
-    request.body.asText flatMap { secret =>
-      Base58.decode(secret) flatMap { privateKey =>
+    request.body.asText.flatMap { secret =>
+      Base58.decode(secret).flatMap { privateKey =>
         Try {
           val publicKey: PublicKey = PublicKey @@ Wallet.provider.generatePublicKey(privateKey)
           if (LSMStorage.store.get(Wallet.secretKey(publicKey)).isEmpty)
@@ -54,7 +54,7 @@ class WalletController @Inject()(cc: ControllerComponents) extends AbstractContr
             )
           Wallet(publicKey)
         }
-      } toOption
+      }.toOption
     } match {
       case Some(_) => Ok
       case None => BadRequest
@@ -65,5 +65,4 @@ class WalletController @Inject()(cc: ControllerComponents) extends AbstractContr
   private def loadAll: Seq[Wallet] = LSMStorage.store.get(Wallet.walletsKey).map { r =>
     r.data.sliding(32, 32).map(k => Wallet(PublicKey @@ k)).toList
   }.getOrElse(List.empty)
-
 }

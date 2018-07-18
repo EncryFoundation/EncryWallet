@@ -3,7 +3,6 @@ package models
 import scala.util.Try
 import scorex.crypto.encode.Base58
 import scorex.crypto.signatures.PublicKey
-
 import crypto.{Base58Check, PublicKey25519}
 
 /** Represents the owner of the Public/Private key pair. */
@@ -34,7 +33,8 @@ object Account {
   def validAddress(address: String): Boolean = Account(address).isValid
 
   object Serializer {
-    def toBytes(obj: Account): Array[Byte] = Base58.decode(obj.address).get   // TODO: .get
+    def toBytes(obj: Account): Array[Byte] = Base58.decode(obj.address).get // TODO: .get
     def parseBytes(bytes: Array[Byte]): Try[Account] = Try(Account(Base58.encode(bytes)))
   }
+
 }
