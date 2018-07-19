@@ -78,11 +78,11 @@ class WalletControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecti
 
   "WalletController#restoreFromSecret" should {
 
-    "return valid json" in {
+    "return a valid json" in {
       val mockWalletService: WalletService = mock[WalletService]
       when(mockWalletService.restoreFromSecret(anyString)) thenReturn Success(sampleWallet)
       val wc: WalletController = new WalletController(mockWalletService, stubControllerComponents())
-      val result: Future[Result] = wc.restoreFromSecret().apply(FakeRequest().withTextBody("testString"))
+      val result: Future[Result] = wc.restoreFromSecret().apply(FakeRequest(POST, "/restoreWithSecret?secretKey=Blablabla"))
       status(result) mustEqual OK
       contentType(result) should contain("application/json")
       contentAsJson(result).right.value should be(sampleWallet.asJson)
@@ -96,7 +96,7 @@ class WalletControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecti
       status(result) mustEqual BAD_REQUEST
     }
 
-    "give bad request on request without body" in {
+    "give bad request on request without a query parameter" in {
       val mockWalletService: WalletService = mock[WalletService]
       val wc: WalletController = new WalletController(mockWalletService, stubControllerComponents())
       val result: Future[Result] = wc.restoreFromSecret().apply(FakeRequest())

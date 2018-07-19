@@ -28,7 +28,7 @@ _Example response:_
 ```
 
 __POST__ _/wallet/restore/withSecret_\
-Restores wallet with its secret key. The key is accepted as a request body.
+Restores wallet with its secret key. The key is accepted as a `secretKey` query parameter.
 
 _Example response:_
 ```json

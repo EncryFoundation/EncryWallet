@@ -7,7 +7,7 @@
 GET     /                           controllers.HomeController.index
 GET     /wallet/all                 controllers.WalletController.getAll
 POST    /wallet/create              controllers.WalletController.createNewWallet
-POST    /wallet/restore/withSecret  controllers.WalletController.restoreFromSecret
+POST    /wallet/restoreWithSecret   controllers.WalletController.restoreFromSecret
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
