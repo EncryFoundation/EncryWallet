@@ -20,5 +20,6 @@ libraryDependencies ++= Seq (
   "org.scorexfoundation" %% "scrypto" % "2.1.1",
   "org.scorexfoundation" %% "iodb" % "0.3.2",
   "org.mockito" % "mockito-core" % "2.19.1" % Test,
+  "org.scalacheck" %% "scalacheck" % "1.13.+" % Test,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test
 )
