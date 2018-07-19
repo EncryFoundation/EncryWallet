@@ -1,6 +1,7 @@
 package models
 
 import java.lang.reflect.Constructor
+import java.util
 import io.circe.Encoder
 import io.circe.syntax._
 import io.iohk.iodb.ByteArrayWrapper
@@ -22,6 +23,11 @@ object WalletInfo {
 case class Wallet(pubKey: PublicKey) {
 
   val account: Account = Account(pubKey)
+
+  override def equals(obj: Any): Boolean = obj match {
+    case other: Wallet => util.Arrays.equals(pubKey, other.pubKey)
+    case _ => false
+  }
 
 }
 
