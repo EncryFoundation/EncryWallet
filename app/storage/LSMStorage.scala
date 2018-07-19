@@ -5,8 +5,10 @@ import io.iohk.iodb.{ByteArrayWrapper, LSMStore}
 import models.Wallet
 import scorex.crypto.signatures.{PrivateKey, PublicKey}
 import crypto.PrivateKey25519
+import javax.inject.Singleton
 
-object LSMStorage {
+@Singleton
+class LSMStorage {
 
   val dir: File = new File("keys")
   dir.mkdirs()
