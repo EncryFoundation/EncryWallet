@@ -82,7 +82,7 @@ class WalletControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecti
       val mockWalletService: WalletService = mock[WalletService]
       when(mockWalletService.restoreFromSecret(anyString)) thenReturn Success(sampleWallet)
       val wc: WalletController = new WalletController(mockWalletService, stubControllerComponents())
-      val result: Future[Result] = wc.restoreFromSecret().apply(FakeRequest(POST, "/restoreWithSecret?secretKey=Blablabla"))
+      val result: Future[Result] = wc.restoreFromSecret().apply(FakeRequest().withFormUrlEncodedBody("secretKey" -> "Blablabla"))
       status(result) mustEqual OK
       contentType(result) should contain("application/json")
       contentAsJson(result).right.value should be(sampleWallet.asJson)

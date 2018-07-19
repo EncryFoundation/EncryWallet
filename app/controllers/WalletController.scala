@@ -22,7 +22,7 @@ class WalletController @Inject()(ws: WalletService, cc: ControllerComponents) ex
   }
 
   def restoreFromSecret(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
-    request.queryString.get("secretKey").flatMap(_.headOption).flatMap(ws.restoreFromSecret(_).toOption) match {
+    request.body.asFormUrlEncoded.flatMap(_.get("secretKey")).flatMap(_.headOption).flatMap(ws.restoreFromSecret(_).toOption) match {
       case Some(wallet) => Ok(wallet.asJson)
       case None => BadRequest
     }
