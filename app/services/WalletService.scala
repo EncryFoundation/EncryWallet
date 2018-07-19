@@ -8,7 +8,6 @@ import scorex.crypto.encode.Base58
 import scorex.crypto.hash.Blake2b256
 import scorex.crypto.signatures.PublicKey
 import storage.LSMStorage
-
 import scala.util.{Random, Try}
 
 class WalletService @Inject()(lsmStorage: LSMStorage){
