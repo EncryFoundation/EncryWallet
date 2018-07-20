@@ -13,12 +13,11 @@ class LoggingFilter @Inject()(implicit val mat: Materializer, ec: ExecutionConte
       val startTime: Long = System.currentTimeMillis
       nextFilter(requestHeader).map { result =>
         val requestTime: Long = System.currentTimeMillis - startTime
-        Logger.info(s"Method = ${requestHeader.method},  " +
-          s"request domain  = ${requestHeader.domain},  " +
-          s"request host  = ${requestHeader.host},  " +
-          s"request remote address = ${requestHeader.remoteAddress},  "+
-          s"request URI = ${requestHeader.uri} took ${requestTime}ms,  " +
-          s"code of response = [ ${result.header.status} ]")
+        Logger.info(s"Method: ${requestHeader.method}, " +
+          s"ip: ${requestHeader.domain}, " +
+          s"uri: ${requestHeader.uri}, " +
+          s"response time: ${requestTime}ms, " +
+          s"code of response = [${result.header.status}].")
         result.withHeaders("Request-Time" -> requestTime.toString)
       }
     }
