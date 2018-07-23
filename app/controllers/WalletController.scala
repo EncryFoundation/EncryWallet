@@ -1,14 +1,15 @@
 package controllers
 
 import javax.inject.{Inject, Singleton}
-import play.api.mvc._
+import scala.util.Success
+import scala.concurrent.ExecutionContext
 import io.circe.syntax._
+import play.api.mvc._
 import play.api.libs.circe.Circe
 import services.WalletService
-import scala.util.Success
 
 @Singleton
-class WalletController @Inject()(ws: WalletService, cc: ControllerComponents) extends AbstractController(cc) with Circe {
+class WalletController @Inject()(implicit ec: ExecutionContext, ws: WalletService, cc: ControllerComponents) extends AbstractController(cc) with Circe {
 
   def getAll: Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
     Ok(ws.loadAll.asJson)
@@ -19,6 +20,10 @@ class WalletController @Inject()(ws: WalletService, cc: ControllerComponents) ex
       case Success(wallet) => Ok(wallet.asJson)
       case _ => InternalServerError
     }
+  }
+
+  def getAllWithInfo(): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
+    ws.loadAllWithInfo().map(xs => Ok(xs.asJson)).recover { case _ => InternalServerError }
   }
 
   def restoreFromSecret(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>

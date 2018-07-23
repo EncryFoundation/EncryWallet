@@ -2,11 +2,12 @@ package models
 
 import java.lang.reflect.Constructor
 import java.util
+import crypto.PublicKey25519
 import io.circe.Encoder
 import io.circe.syntax._
 import io.iohk.iodb.ByteArrayWrapper
 import org.whispersystems.curve25519.OpportunisticCurve25519Provider
-import scorex.crypto.encode.Base58
+import scorex.crypto.encode.Base16
 import scorex.crypto.hash.Blake2b256
 import scorex.crypto.signatures.PublicKey
 
@@ -18,6 +19,7 @@ object WalletInfo {
     "wallet" -> wi.wallet.asJson,
     "balance" -> wi.balance.asJson
   ).asJson
+
 }
 
 case class Wallet(pubKey: PublicKey) {
@@ -33,8 +35,10 @@ case class Wallet(pubKey: PublicKey) {
 
 object Wallet {
 
+  def fromId(id: String): Option[Wallet] = Base16.decode(id).filter(_.length == PublicKey25519.Length).map(id => Wallet(PublicKey @@ id)).toOption
+
   implicit val jsonEncoder: Encoder[Wallet] = (w: Wallet) => Map(
-    "pubKey" -> Base58.encode(w.pubKey).asJson,
+    "pubKey" -> Base16.encode(w.pubKey).asJson,
     "address" -> w.account.address.asJson
   ).asJson
 

@@ -3,11 +3,13 @@
 # https://www.playframework.com/documentation/latest/ScalaRouting
 # ~~~~
 
-# An example controller showing a sample home page
-GET     /                           controllers.HomeController.index
-GET     /wallet/all                 controllers.WalletController.getAll
-POST    /wallet/create              controllers.WalletController.createNewWallet
-POST    /wallet/restoreWithSecret   controllers.WalletController.restoreFromSecret
+GET     /                                     controllers.HomeController.index
+GET     /wallet/all                           controllers.WalletController.getAll
+GET     /wallet/all/info                      controllers.WalletController.getAllWithInfo
+POST    /wallet/create                        controllers.WalletController.createNewWallet
+POST    /wallet/restoreWithSecret             controllers.WalletController.restoreFromSecret
+POST    /transactions/send/payment/:walletId  controllers.TransactionController.sendPaymentTransaction(walletId)
+POST    /transactions/send/scripted/:walletId controllers.TransactionController.sendScriptedTransaction(walletId)
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET     /assets/*file                         controllers.Assets.versioned(path="/public", file: Asset)

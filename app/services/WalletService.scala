@@ -3,14 +3,15 @@ package services
 import crypto.{PrivateKey25519, PublicKey25519}
 import io.iohk.iodb.ByteArrayWrapper
 import javax.inject.Inject
-import models.Wallet
+import models.{Wallet, WalletInfo}
 import scorex.crypto.encode.Base58
 import scorex.crypto.hash.Blake2b256
 import scorex.crypto.signatures.PublicKey
 import storage.LSMStorage
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Random, Try}
 
-class WalletService @Inject()(lsmStorage: LSMStorage){
+class WalletService @Inject()(implicit ec: ExecutionContext, lsmStorage: LSMStorage, es: ExplorerService) {
 
   def loadAll: Seq[Wallet] = lsmStorage.store.get(Wallet.walletsKey).map { r =>
     r.data.sliding(PublicKey25519.Length, PublicKey25519.Length).map(k => Wallet(PublicKey @@ k)).toList
@@ -44,6 +45,10 @@ class WalletService @Inject()(lsmStorage: LSMStorage){
         )
       Wallet(publicKey)
     }
+
+  def loadAllWithInfo(): Future[Seq[WalletInfo]] = Future.sequence(loadAll.map { w =>
+    es.requestUtxos(w.account.address).map(bxs => WalletInfo(w, bxs.map(_.value).sum))
+  })
 
 }
 
