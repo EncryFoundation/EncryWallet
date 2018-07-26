@@ -1,13 +1,15 @@
 package controllers
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
+import scala.util.control.NonFatal
 import akka.http.scaladsl.model.StatusCodes
 import play.api.mvc._
 import play.api.libs.circe.Circe
 import models._
 import services.TransactionService
 
+@Singleton
 class TransactionController @Inject()(implicit ec: ExecutionContext, ts: TransactionService, cc: ControllerComponents)
   extends AbstractController(cc) with Circe {
 
@@ -20,7 +22,7 @@ class TransactionController @Inject()(implicit ec: ExecutionContext, ts: Transac
         }
       }.recover {
         case e: IllegalArgumentException => BadRequest(e.getMessage)
-        case _ => InternalServerError
+        case NonFatal(_) => InternalServerError
       }
   }
 
@@ -33,7 +35,7 @@ class TransactionController @Inject()(implicit ec: ExecutionContext, ts: Transac
         }
       }.recover {
         case e: IllegalArgumentException => BadRequest(e.getMessage)
-        case _ => InternalServerError
+        case NonFatal(_) => InternalServerError
       }
   }
 

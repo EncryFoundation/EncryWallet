@@ -11,5 +11,14 @@ POST    /wallet/restoreWithSecret             controllers.WalletController.resto
 POST    /transactions/send/payment/:walletId  controllers.TransactionController.sendPaymentTransaction(walletId)
 POST    /transactions/send/scripted/:walletId controllers.TransactionController.sendScriptedTransaction(walletId)
 
+GET     /transactions/payment/                     controllers.ViewController.showPaymentTransactionForm
+POST    /transactions/payment/send/:walletId       controllers.ViewController.sendPaymentTransactionFromForm(walletId)
+GET     /transactions/scripted/                    controllers.ViewController.showScriptedTransactionForm
+POST    /transactions/scripted/send/:walletId      controllers.ViewController.sendScriptedTransactionFromForm(walletId)
+GET     /transactions/message                      controllers.ViewController.message(msg)
+GET     /transactions/settings                     controllers.ViewController.showSettingsForm
+POST    /transactions/settings/setKey              controllers.ViewController.setWallet
+GET     /transactions/walletInfo                   controllers.ViewController.showWalletInfo
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                         controllers.Assets.versioned(path="/public", file: Asset)

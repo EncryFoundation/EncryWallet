@@ -20,8 +20,8 @@ class ExplorerService @Inject()(implicit val system: ActorSystem, implicit val m
   def requestUtxos(address: String): Future[IndexedSeq[AssetBox]] =
     Http().singleRequest(HttpRequest(
       method = HttpMethods.GET,
-      uri = "/transactions/$address/outputs/unspent"
-    ).withEffectiveUri(false, Host(settings.explorerAddress)))
+      uri = s"/transactions/$address/outputs/unspent"
+    ).withEffectiveUri(securedConnection = false, Host(settings.explorerAddress)))
       .flatMap(_.entity.dataBytes.runFold(ByteString.empty)(_ ++ _))
       .map(_.utf8String)
       .map(decode[Seq[AssetBox]])
@@ -33,6 +33,6 @@ class ExplorerService @Inject()(implicit val system: ActorSystem, implicit val m
       method = HttpMethods.POST,
       uri = "/transactions/send",
       entity = HttpEntity(ContentTypes.`application/json`, tx.asJson.toString)
-    ).withEffectiveUri(false, Host(settings.knownPeers.head)))
+    ).withEffectiveUri(securedConnection = false, Host(settings.knownPeers.head)))
 
 }

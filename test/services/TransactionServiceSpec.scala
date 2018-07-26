@@ -34,7 +34,7 @@ class TransactionServiceSpec extends PlaySpec with GuiceOneAppPerTest with Injec
 
   "TransactionService#sendPaymentTransaction" should {
 
-    val samplePaymentTransactionRequest: PaymentTransactionRequest = PaymentTransactionRequest(1L, 2L, "9WMTsdbwsgdF9ZH8JdGsF5SnqcKy7fPSR4cift1iLPuw")
+    val samplePaymentTransactionRequest: PaymentTransactionRequest = PaymentTransactionRequest(1L, 2L, "4rsPPCu1p1UjjT45emepvCPen7t6qGeoNBg9ArBPGdxhTqn5dr")
 
     "fail if a not valid Base58 encoded string is given" in forAll { s: String =>
       val mockLSMStorage: LSMStorage = mock[LSMStorage]

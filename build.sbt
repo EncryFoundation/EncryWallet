@@ -9,7 +9,12 @@ scalaVersion := "2.12.6"
 
 val circeVersion = "0.9.3"
 
+routesGenerator := InjectedRoutesGenerator
+
+resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+
 libraryDependencies += guice
+libraryDependencies += filters
 
 libraryDependencies ++= Seq(
   "javax.xml.bind" % "jaxb-api" % "2.1",
@@ -22,6 +27,9 @@ libraryDependencies ++= Seq(
   "org.scorexfoundation" %% "iodb" % "0.3.2",
   "com.iheart" %% "ficus" % "1.4.3",
   "org.encry" %% "prism" % "0.2.3",
+  "com.adrianhurt" %% "play-bootstrap" % "1.4-P26-B4-SNAPSHOT",
+  "org.webjars" % "bootstrap" % "4.1.2",
+  "org.webjars" % "jquery" % "3.3.1",
   "org.mockito" % "mockito-core" % "2.19.1" % Test,
   "org.scalacheck" %% "scalacheck" % "1.13.+" % Test,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test

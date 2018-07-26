@@ -1,0 +1,13 @@
+@(settingsForm: Form[controllers.ViewController.SettingsData])(implicit lang: play.api.i18n.Messages)
+
+@import helper._
+
+@layout("Settings") {
+<div class="container">
+
+    @b4.horizontal.form(routes.ViewController.setWallet(), "col-sm-3", "col-sm-9") { implicit hfc =>
+        @b4.text(settingsForm("secretKey"), '_label -> "Private key")
+        @b4.submit('class -> "btn btn-default"){ Submit }
+    }
+
+}

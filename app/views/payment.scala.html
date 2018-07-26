@@ -1,0 +1,14 @@
+@(walletId: String, paymentTransactionRequestForm: Form[models.PaymentTransactionRequest])(implicit lang: play.api.i18n.Messages)
+
+@import helper._
+
+@layout("Payment transaction") {
+<div class="container">
+
+    @b4.horizontal.form(routes.ViewController.sendPaymentTransactionFromForm(walletId), "col-sm-3", "col-sm-9") { implicit hfc =>
+        @b4.text(paymentTransactionRequestForm("fee"), '_label -> "Fee", 'placeholder -> 0, 'type -> "number")
+        @b4.text(paymentTransactionRequestForm("amount"), '_label -> "Amount", 'placeholder -> 0, 'type -> "number")
+        @b4.text(paymentTransactionRequestForm("recipient"), '_label -> "Address", 'placeholder -> "Recipient address")
+        @b4.submit('class -> "btn btn-default"){ Submit }
+    }
+}

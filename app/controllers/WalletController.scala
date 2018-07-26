@@ -1,6 +1,7 @@
 package controllers
 
 import javax.inject.{Inject, Singleton}
+import scala.util.control.NonFatal
 import scala.util.Success
 import scala.concurrent.ExecutionContext
 import io.circe.syntax._
@@ -22,8 +23,8 @@ class WalletController @Inject()(implicit ec: ExecutionContext, ws: WalletServic
     }
   }
 
-  def getAllWithInfo(): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
-    ws.loadAllWithInfo().map(xs => Ok(xs.asJson)).recover { case _ => InternalServerError }
+  def getAllWithInfo: Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
+    ws.loadAllWithInfo().map(xs => Ok(xs.asJson)).recover { case NonFatal(_) => InternalServerError }
   }
 
   def restoreFromSecret(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>

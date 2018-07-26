@@ -28,12 +28,14 @@ object Account {
 
   def pubKeyFromAddress(address: String): Try[PublicKey] = Base58Check.decode(address).map(PublicKey @@ _)
 
-  def decodeAddress(address: String): Array[Byte] = Base58.decode(address).get
+  // TODO find a better way of handling invalid address strings
+  def decodeAddress(address: String): Array[Byte] = Base58.decode(address).filter(_.length == AddressLength)
+    .getOrElse(throw new IllegalArgumentException("The given string is not a valid address"))
 
   def validAddress(address: String): Boolean = Account(address).isValid
 
   object Serializer {
-    def toBytes(obj: Account): Array[Byte] = Base58.decode(obj.address).get // TODO: .get
+    def toBytes(obj: Account): Array[Byte] = decodeAddress(obj.address)
     def parseBytes(bytes: Array[Byte]): Try[Account] = Try(Account(Base58.encode(bytes)))
   }
 

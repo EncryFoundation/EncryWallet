@@ -46,9 +46,9 @@ class WalletService @Inject()(implicit ec: ExecutionContext, lsmStorage: LSMStor
       Wallet(publicKey)
     }
 
-  def loadAllWithInfo(): Future[Seq[WalletInfo]] = Future.sequence(loadAll.map { w =>
-    es.requestUtxos(w.account.address).map(bxs => WalletInfo(w, bxs.map(_.value).sum))
-  })
+  def loadWalletInfo(w: Wallet): Future[WalletInfo] = es.requestUtxos(w.account.address).map(bxs => WalletInfo(w, bxs.map(_.value).sum))
+
+  def loadAllWithInfo(): Future[Seq[WalletInfo]] = Future.sequence(loadAll.map(loadWalletInfo))
 
 }
 
