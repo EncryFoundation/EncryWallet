@@ -10,7 +10,7 @@ import scala.util.Try
 
 case class Input(boxId: ADKey, contract: Either[CompiledContract, RegularContract], proofs: List[Proof]) {
 
-  lazy val bytesWithoutProof: Array[Byte] = boxId
+  lazy val bytesWithoutProof: Array[Byte] = Input.Serializer.toBytesWithoutProof(this)
 
   def isUnsigned: Boolean = proofs.isEmpty
 }

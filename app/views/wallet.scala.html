@@ -1,25 +1,59 @@
-@(w: Wallet, balance: Option[Long], hash: String)(implicit lang: play.api.i18n.Messages)
+@(w: Wallet, balance: Option[Long], hash: String, outputs: Seq[Output])(implicit lang: play.api.i18n.Messages)
 
 @import helper._
-@import scorex.crypto.encode.Base16
+@import scorex.crypto.encode.{Base16, Base58}
 
 @layout("Wallet info") {
 <form class="form-horizontal">
 
-<div class="form-group>
-    <label class="col-form-label col-sm-3">Public key</label>
-    <div class="col-sm-9">@{Base16.encode(w.pubKey)}</div>
-</div>
+    <div class="form-group">
+        <label class="col-form-label col-sm-3"><b>Public key</b></label>
+        <div class="col-sm-9">@{Base16.encode(w.pubKey)}</div>
+    </div>
 
-<div class="form-group>
-    <label class="col-form-label col-sm-3">Balance</label>
-    <div class="col-sm-9">@{balance.getOrElse("N/A")}</div>
-</div>
+    <div class="form-group">
+        <label class="col-form-label col-sm-3"><b>Address</b></label>
+        <div class="col-sm-9">@{w.account.address}</div>
+    </div>
 
-<div class="form-group>
-    <label class="col-form-label col-sm-3">Regular contract hash</label>
-<div class="col-sm-9">@hash</div>
-</div>
+    <div class="form-group">
+        <label class="col-form-label col-sm-3"><b>Balance</b></label>
+        <div class="col-sm-9">@{balance.getOrElse("N/A")}</div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-form-label col-sm-3"><b>Regular contract hash</b></label>
+        <div class="col-sm-9">@hash</div>
+    </div>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Type</th>
+            <th scope="col">Contract hash</th>
+            <th scope="col">Amount</th>
+        </tr>
+        </thead>
+        <tbody>
+        @for(output <- outputs) {
+        <tr>
+            <td scope="row">@output.id</td>
+            <td>@{Base16.decode(output.id).map(_.head).map {
+                    case 1 => "AssetBox"
+                    case 2 => "AssetCreationBox"
+                    case 3 => "AssetIssuingBox"
+                    case 4 => "DataBox"
+                    case _ => "unknown"
+                }.getOrElse("invalid")}
+            </td>
+            <td>@output.contractHash</td>
+            <td>@output.monetaryValue</td>
+        </tr>
+        }
+        </tbody>
+    </table>
 </form>
 
 }
+

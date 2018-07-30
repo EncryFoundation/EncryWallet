@@ -12,6 +12,7 @@ sealed trait RegularContract {
   val typeId: Byte
   val contract: CompiledContract
   lazy val bytes: Array[Byte] = RegularContract.Serializer.toBytes(this)
+  lazy val contractHashHex: String = Base16.encode(contract.hash)
 }
 object RegularContract {
   object Serializer {

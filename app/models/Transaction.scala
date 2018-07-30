@@ -43,12 +43,12 @@ object EncryTransaction {
       directives <- c.downField("directives").as[IndexedSeq[Directive]]
       defaultProofOpt <- c.downField("defaultProofOpt").as[Option[Proof]]
     } yield EncryTransaction(
-        fee,
-        timestamp,
-        inputs,
-        directives,
-        defaultProofOpt
-      )
+      fee,
+      timestamp,
+      inputs,
+      directives,
+      defaultProofOpt
+    )
   }
 }
 
@@ -62,8 +62,9 @@ case class UnsignedEncryTransaction(fee: Long,
   val messageToSign: Array[Byte] = UnsignedEncryTransaction.bytesToSign(fee, timestamp, inputs, directives)
 
   def toSigned(proofs: IndexedSeq[Seq[Proof]], defaultProofOpt: Option[Proof]): EncryTransaction = {
-    val signedInputs: IndexedSeq[Input] = inputs.zip(proofs).map{case (input, proof) => input.copy(proofs = proof.toList)} ++
-      inputs.drop(proofs.length)
+    val signedInputs: IndexedSeq[Input] = inputs.zipWithIndex.map { case (input, idx) =>
+      if (proofs.nonEmpty && proofs.lengthCompare(idx + 1) <= 0) input.copy(proofs = proofs(idx).toList) else input
+    }
     EncryTransaction(fee, timestamp, signedInputs, directives, defaultProofOpt)
   }
 }
@@ -87,13 +88,17 @@ object Transaction {
   def defaultPaymentTransactionScratch(privKey: PrivateKey25519,
                                        fee: Long,
                                        timestamp: Long,
-                                       useBoxes: IndexedSeq[AssetBox],
+                                       usedOutputs: Seq[Output],
                                        recipient: String,
                                        amount: Long,
                                        tokenIdOpt: Option[ADKey] = None): EncryTransaction = {
     val pubKey: PublicKey25519 = privKey.publicImage
-    val uInputs: IndexedSeq[Input] = useBoxes.map(bx => Input.unsigned(bx.id, AccountLockedContract(Account(pubKey.address)))).toIndexedSeq
-    val change: Long = useBoxes.map(_.value).sum - (amount + fee)
+    val uInputs: IndexedSeq[Input] = usedOutputs.map(output =>
+      Input.unsigned(
+        Base16.decode(output.id).map(ADKey @@ _).getOrElse(throw new RuntimeException(s"Output id ${output.id} con not be decoded with Base16")),
+        AccountLockedContract(Account(pubKey.address)))
+    ).toIndexedSeq
+    val change: Long = usedOutputs.map(_.monetaryValue).sum - (amount + fee)
     val directives: IndexedSeq[TransferDirective] = if (change > 0) {
       IndexedSeq(TransferDirective(recipient, amount, tokenIdOpt), TransferDirective(pubKey.address, change, tokenIdOpt))
     } else {
@@ -109,13 +114,17 @@ object Transaction {
   def scriptedAssetTransactionScratch(privKey: PrivateKey25519,
                                       fee: Long,
                                       timestamp: Long,
-                                      useBoxes: IndexedSeq[AssetBox],
+                                      usedOutputs: Seq[Output],
                                       contract: CompiledContract,
                                       amount: Long,
                                       tokenIdOpt: Option[ADKey] = None): EncryTransaction = {
     val pubKey: PublicKey25519 = privKey.publicImage
-    val uInputs: IndexedSeq[Input] = useBoxes.map(bx => Input.unsigned(bx.id, AccountLockedContract(Account(pubKey.address)))).toIndexedSeq
-    val change: Long = useBoxes.map(_.value).sum - (amount + fee)
+    val uInputs: IndexedSeq[Input] = usedOutputs.map(output =>
+      Input.unsigned(
+        Base16.decode(output.id).map(ADKey @@ _).getOrElse(throw new RuntimeException(s"Output id ${output.id} con not be decoded with Base16")),
+        AccountLockedContract(Account(pubKey.address)))
+    ).toIndexedSeq
+    val change: Long = usedOutputs.map(_.monetaryValue).sum - (amount + fee)
     val assetDirective: ScriptedAssetDirective = ScriptedAssetDirective(contract.hash, amount, tokenIdOpt)
     val directives: IndexedSeq[Directive] =
       if (change > 0) IndexedSeq(assetDirective, TransferDirective(pubKey.address, change, tokenIdOpt))

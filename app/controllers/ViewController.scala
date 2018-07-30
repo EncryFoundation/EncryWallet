@@ -12,11 +12,12 @@ import play.api.i18n.I18nSupport
 import scorex.crypto.encode.{Base16, Base58}
 import models._
 import scorex.crypto.hash.Blake2b256
-import services.{TransactionService, WalletService}
+import services._
 import storage.LSMStorage
 
 @Singleton
-class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionService, ws: WalletService, lsmStorage: LSMStorage, cc: ControllerComponents) extends AbstractController(cc) with I18nSupport {
+class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionService, ws: WalletService, lsmStorage: LSMStorage, es: ExplorerService, cc: ControllerComponents)
+  extends AbstractController(cc) with I18nSupport {
 
   var wallet: Option[Wallet] = None
 
@@ -101,10 +102,9 @@ class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionSer
       _ => Redirect(routes.ViewController.message("Invalid key")),
       data => {
         ws.restoreFromSecret(data.secretKey) match {
-          case Success(w) => {
+          case Success(w) =>
             wallet = Some(w)
             Redirect(routes.ViewController.message("Wallet has been successfully set"))
-          }
           case Failure(_) => Redirect(routes.ViewController.message("Can not restore wallet from this key"))
         }
       }
@@ -117,11 +117,14 @@ class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionSer
 
   def showWalletInfo(): Action[AnyContent] = Action.async { implicit request =>
     wallet match {
-      case Some(w) => {
-        val balance: Future[Option[Long]] = ws.loadWalletInfo(w).map(_.balance).map(Some(_)).recover { case NonFatal(_) => None }
-        val hash: String = Base16.encode(Blake2b256.hash(AccountLockedContract(w.account).bytes))
-        balance.map { x => Ok(views.html.wallet(w, x, hash)) }
-      }
+      case Some(w) =>
+        val balanceF: Future[Option[Long]] = ws.loadWalletInfo(w).map(_.balance).map(Some(_)).recover { case NonFatal(_) => None }
+        val hash: String = AccountLockedContract(w.account).contractHashHex
+        val outputsF: Future[Seq[Output]] = es.requestUtxos(w.account.address).recover { case NonFatal(_) => Seq.empty }
+        for {
+          balance <- balanceF
+          outputs <- outputsF
+        } yield Ok(views.html.wallet(w, balance, hash, outputs))
       case None => Future.successful(Redirect(routes.ViewController.message("You should set up a wallet before making transaction")))
     }
   }

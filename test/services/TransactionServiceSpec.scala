@@ -14,7 +14,6 @@ import scorex.crypto.signatures.{PrivateKey, PublicKey}
 import crypto.PrivateKey25519
 import storage.LSMStorage
 import models._
-import models.box.AssetBox
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import play.api.test.Injecting
 import org.scalatest.concurrent.ScalaFutures
@@ -29,8 +28,16 @@ class TransactionServiceSpec extends PlaySpec with GuiceOneAppPerTest with Injec
   )
 
   val sampleProposition: EncryProposition = EncryProposition(new Array[Byte](0))
-  val sampleBoxes: IndexedSeq[AssetBox] = IndexedSeq(AssetBox(sampleProposition, 0L, 1L, None), AssetBox(sampleProposition, 0L, 2L, None))
-  val sampleEncryTransaction: EncryTransaction = EncryTransaction(3L, 4L, IndexedSeq(), IndexedSeq(), None)
+  val sampleOutputId: String = "010000691b35d6eaae31a43a2327f58a78f47293a03715821cf83399e4e3a0b0"
+  val sampleTxId: String = "0b6df74842f4088b8ba3b6ad7b744cd415769b4a27470f993699c3827a98030c"
+  val sampleOutputs: Seq[Output] = Seq(Output(
+    sampleOutputId,
+    sampleTxId,
+    100L,
+    "487291c237b68dd2ab213be6b5d1174666074a5afab772b600ea14e8285affab",
+    "ede3fb8cbace04e878a0207aeac9bd3ffb3754c84a25eaabe27d17e2493a0092",
+    ""
+  ))
 
   "TransactionService#sendPaymentTransaction" should {
 
@@ -40,7 +47,7 @@ class TransactionServiceSpec extends PlaySpec with GuiceOneAppPerTest with Injec
       val mockLSMStorage: LSMStorage = mock[LSMStorage]
       when(mockLSMStorage.getWalletSecret(any[Wallet])) thenReturn sampleWalletPrivateKey
       val mockExplorerService: ExplorerService = mock[ExplorerService]
-      when(mockExplorerService.requestUtxos(anyString)) thenReturn Future.successful(sampleBoxes)
+      when(mockExplorerService.requestUtxos(anyString)) thenReturn Future.successful(sampleOutputs)
       when(mockExplorerService.commitTransaction(any[EncryTransaction])) thenReturn Future.successful(HttpResponse(StatusCodes.OK))
       val ts = new TransactionService()(inject[ExecutionContext], mockLSMStorage, mockExplorerService)
       ts.sendPaymentTransaction("true", samplePaymentTransactionRequest).failed.futureValue shouldBe an[IllegalArgumentException]
@@ -53,7 +60,7 @@ class TransactionServiceSpec extends PlaySpec with GuiceOneAppPerTest with Injec
       val mockLSMStorage: LSMStorage = mock[LSMStorage]
       when(mockLSMStorage.getWalletSecret(any[Wallet])) thenReturn sampleWalletPrivateKey
       val mockExplorerService: ExplorerService = mock[ExplorerService]
-      when(mockExplorerService.requestUtxos(anyString)) thenReturn Future.successful(sampleBoxes)
+      when(mockExplorerService.requestUtxos(anyString)) thenReturn Future.successful(sampleOutputs)
       when(mockExplorerService.commitTransaction(any[EncryTransaction])) thenReturn Future.successful(HttpResponse(StatusCodes.OK))
       val ts = new TransactionService()(inject[ExecutionContext], mockLSMStorage, mockExplorerService)
       ts.sendPaymentTransaction(sampleWalletID, samplePaymentTransactionRequest).futureValue.status shouldBe StatusCodes.OK
@@ -86,7 +93,7 @@ class TransactionServiceSpec extends PlaySpec with GuiceOneAppPerTest with Injec
       val mockLSMStorage: LSMStorage = mock[LSMStorage]
       when(mockLSMStorage.getWalletSecret(any[Wallet])) thenReturn sampleWalletPrivateKey
       val mockExplorerService: ExplorerService = mock[ExplorerService]
-      when(mockExplorerService.requestUtxos(anyString)) thenReturn Future.successful(sampleBoxes)
+      when(mockExplorerService.requestUtxos(anyString)) thenReturn Future.successful(sampleOutputs)
       when(mockExplorerService.commitTransaction(any[EncryTransaction])) thenReturn Future.successful(HttpResponse(StatusCodes.OK))
       val ts = new TransactionService()(inject[ExecutionContext], mockLSMStorage, mockExplorerService)
       ts.sendScriptedTransaction("true", sampleScriptedTransactionRequest).failed.futureValue shouldBe an[IllegalArgumentException]
@@ -99,7 +106,7 @@ class TransactionServiceSpec extends PlaySpec with GuiceOneAppPerTest with Injec
       val mockLSMStorage: LSMStorage = mock[LSMStorage]
       when(mockLSMStorage.getWalletSecret(any[Wallet])) thenReturn sampleWalletPrivateKey
       val mockExplorerService: ExplorerService = mock[ExplorerService]
-      when(mockExplorerService.requestUtxos(anyString)) thenReturn Future.successful(sampleBoxes)
+      when(mockExplorerService.requestUtxos(anyString)) thenReturn Future.successful(sampleOutputs)
       when(mockExplorerService.commitTransaction(any[EncryTransaction])) thenReturn Future.successful(HttpResponse(StatusCodes.OK))
       val ts = new TransactionService()(inject[ExecutionContext], mockLSMStorage, mockExplorerService)
       ts.sendScriptedTransaction(sampleWalletID, sampleScriptedTransactionRequest).futureValue(Timeout(Span(5000, Millis))).status shouldBe StatusCodes.OK
@@ -112,7 +119,7 @@ class TransactionServiceSpec extends PlaySpec with GuiceOneAppPerTest with Injec
       val mockLSMStorage: LSMStorage = mock[LSMStorage]
       when(mockLSMStorage.getWalletSecret(any[Wallet])) thenReturn sampleWalletPrivateKey
       val mockExplorerService: ExplorerService = mock[ExplorerService]
-      when(mockExplorerService.requestUtxos(anyString)) thenReturn Future.successful(sampleBoxes)
+      when(mockExplorerService.requestUtxos(anyString)) thenReturn Future.successful(sampleOutputs)
       when(mockExplorerService.commitTransaction(any[EncryTransaction])) thenReturn Future.successful(HttpResponse(StatusCodes.OK))
       val ts = new TransactionService()(inject[ExecutionContext], mockLSMStorage, mockExplorerService)
       ts.sendScriptedTransaction(sampleWalletID, sampleScriptedTransactionRequest.copy(source = "blablabla")).failed.futureValue shouldBe an[Exception]

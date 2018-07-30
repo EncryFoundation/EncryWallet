@@ -18,7 +18,7 @@ import scorex.crypto.hash.Blake2b256
 import crypto.PrivateKey25519
 import models.box.AssetBox
 import storage.LSMStorage
-import models.{EncryProposition, Wallet, WalletInfo}
+import models.{EncryProposition, Output, Wallet, WalletInfo}
 
 class WalletServiceSpec extends PlaySpec with GuiceOneAppPerTest with Injecting with MockitoSugar with GeneratorDrivenPropertyChecks with ScalaFutures {
 
@@ -128,8 +128,16 @@ class WalletServiceSpec extends PlaySpec with GuiceOneAppPerTest with Injecting 
 
   "WalletService#loadAllWithInfo" should {
 
-    val sampleProposition: EncryProposition = EncryProposition(new Array[Byte](0))
-    val sampleBoxes: IndexedSeq[AssetBox] = IndexedSeq(AssetBox(sampleProposition, 0L, 1L, None), AssetBox(sampleProposition, 0L, 2L, None))
+    val sampleOutputId: String = "010000691b35d6eaae31a43a2327f58a78f47293a03715821cf83399e4e3a0b0"
+    val sampleTxId: String = "0b6df74842f4088b8ba3b6ad7b744cd415769b4a27470f993699c3827a98030c"
+    val sampleOutputs: Seq[Output] = Seq(Output(
+      sampleOutputId,
+      sampleTxId,
+      100L,
+      "487291c237b68dd2ab213be6b5d1174666074a5afab772b600ea14e8285affab",
+      "ede3fb8cbace04e878a0207aeac9bd3ffb3754c84a25eaabe27d17e2493a0092",
+      ""
+    ))
     val sampleWallets: List[Wallet] = createWallet() :: createWallet() :: Nil
 
     "make request to the explorer" in {
@@ -138,9 +146,9 @@ class WalletServiceSpec extends PlaySpec with GuiceOneAppPerTest with Injecting 
       val lsmStorage: LSMStorage = mock[LSMStorage]
       when(lsmStorage.store) thenReturn store
       val mockExplorerService: ExplorerService = mock[ExplorerService]
-      when(mockExplorerService.requestUtxos(anyString)) thenReturn Future.successful(sampleBoxes)
+      when(mockExplorerService.requestUtxos(anyString)) thenReturn Future.successful(sampleOutputs)
       val ws: WalletService = new WalletService()(inject[ExecutionContext], lsmStorage, mockExplorerService)
-      ws.loadAllWithInfo().futureValue shouldBe sampleWallets.map(WalletInfo(_, 3L))
+      ws.loadAllWithInfo().futureValue shouldBe sampleWallets.map(WalletInfo(_, 100L))
       verify(mockExplorerService, times(sampleWallets.size)).requestUtxos(anyString)
     }
 
