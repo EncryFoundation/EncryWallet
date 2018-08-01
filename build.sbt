@@ -1,4 +1,4 @@
-name := """wallet"""
+name := "wallet"
 organization := "com.encry"
 
 version := "1.0-SNAPSHOT"
@@ -10,6 +10,7 @@ scalaVersion := "2.12.6"
 val circeVersion = "0.9.3"
 
 routesGenerator := InjectedRoutesGenerator
+PlayKeys.devSettings := Seq("play.server.http.port" -> "9054")
 
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
@@ -39,3 +40,8 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-api" % "1.7.25",
   "ch.qos.logback" % "logback-classic" % "1.2.3"
 )
+
+evictionWarningOptions in update := EvictionWarningOptions.default
+  .withWarnTransitiveEvictions(false)
+  .withWarnDirectEvictions(false)
+  .withWarnScalaVersionEviction(false)

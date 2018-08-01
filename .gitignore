@@ -5,5 +5,5 @@
 /target/
 /project/target/
 /project/project/target/
-/src/main/resources/local.conf
+/conf/local.conf
 /keys
