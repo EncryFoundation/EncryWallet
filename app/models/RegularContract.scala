@@ -8,7 +8,6 @@ import org.encryfoundation.prismlang.core.{Ast, Types}
 import org.encryfoundation.prismlang.lib.predefined.signature.CheckSig
 import scorex.crypto.encode.Base16
 import scorex.crypto.signatures.PublicKey
-
 import scala.util.{Failure, Success, Try}
 
 sealed trait RegularContract {

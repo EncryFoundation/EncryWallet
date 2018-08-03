@@ -1,7 +1,6 @@
 package models.directives
 
 import java.nio.charset.Charset
-
 import com.google.common.primitives.{Bytes, Ints, Longs}
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder, HCursor}
@@ -10,7 +9,6 @@ import models.{EncryAddress, EncryProposition}
 import scorex.crypto.authds.ADKey
 import scorex.crypto.encode.Base16
 import scorex.crypto.hash.Digest32
-
 import scala.util.Try
 
 case class TransferDirective(address: String,

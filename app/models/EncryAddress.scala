@@ -3,7 +3,6 @@ package models
 import crypto.Base58Check
 import org.encryfoundation.prismlang.compiler.CompiledContract.ContractHash
 import scorex.crypto.signatures.PublicKey
-
 import scala.util.Try
 
 sealed trait EncryAddress {

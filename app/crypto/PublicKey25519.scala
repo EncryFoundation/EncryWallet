@@ -4,7 +4,6 @@ import io.iohk.iodb.ByteArrayWrapper
 import models.Pay2PubKeyAddress
 import scorex.crypto.encode.Base58
 import scorex.crypto.signatures.{Curve25519, PublicKey}
-
 import scala.util.Try
 
 case class PublicKey25519(pubKeyBytes: PublicKey) {

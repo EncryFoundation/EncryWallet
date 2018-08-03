@@ -5,7 +5,6 @@ import io.circe.{Decoder, Encoder, HCursor}
 import org.encryfoundation.prismlang.compiler.CompiledContract.ContractHash
 import scorex.crypto.encode.Base16
 import scorex.crypto.signatures.PublicKey
-
 import scala.util.{Failure, Success, Try}
 
 case class EncryProposition(contractHash: ContractHash) {

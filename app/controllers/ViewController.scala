@@ -1,19 +1,18 @@
 package controllers
 
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, ExecutionException, Future}
-import scala.util.{Failure, Success, Try}
-import scala.util.control.NonFatal
 import akka.http.scaladsl.model.StatusCodes
-import play.api.mvc._
-import play.api.data.{Form, Mapping}
-import play.api.data.Forms._
-import play.api.i18n.I18nSupport
-import scorex.crypto.encode.{Base16, Base58}
+import javax.inject.{Inject, Singleton}
 import models._
-import scorex.crypto.hash.Blake2b256
+import play.api.data.Forms._
+import play.api.data.{Form, Mapping}
+import play.api.i18n.I18nSupport
+import play.api.mvc._
+import scorex.crypto.encode.{Base16, Base58}
 import services._
 import storage.LSMStorage
+import scala.concurrent.{ExecutionContext, ExecutionException, Future}
+import scala.util.control.NonFatal
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionService, ws: WalletService, lsmStorage: LSMStorage, es: ExplorerService, cc: ControllerComponents)
