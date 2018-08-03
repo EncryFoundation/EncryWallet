@@ -119,8 +119,8 @@ class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionSer
     wallet match {
       case Some(w) =>
         val balanceF: Future[Option[Long]] = ws.loadWalletInfo(w).map(_.balance).map(Some(_)).recover { case NonFatal(_) => None }
-        val hash: String = AccountLockedContract(w.account).contractHashHex
-        val outputsF: Future[Seq[Output]] = es.requestUtxos(w.account.address).recover { case NonFatal(_) => Seq.empty }
+        val hash: String = PubKeyLockedContract(w.pubKey).contractHashHex
+        val outputsF: Future[Seq[Output]] = es.requestUtxos(w.address.address).recover { case NonFatal(_) => Seq.empty }
         for {
           balance <- balanceF
           outputs <- outputsF

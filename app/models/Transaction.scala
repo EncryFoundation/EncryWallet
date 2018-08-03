@@ -96,11 +96,11 @@ object Transaction {
     val uInputs: IndexedSeq[Input] = usedOutputs.map(output =>
       Input.unsigned(
         Base16.decode(output.id).map(ADKey @@ _).getOrElse(throw new RuntimeException(s"Output id ${output.id} con not be decoded with Base16")),
-        AccountLockedContract(Account(pubKey.address)))
+        PubKeyLockedContract(pubKey.pubKeyBytes))
     ).toIndexedSeq
     val change: Long = usedOutputs.map(_.monetaryValue).sum - (amount + fee)
     val directives: IndexedSeq[TransferDirective] = if (change > 0) {
-      IndexedSeq(TransferDirective(recipient, amount, tokenIdOpt), TransferDirective(pubKey.address, change, tokenIdOpt))
+      IndexedSeq(TransferDirective(recipient, amount, tokenIdOpt), TransferDirective(pubKey.address.address, change, tokenIdOpt))
     } else {
       IndexedSeq(TransferDirective(recipient, amount, tokenIdOpt))
     }
@@ -122,12 +122,12 @@ object Transaction {
     val uInputs: IndexedSeq[Input] = usedOutputs.map(output =>
       Input.unsigned(
         Base16.decode(output.id).map(ADKey @@ _).getOrElse(throw new RuntimeException(s"Output id ${output.id} con not be decoded with Base16")),
-        AccountLockedContract(Account(pubKey.address)))
+        PubKeyLockedContract(pubKey.pubKeyBytes))
     ).toIndexedSeq
     val change: Long = usedOutputs.map(_.monetaryValue).sum - (amount + fee)
     val assetDirective: ScriptedAssetDirective = ScriptedAssetDirective(contract.hash, amount, tokenIdOpt)
     val directives: IndexedSeq[Directive] =
-      if (change > 0) IndexedSeq(assetDirective, TransferDirective(pubKey.address, change, tokenIdOpt))
+      if (change > 0) IndexedSeq(assetDirective, TransferDirective(pubKey.address.address, change, tokenIdOpt))
       else IndexedSeq(assetDirective)
 
     val uTransaction: UnsignedEncryTransaction = UnsignedEncryTransaction(fee, timestamp, uInputs, directives)
@@ -145,10 +145,10 @@ object Transaction {
                                 change: Long,
                                 tokenIdOpt: Option[ADKey] = None): EncryTransaction = {
     val pubKey: PublicKey25519 = privKey.publicImage
-    val uInputs: IndexedSeq[Input] = useBoxes.map(id => Input.unsigned(id, AccountLockedContract(Account(pubKey.address)))).toIndexedSeq
+    val uInputs: IndexedSeq[Input] = useBoxes.map(id => Input.unsigned(id, PubKeyLockedContract(pubKey.pubKeyBytes))).toIndexedSeq
     val transferDirective: TransferDirective = TransferDirective(recipient, amount, tokenIdOpt)
     val directives: IndexedSeq[TransferDirective] =
-      if (change > 0) IndexedSeq(transferDirective, TransferDirective(pubKey.address, change, tokenIdOpt))
+      if (change > 0) IndexedSeq(transferDirective, TransferDirective(pubKey.address.address, change, tokenIdOpt))
       else IndexedSeq(transferDirective)
 
     val uTransaction: UnsignedEncryTransaction = UnsignedEncryTransaction(fee, timestamp, uInputs, directives)

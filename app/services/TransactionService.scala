@@ -11,7 +11,7 @@ class TransactionService @Inject()(implicit ec: ExecutionContext, lsmStrorage: L
 
   def sendPaymentTransaction(walletId: String, ptr: PaymentTransactionRequest): Future[HttpResponse] = {
     Wallet.fromId(walletId) match {
-      case Some(w) => es.requestUtxos(w.account.address).map { outputs =>
+      case Some(w) => es.requestUtxos(w.address.address).map { outputs =>
         Transaction.defaultPaymentTransactionScratch(
           lsmStrorage.getWalletSecret(w),
           ptr.fee,
@@ -30,7 +30,7 @@ class TransactionService @Inject()(implicit ec: ExecutionContext, lsmStrorage: L
 
   def sendScriptedTransaction(walletId: String, str: ScriptedTransactionRequest): Future[HttpResponse] = {
     Wallet.fromId(walletId) match {
-      case Some(w) => es.requestUtxos(w.account.address).flatMap { outputs =>
+      case Some(w) => es.requestUtxos(w.address.address).flatMap { outputs =>
         compile(str.source).map { contract =>
           Transaction.scriptedAssetTransactionScratch(
             lsmStrorage.getWalletSecret(w),
