@@ -1,13 +1,13 @@
 package controllers
 
-import javax.inject.{Inject, Singleton}
-import scala.util.control.NonFatal
-import scala.util.Success
-import scala.concurrent.ExecutionContext
 import io.circe.syntax._
-import play.api.mvc._
+import javax.inject.{Inject, Singleton}
 import play.api.libs.circe.Circe
+import play.api.mvc._
+import scorex.crypto.encode.Base58
 import services.WalletService
+import scala.concurrent.ExecutionContext
+import scala.util.control.NonFatal
 
 @Singleton
 class WalletController @Inject()(implicit ec: ExecutionContext, ws: WalletService, cc: ControllerComponents) extends AbstractController(cc) with Circe {
@@ -17,9 +17,11 @@ class WalletController @Inject()(implicit ec: ExecutionContext, ws: WalletServic
   }
 
   def createNewWallet(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
-    ws.createNewWallet(request.body.asText) match {
-      case Success(wallet) => Ok(wallet.asJson)
-      case _ => InternalServerError
+    request.body.asText match {
+      case None => Ok(ws.createNewWallet(None).asJson)
+      case Some(seed) if seed.isEmpty => Ok(ws.createNewWallet(None).asJson)
+      case s@Some(seed) =>
+        Base58.decode(seed).map(x => ws.createNewWallet(Some(x))).map(x => Ok(x.asJson)).getOrElse(BadRequest)
     }
   }
 
@@ -28,8 +30,14 @@ class WalletController @Inject()(implicit ec: ExecutionContext, ws: WalletServic
   }
 
   def restoreFromSecret(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
-    request.body.asFormUrlEncoded.flatMap(_.get("secretKey")).flatMap(_.headOption).flatMap(ws.restoreFromSecret(_).toOption) match {
-      case Some(wallet) => Ok(wallet.asJson)
+
+    val secretKey: Option[Array[Byte]] = request.body.asFormUrlEncoded
+      .flatMap(_.get("secretKey"))
+      .flatMap(_.headOption)
+      .flatMap(x => Base58.decode(x).toOption)
+
+    secretKey match {
+      case Some(s) => Ok(ws.restoreFromSecret(s).asJson)
       case None => BadRequest
     }
   }

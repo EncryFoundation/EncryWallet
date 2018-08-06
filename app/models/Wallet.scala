@@ -24,7 +24,7 @@ object WalletInfo {
 
 case class Wallet(pubKey: PublicKey) {
 
-  val account: Account = Account(pubKey)
+  val address: Pay2PubKeyAddress = Pay2PubKeyAddress(pubKey)
 
   override def equals(obj: Any): Boolean = obj match {
     case other: Wallet => util.Arrays.equals(pubKey, other.pubKey)
@@ -39,7 +39,7 @@ object Wallet {
 
   implicit val jsonEncoder: Encoder[Wallet] = (w: Wallet) => Map(
     "pubKey" -> Base16.encode(w.pubKey).asJson,
-    "address" -> w.account.address.asJson
+    "address" -> w.address.address.asJson
   ).asJson
 
   val walletsKey: ByteArrayWrapper = ByteArrayWrapper(Blake2b256.hash("wallets"))

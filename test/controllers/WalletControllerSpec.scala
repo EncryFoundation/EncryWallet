@@ -54,7 +54,7 @@ class WalletControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecti
   "WalletController#createWallet" should {
     "return valid json" in {
       val mockWalletService: WalletService = mock[WalletService]
-      when(mockWalletService.createNewWallet(any[Option[String]])) thenReturn Success(sampleWallet)
+      when(mockWalletService.createNewWallet(any[Option[Array[Byte]]])) thenReturn sampleWallet
       val wc: WalletController = new WalletController()(inject[ExecutionContext], mockWalletService, stubControllerComponents())
       val result: Future[Result] = wc.createNewWallet().apply(FakeRequest())
       status(result) shouldBe OK
@@ -62,12 +62,13 @@ class WalletControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecti
       contentAsJson(result).right.value shouldBe sampleWallet.asJson
     }
 
-    "give bad request error on service failure" in {
+    "give bad request error if not a valid Base58 tring given" in {
       val mockWalletService: WalletService = mock[WalletService]
-      when(mockWalletService.createNewWallet(any[Option[String]])) thenReturn Failure(new RuntimeException("Ooops! Something went wrong!"))
+      when(mockWalletService.createNewWallet(any[Option[Array[Byte]]])) thenThrow new RuntimeException("Ooops! Something went wrong!")
       val wc: WalletController = new WalletController()(inject[ExecutionContext], mockWalletService, stubControllerComponents())
-      val result: Future[Result] = wc.createNewWallet().apply(FakeRequest())
-      status(result) shouldBe INTERNAL_SERVER_ERROR
+      val result: Future[Result] = wc.createNewWallet().apply(FakeRequest().withTextBody("blablabla"))
+      verify(mockWalletService, never).createNewWallet(any[Option[Array[Byte]]])
+      status(result) shouldBe BAD_REQUEST
     }
 
   }
@@ -75,19 +76,20 @@ class WalletControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecti
   "WalletController#restoreFromSecret" should {
     "return a valid json" in {
       val mockWalletService: WalletService = mock[WalletService]
-      when(mockWalletService.restoreFromSecret(anyString)) thenReturn Success(sampleWallet)
+      when(mockWalletService.restoreFromSecret(any[Array[Byte]])) thenReturn sampleWallet
       val wc: WalletController = new WalletController()(inject[ExecutionContext], mockWalletService, stubControllerComponents())
-      val result: Future[Result] = wc.restoreFromSecret().apply(FakeRequest().withFormUrlEncodedBody("secretKey" -> "Blablabla"))
+      val result: Future[Result] = wc.restoreFromSecret().apply(FakeRequest().withFormUrlEncodedBody("secretKey" -> "9WMTsdbwsgdF9ZH8JdGsF5SnqcKy7fPSR4cift1iLPuw"))
       status(result) shouldBe OK
       contentType(result).value shouldBe "application/json"
       contentAsJson(result).right.value shouldBe sampleWallet.asJson
     }
 
-    "give bad request error on service failure" in {
+    "give bad request error if key is not a valid Base58 string" in {
       val mockWalletService: WalletService = mock[WalletService]
-      when(mockWalletService.restoreFromSecret(anyString)) thenReturn Failure(new RuntimeException("Oops! Something went wrong!"))
+      when(mockWalletService.restoreFromSecret(any[Array[Byte]])) thenThrow new RuntimeException("Oops! Something went wrong!")
       val wc: WalletController = new WalletController()(inject[ExecutionContext], mockWalletService, stubControllerComponents())
       val result: Future[Result] = wc.restoreFromSecret().apply(FakeRequest())
+      verify(mockWalletService, never).restoreFromSecret(any[Array[Byte]])
       status(result) shouldBe BAD_REQUEST
     }
 

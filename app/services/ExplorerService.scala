@@ -34,4 +34,17 @@ class ExplorerService @Inject()(implicit val system: ActorSystem, implicit val m
       entity = HttpEntity(ContentTypes.`application/json`, tx.asJson.toString)
     ).withEffectiveUri(securedConnection = false, Host(settings.knownPeers.head)))
 
+  def requestOutput(id: String): Future[Output] =
+    Http().singleRequest(HttpRequest(
+      method = HttpMethods.GET,
+      uri = s"/api/transactions/output/$id"
+    ).withEffectiveUri(securedConnection = false, Host(settings.explorerAddress)))
+      .flatMap(_.entity.dataBytes.runFold(ByteString.empty)(_ ++ _))
+      .map(_.utf8String)
+      .map(decode[Option[Output]])
+      .flatMap(_.fold(Future.failed, Future.successful))
+      .flatMap(_.map(Future.successful).getOrElse(Future.failed(new NoSuchElementException)))
+
+
+
 }

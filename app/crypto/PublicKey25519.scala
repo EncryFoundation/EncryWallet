@@ -1,5 +1,7 @@
 package crypto
 
+import io.iohk.iodb.ByteArrayWrapper
+import models.Pay2PubKeyAddress
 import scorex.crypto.encode.Base58
 import scorex.crypto.signatures.{Curve25519, PublicKey}
 import scala.util.Try
@@ -9,10 +11,10 @@ case class PublicKey25519(pubKeyBytes: PublicKey) {
   require(pubKeyBytes.length == Curve25519.KeyLength,
     s"Incorrect pubKey length, ${Curve25519.KeyLength} expected, ${pubKeyBytes.length} given")
 
-  lazy val address: String = Base58Check.encode(pubKeyBytes)
+  lazy val address: Pay2PubKeyAddress = Pay2PubKeyAddress(pubKeyBytes)
 
   override def equals(obj: scala.Any): Boolean = obj match {
-    case p: PublicKey25519 => p.pubKeyBytes sameElements pubKeyBytes
+    case p: PublicKey25519 => ByteArrayWrapper(p.pubKeyBytes) == ByteArrayWrapper(pubKeyBytes)
     case _ => false
   }
 
@@ -22,10 +24,9 @@ case class PublicKey25519(pubKeyBytes: PublicKey) {
 }
 
 object PublicKey25519 {
-
   val Length: Int = 32
-
-  def toBytes(obj: PublicKey25519): Array[Byte] = obj.pubKeyBytes
-
-  def parseBytes(bytes: Array[Byte]): Try[PublicKey25519] = Try(PublicKey25519(PublicKey @@ bytes))
+  object Serializer {
+    def toBytes(obj: PublicKey25519): Array[Byte] = obj.pubKeyBytes
+    def parseBytes(bytes: Array[Byte]): Try[PublicKey25519] = Try(PublicKey25519(PublicKey @@ bytes))
+  }
 }

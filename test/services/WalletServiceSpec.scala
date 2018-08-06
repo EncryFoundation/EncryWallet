@@ -59,19 +59,8 @@ class WalletServiceSpec extends PlaySpec with GuiceOneAppPerTest with Injecting 
       when(lsmStorage.store) thenReturn store
       val mockExplorerService: ExplorerService = mock[ExplorerService]
       val ws: WalletService = new WalletService()(inject[ExecutionContext], lsmStorage, mockExplorerService)
-      ws.createNewWallet(None) shouldBe a[Success[_]]
+      ws.createNewWallet(None) shouldBe a[Wallet]
       verify(store, never).update(anyLong, any[Iterable[ByteArrayWrapper]], any[Iterable[(ByteArrayWrapper, ByteArrayWrapper)]])
-    }
-
-    "create a Wallet from an arbitrary String" in forAll { s: String =>
-      val store: LSMStore = mock[LSMStore]
-      when(store.get(any)) thenReturn None
-      val lsmStorage: LSMStorage = mock[LSMStorage]
-      when(lsmStorage.store) thenReturn store
-      val mockExplorerService: ExplorerService = mock[ExplorerService]
-      val ws: WalletService = new WalletService()(inject[ExecutionContext], lsmStorage, mockExplorerService)
-      ws.createNewWallet(Some(s)) shouldBe a[Success[_]]
-      verify(store, times(1)).update(anyLong, any[Iterable[ByteArrayWrapper]], any[Iterable[(ByteArrayWrapper, ByteArrayWrapper)]])
     }
 
     "receive a Wallet from the store if it exists" in forAll { s: String =>
@@ -81,19 +70,12 @@ class WalletServiceSpec extends PlaySpec with GuiceOneAppPerTest with Injecting 
       when(lsmStorage.store) thenReturn store
       val mockExplorerService: ExplorerService = mock[ExplorerService]
       val ws: WalletService = new WalletService()(inject[ExecutionContext], lsmStorage, mockExplorerService)
-      ws.createNewWallet(Some(s)) shouldBe a[Success[_]]
+      ws.createNewWallet(Some(Base58.decode("9WMTsdbwsgdF9ZH8JdGsF5SnqcKy7fPSR4cift1iLPuw").get)) shouldBe a[Wallet]
       verify(store, never).update(anyLong, any[Iterable[ByteArrayWrapper]], any[Iterable[(ByteArrayWrapper, ByteArrayWrapper)]])
     }
   }
 
   "WalletService#restoreFromSecret" should {
-
-    "fail if a non Base58 string is given" in forAll { s: String =>
-      val lsmStorage: LSMStorage = mock[LSMStorage]
-      val mockExplorerService: ExplorerService = mock[ExplorerService]
-      val ws: WalletService = new WalletService()(inject[ExecutionContext], lsmStorage, mockExplorerService)
-      ws.restoreFromSecret(s) shouldBe a[Failure[_]]
-    }
 
     val privateKey: String = "4Etkd64NNYEDt8TZ21Z3jNHPvfbvEksmuuTwRUtPgqGH"
     val wallet: Wallet = Wallet(PublicKey @@ Base58.decode("9WMTsdbwsgdF9ZH8JdGsF5SnqcKy7fPSR4cift1iLPuw").get)
@@ -105,9 +87,8 @@ class WalletServiceSpec extends PlaySpec with GuiceOneAppPerTest with Injecting 
       when(lsmStorage.store) thenReturn store
       val mockExplorerService: ExplorerService = mock[ExplorerService]
       val ws: WalletService = new WalletService()(inject[ExecutionContext], lsmStorage, mockExplorerService)
-      val result: Try[Wallet] = ws.restoreFromSecret(privateKey)
-      result shouldBe a[Success[_]]
-      result.toOption.value shouldBe wallet
+      val result: Wallet = ws.restoreFromSecret(Base58.decode(privateKey).get)
+      result shouldBe wallet
       verify(store, times(1)).update(anyLong, any[Iterable[ByteArrayWrapper]], any[Iterable[(ByteArrayWrapper, ByteArrayWrapper)]])
     }
 
@@ -118,9 +99,8 @@ class WalletServiceSpec extends PlaySpec with GuiceOneAppPerTest with Injecting 
       when(lsmStorage.store) thenReturn store
       val mockExplorerService: ExplorerService = mock[ExplorerService]
       val ws: WalletService = new WalletService()(inject[ExecutionContext], lsmStorage, mockExplorerService)
-      val result: Try[Wallet] = ws.restoreFromSecret(privateKey)
-      result shouldBe a[Success[_]]
-      result.toOption.value shouldBe wallet
+      val result: Wallet = ws.restoreFromSecret(Base58.decode(privateKey).get)
+      result shouldBe wallet
       verify(store, never).update(anyLong, any[Iterable[ByteArrayWrapper]], any[Iterable[(ByteArrayWrapper, ByteArrayWrapper)]])
     }
 

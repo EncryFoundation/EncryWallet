@@ -12,7 +12,10 @@ val circeVersion = "0.9.3"
 routesGenerator := InjectedRoutesGenerator
 PlayKeys.devSettings := Seq("play.server.http.port" -> "9054")
 
-resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+resolvers ++= Seq("Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/",
+  "SonaType" at "https://oss.sonatype.org/content/groups/public",
+  "Typesafe maven releases" at "http://repo.typesafe.com/typesafe/maven-releases/",
+  "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/")
 
 libraryDependencies += guice
 libraryDependencies += filters
@@ -27,7 +30,7 @@ libraryDependencies ++= Seq(
   "org.scorexfoundation" %% "scrypto" % "2.1.1",
   "org.scorexfoundation" %% "iodb" % "0.3.2",
   "com.iheart" %% "ficus" % "1.4.3",
-  "org.encry" %% "prism" % "0.2.3",
+  "org.encry" %% "prism" % "0.2.7",
   "com.adrianhurt" %% "play-bootstrap" % "1.4-P26-B4-SNAPSHOT",
   "org.webjars" % "bootstrap" % "4.1.2",
   "org.webjars" % "jquery" % "3.3.1",

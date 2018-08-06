@@ -115,7 +115,7 @@ class TransactionServiceSpec extends PlaySpec with GuiceOneAppPerTest with Injec
       verify(mockExplorerService, times(1)).commitTransaction(any[EncryTransaction])
     }
 
-    "should fail if smart contract is not valid" in {
+    "fail if smart contract is not valid" in {
       val mockLSMStorage: LSMStorage = mock[LSMStorage]
       when(mockLSMStorage.getWalletSecret(any[Wallet])) thenReturn sampleWalletPrivateKey
       val mockExplorerService: ExplorerService = mock[ExplorerService]
@@ -124,7 +124,7 @@ class TransactionServiceSpec extends PlaySpec with GuiceOneAppPerTest with Injec
       val ts = new TransactionService()(inject[ExecutionContext], mockLSMStorage, mockExplorerService)
       ts.sendScriptedTransaction(sampleWalletID, sampleScriptedTransactionRequest.copy(source = "blablabla")).failed.futureValue shouldBe an[Exception]
       verify(mockLSMStorage, never).getWalletSecret(any[Wallet])
-      verify(mockExplorerService, times(1)).requestUtxos(anyString)
+      verify(mockExplorerService, never).requestUtxos(anyString)
       verify(mockExplorerService, never).commitTransaction(any[EncryTransaction])
     }
 

@@ -1,10 +1,11 @@
 package models.directives
 
+import java.nio.charset.Charset
 import com.google.common.primitives.{Bytes, Ints, Longs}
-import io.circe.{Decoder, Encoder, HCursor}
 import io.circe.syntax._
-import models.{Account, EncryProposition}
+import io.circe.{Decoder, Encoder, HCursor}
 import models.box.{AssetBox, EncryBox}
+import models.{EncryAddress, EncryProposition}
 import scorex.crypto.authds.ADKey
 import scorex.crypto.encode.Base16
 import scorex.crypto.hash.Digest32
@@ -17,10 +18,10 @@ case class TransferDirective(address: String,
   override val typeId: Byte = TransferDirective.TypeId
 
   override def boxes(digest: Digest32, idx: Int): Seq[EncryBox] =
-    Seq(AssetBox(EncryProposition.accountLock(Account(address)),
+    Seq(AssetBox(EncryProposition.addressLocked(address),
       EncryBox.nonceFromDigest(digest ++ Ints.toByteArray(idx)), amount, tokenIdOpt))
 
-  override lazy val isValid: Boolean = amount > 0 && Account.validAddress(address)
+  override lazy val isValid: Boolean = amount > 0 && EncryAddress.resolveAddress(address).isSuccess
 
   lazy val isIntrinsic: Boolean = tokenIdOpt.isEmpty
 }
@@ -51,21 +52,23 @@ object TransferDirective {
   }
 
   object Serializer {
-    def toBytes(obj: TransferDirective): Array[Byte] =
-      Bytes.concat(
-        Account.decodeAddress(obj.address),
+    def toBytes(obj: TransferDirective): Array[Byte] = {
+      val address: Array[Byte] = obj.address.getBytes(Charset.defaultCharset())
+      address.length.toByte +: Bytes.concat(
+        address,
         Longs.toByteArray(obj.amount),
         obj.tokenIdOpt.getOrElse(Array.empty)
       )
+    }
 
     def parseBytes(bytes: Array[Byte]): Try[TransferDirective] = Try {
-      val address = Base16.encode(bytes.take(Account.AddressLength))
-      val amount = Longs.fromByteArray(bytes.slice(Account.AddressLength, Account.AddressLength + 8))
-      val tokenIdOpt = if ((bytes.length - (Account.AddressLength + 8)) == 32) {
+      val addressLen: Int = bytes.head.toInt
+      val address: String = new String(bytes.slice(1, 1 + addressLen), Charset.defaultCharset())
+      val amount: Long = Longs.fromByteArray(bytes.slice(1 + addressLen, 1 + addressLen + 8))
+      val tokenIdOpt: Option[ADKey] = if ((bytes.length - (1 + addressLen + 8)) == 32) {
         Some(ADKey @@ bytes.takeRight(32))
       } else None
       TransferDirective(address, amount, tokenIdOpt)
     }
   }
-
 }
