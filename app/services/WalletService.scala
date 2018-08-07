@@ -1,9 +1,9 @@
 package services
 
-import crypto.{PrivateKey25519, PublicKey25519}
 import io.iohk.iodb.ByteArrayWrapper
 import javax.inject.Inject
 import models.{Wallet, WalletInfo}
+import org.encryfoundation.common.crypto.{PrivateKey25519, PublicKey25519}
 import scorex.crypto.hash.Blake2b256
 import scorex.crypto.signatures.PublicKey
 import storage.LSMStorage

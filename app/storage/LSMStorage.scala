@@ -4,8 +4,8 @@ import java.io.File
 import io.iohk.iodb.{ByteArrayWrapper, LSMStore}
 import models.Wallet
 import scorex.crypto.signatures.{PrivateKey, PublicKey}
-import crypto.PrivateKey25519
 import javax.inject.Singleton
+import org.encryfoundation.common.crypto.PrivateKey25519
 
 @Singleton
 class LSMStorage {

@@ -1,27 +1,26 @@
 package controllers
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 import akka.stream.Materializer
 import akka.util.Timeout
-import io.circe.{Json, ParsingFailure}
-import io.circe.syntax._
 import io.circe.parser.parse
+import io.circe.syntax._
+import io.circe.{Json, ParsingFailure}
+import models.{Wallet, WalletInfo}
+import org.encryfoundation.common.crypto.PrivateKey25519
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito._
+import org.scalatest.EitherValues._
+import org.scalatest.Matchers._
+import org.scalatest._
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
-import org.scalatest._
-import org.scalatest.Matchers._
-import org.scalatest.EitherValues._
-import org.scalatest.mockito.MockitoSugar
-import org.mockito.Mockito._
-import org.mockito.ArgumentMatchers.{any, anyString}
 import play.api.mvc.Result
-import play.api.test.{FakeRequest, Injecting, NoMaterializer}
 import play.api.test.Helpers._
+import play.api.test.{FakeRequest, Injecting, NoMaterializer}
 import scorex.crypto.hash.Blake2b256
-import crypto.PrivateKey25519
-import models.{Wallet, WalletInfo}
 import services.WalletService
+import scala.concurrent.{ExecutionContext, Future}
 
 class WalletControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting with MockitoSugar {
 

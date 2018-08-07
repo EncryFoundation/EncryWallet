@@ -44,7 +44,4 @@ class ExplorerService @Inject()(implicit val system: ActorSystem, implicit val m
       .map(decode[Option[Output]])
       .flatMap(_.fold(Future.failed, Future.successful))
       .flatMap(_.map(Future.successful).getOrElse(Future.failed(new NoSuchElementException)))
-
-
-
 }

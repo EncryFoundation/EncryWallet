@@ -11,6 +11,7 @@ import play.api.i18n.I18nSupport
 import play.api.mvc._
 import scorex.crypto.encode.{Base16, Base58}
 import models._
+import org.encryfoundation.common.transaction.PubKeyLockedContract
 import services._
 import storage.LSMStorage
 

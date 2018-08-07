@@ -1,10 +1,11 @@
 package models
 
 import com.google.common.primitives.{Bytes, Longs}
-import crypto.{PrivateKey25519, PublicKey25519, Signature25519}
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder, HCursor}
 import models.directives.{Directive, ScriptedAssetDirective, TransferDirective}
+import org.encryfoundation.common.crypto.{PrivateKey25519, PublicKey25519, Signature25519}
+import org.encryfoundation.common.transaction.{Input, Proof, PubKeyLockedContract}
 import org.encryfoundation.prismlang.compiler.{CompiledContract, PCompiler}
 import org.encryfoundation.prismlang.core.wrapped.BoxedValue
 import scorex.crypto.authds.ADKey

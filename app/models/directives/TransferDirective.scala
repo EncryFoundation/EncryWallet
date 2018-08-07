@@ -5,7 +5,8 @@ import com.google.common.primitives.{Bytes, Ints, Longs}
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder, HCursor}
 import models.box.{AssetBox, EncryBox}
-import models.{EncryAddress, EncryProposition}
+import models.EncryProposition
+import org.encryfoundation.common.transaction.EncryAddress
 import scorex.crypto.authds.ADKey
 import scorex.crypto.encode.Base16
 import scorex.crypto.hash.Digest32

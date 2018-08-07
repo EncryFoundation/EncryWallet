@@ -2,14 +2,18 @@ package models
 
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder, HCursor}
+import org.encryfoundation.common.serialization.Serializer
+import org.encryfoundation.common.transaction._
 import org.encryfoundation.prismlang.compiler.CompiledContract.ContractHash
 import scorex.crypto.encode.Base16
 import scorex.crypto.signatures.PublicKey
 import scala.util.{Failure, Success, Try}
 
-case class EncryProposition(contractHash: ContractHash) {
+case class EncryProposition(contractHash: ContractHash) extends Proposition {
 
-  lazy val bytes: Array[Byte] = EncryProposition.Serializer.toBytes(this)
+  override type M = EncryProposition
+
+  override def serializer: Serializer[M] = EncryPropositionSerializer
 }
 
 object EncryProposition {
@@ -30,11 +34,11 @@ object EncryProposition {
     case p2pk: Pay2PubKeyAddress => EncryProposition(PubKeyLockedContract(p2pk.pubKey).contract.hash)
     case p2sh: Pay2ContractHashAddress => EncryProposition(p2sh.contractHash)
   }.getOrElse(throw EncryAddress.InvalidAddressException)
+}
 
-  object Serializer {
-    def toBytes(obj: EncryProposition): Array[Byte] = obj.contractHash
-    def parseBytes(bytes: Array[Byte]): Try[EncryProposition] =
-      if (bytes.lengthCompare(32) == 0) Success(EncryProposition(bytes))
-      else Failure(new Exception("Invalid contract hash length"))
-  }
+object EncryPropositionSerializer extends Serializer[EncryProposition] {
+  def toBytes(obj: EncryProposition): Array[Byte] = obj.contractHash
+  def parseBytes(bytes: Array[Byte]): Try[EncryProposition] =
+    if (bytes.lengthCompare(32) == 0) Success(EncryProposition(bytes))
+    else Failure(new Exception("Invalid contract hash length"))
 }

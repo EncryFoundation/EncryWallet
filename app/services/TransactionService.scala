@@ -18,7 +18,7 @@ class TransactionService @Inject()(implicit ec: ExecutionContext, lsmStrorage: L
   }
 
   def sendPaymentTransactionWithInputIds(walletId: String, ptr: PaymentTransactionRequest, inputIds: Seq[(String, String)]): Future[HttpResponse] = {
-    Wallet.fromId(walletId) match {
+    Wallet.apply(walletId) match {
       case Some(w) =>
 
         val outputsF: Future[Seq[(Output, String)]] =
@@ -46,7 +46,7 @@ class TransactionService @Inject()(implicit ec: ExecutionContext, lsmStrorage: L
   }
 
   def sendScriptedTransactionWithInputsIds(walletId: String, str: ScriptedTransactionRequest, inputIds: Seq[(String, String)]): Future[HttpResponse] = {
-    Wallet.fromId(walletId) match {
+    Wallet.apply(walletId) match {
       case Some(w) =>
         Future.fromTry(PCompiler.compile(str.source)).flatMap { contract =>
 
