@@ -7,8 +7,6 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.12.6"
 
-val circeVersion = "0.9.3"
-
 routesGenerator := InjectedRoutesGenerator
 PlayKeys.devSettings := Seq("play.server.http.port" -> "9054")
 
@@ -24,13 +22,8 @@ libraryDependencies ++= Seq(
   "javax.xml.bind" % "jaxb-api" % "2.1",
   "com.dripower" %% "play-circe" % "2609.1" exclude("io.circe", "*"),
   "net.codingwell" %% "scala-guice" % "4.2.1",
-  "io.circe" %% "circe-core" % circeVersion,
-  "io.circe" %% "circe-generic" % circeVersion,
-  "io.circe" %% "circe-parser" % circeVersion,
-  "org.scorexfoundation" %% "scrypto" % "2.1.1",
   "org.scorexfoundation" %% "iodb" % "0.3.2",
   "com.iheart" %% "ficus" % "1.4.3",
-  "org.encry" %% "prism" % "0.2.7",
   "org.encry" %% "encry-common" % "0.1.2",
   "com.adrianhurt" %% "play-bootstrap" % "1.4-P26-B4-SNAPSHOT",
   "org.webjars" % "bootstrap" % "4.1.2",
