@@ -1,7 +1,7 @@
 package services
 
+import scala.concurrent.{ExecutionContext, Future}
 import io.iohk.iodb.{ByteArrayWrapper, LSMStore}
-import models.{Output, Wallet, WalletInfo}
 import org.encryfoundation.common.crypto.PrivateKey25519
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -16,7 +16,7 @@ import scorex.crypto.encode.Base58
 import scorex.crypto.hash.Blake2b256
 import scorex.crypto.signatures.PublicKey
 import storage.LSMStorage
-import scala.concurrent.{ExecutionContext, Future}
+import models.{Output, Wallet, WalletInfo}
 
 class WalletServiceSpec extends PlaySpec with GuiceOneAppPerTest with Injecting with MockitoSugar with GeneratorDrivenPropertyChecks with ScalaFutures {
 

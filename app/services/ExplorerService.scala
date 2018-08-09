@@ -41,7 +41,7 @@ class ExplorerService @Inject()(implicit val system: ActorSystem, implicit val m
     ).withEffectiveUri(securedConnection = false, Host(settings.explorerAddress)))
       .flatMap(_.entity.dataBytes.runFold(ByteString.empty)(_ ++ _))
       .map(_.utf8String)
-      .map(decode[Option[Output]])
-      .flatMap(_.fold(Future.failed, Future.successful))
-      .flatMap(_.map(Future.successful).getOrElse(Future.failed(new NoSuchElementException)))
+      .map(decode[Output])
+      .map(_.fold(throw _, identity))
+
 }

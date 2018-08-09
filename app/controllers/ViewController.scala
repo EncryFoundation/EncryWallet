@@ -5,13 +5,21 @@ import scala.concurrent.{ExecutionContext, ExecutionException, Future}
 import scala.util.control.NonFatal
 import scala.util.{Failure, Success, Try}
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
+import cats.implicits._
+import fastparse.all._
+import fastparse.core.{ParseError, Parsed, Parser}
 import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
+import org.encryfoundation.prismlang.core.wrapped.BoxedValue
+import org.encryfoundation.prismlang.core.wrapped.BoxedValue._
+import org.encryfoundation.prismlang.parser.{Expressions, Lexer}
 import scorex.crypto.encode.{Base16, Base58}
 import models._
-import org.encryfoundation.common.transaction.PubKeyLockedContract
+import org.encryfoundation.common.transaction.{Proof, PubKeyLockedContract}
+import org.encryfoundation.prismlang.compiler.{CompiledContract, PCompiler}
+import scorex.crypto.authds.ADKey
 import services._
 import storage.LSMStorage
 
@@ -46,10 +54,12 @@ class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionSer
       ViewController.paymentTransactionRequestForm.bindFromRequest.fold(
         errors => Future.successful(Redirect(routes.ViewController.message("Wrong transaction parameters\n" + errors.errors.mkString("\n") + errors))),
         ptrd => {
-          val inputIds: Seq[(String, String)] = ViewController.parseInputs(ptrd.inputsIds)
-          if (inputIds.forall(x => Base16.decode(x._1).isSuccess))
-            handleSendTransactionResponse(ts.sendPaymentTransactionWithInputIds(walletId, ptrd.paymentTransactionRequest, inputIds))
-          else Future.successful(Redirect(routes.ViewController.message("Inputs IDs are not valid Base16 strings")))
+          val inputsE: Either[Throwable, Seq[ParsedInput]] = ViewController.parseInputs(ptrd.inputsIds)
+          inputsE match {
+            case Right(v) =>
+              handleSendTransactionResponse(ts.sendPaymentTransactionWithInputIds(walletId, ptrd.paymentTransactionRequest, v))
+            case Left(f) => Future.successful(Redirect(routes.ViewController.message(f.getMessage)))
+          }
         }
       )
   }
@@ -66,10 +76,12 @@ class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionSer
       ViewController.scriptedTransactionRequestForm.bindFromRequest.fold(
         errors => Future.successful(Redirect(routes.ViewController.message("Wrong transaction parameters\n" + errors.errors.mkString("\n") + errors))),
         strd => {
-          val inputIds: Seq[(String, String)] = ViewController.parseInputs(strd.inputsIds)
-          if (inputIds.forall(x => Base16.decode(x._1).isSuccess))
-            handleSendTransactionResponse(ts.sendScriptedTransactionWithInputsIds(walletId, strd.scriptedTransactionRequest, inputIds))
-          else Future.successful(Redirect(routes.ViewController.message("Inputs IDs are not valid Base16 strings")))
+          val inputsE: Either[Throwable, Seq[ParsedInput]] = ViewController.parseInputs(strd.inputsIds)
+          inputsE match {
+            case Right(v) =>
+              handleSendTransactionResponse(ts.sendScriptedTransactionWithInputsIds(walletId, strd.scriptedTransactionRequest, v))
+            case Left(f) => Future.successful(Redirect(routes.ViewController.message(f.getMessage)))
+          }
         }
       )
   }
@@ -150,19 +162,59 @@ object ViewController {
 
   case class SettingsData(secretKey: String)
 
-  def parseInputs(str: String): Seq[(String, String)] = {
+  def parseInputs(str: String): Either[Throwable, Seq[ParsedInput]] = {
     str
       .split("------")
+      .map(_.split(">>>>>>").filter(_.nonEmpty).map(_.stripLineEnd.trim).toList)
       .filter(_.nonEmpty)
-      .map(_.stripLineEnd.trim)
-      .map(_.split(">>>>>>").filter(_.nonEmpty).map(_.stripLineEnd).toList)
       .map {
-        case x :: Nil => (x, "")
-        case x :: y :: Nil => (x, y)
-        case _ => ("", "")
+        case id :: Nil => Base16.decode(id).map(ADKey @@ _).map(x => ParsedInput(key = x))
+        case id :: contractSource :: Nil =>
+          for {
+            i <- Base16.decode(id).map(ADKey @@ _)
+            c <- PCompiler.compile(contractSource)
+          } yield ParsedInput(i, Some(c -> Seq.empty))
+        case id :: contractSource :: contractArgs :: Nil =>
+          for {
+            i <- Base16.decode(id).map(ADKey @@ _)
+            c <- PCompiler.compile(contractSource)
+            a <- parseScriptArgs(contractArgs).map { xs => xs.map { case (tag, bv) => if (tag != "_") Proof(bv, Some(tag)) else Proof(bv) } }.toTry
+          } yield ParsedInput(i, Some(c -> a))
+        case _ => Failure(new RuntimeException("Inputs can not be parsed"))
       }
-      .filter(_._1.nonEmpty)
-      .toSeq
+      .foldLeft(Seq.empty[ParsedInput].asRight[Throwable]) { (acc, e) =>
+        e match {
+          case Success(v) => acc.map(_ :+ v)
+          case Failure(f) => f.asLeft
+        }
+      }
   }
+
+  def parseScriptArgs(s: String): Either[ParseError[Char, String], Seq[(String, BoxedValue)]] = {
+
+    val base16: Parser[List[Byte], Char, String] = Expressions.BASE16STRING
+      .flatMap(x => Base16.decode(x).map(_.toList).fold(_ => Fail, xs => PassWith(xs)))
+    val base58: Parser[List[Byte], Char, String] = Expressions.BASE58STRING
+      .flatMap(x => Base58.decode(x).map(_.toList).fold(_ => Fail, xs => PassWith(xs)))
+
+    val intValueExp: Parser[IntValue, Char, String] = P("IntValue(" ~ Lexer.integer ~ ")").map(IntValue)
+    val byteValueExp: Parser[ByteValue, Char, String] = P("ByteValue(" ~ Lexer.integer.map(_.toByte) ~ ")").map(ByteValue)
+    val boolValueExp: Parser[BoolValue, Char, String] = P("BoolValue(" ~ ("true" | "false").rep(min = 1, max = 1).!.map(_.toBoolean) ~ ")").map(BoolValue)
+    val stringValueExp: Parser[StringValue, Char, String] = P("StringValue(" ~ Lexer.stringliteral ~ ")").map(StringValue)
+    val byteCollectionValueExp: Parser[ByteCollectionValue, Char, String] = P("ByteCollectionValue(" ~ (base16 | base58) ~ ")").map(ByteCollectionValue)
+    val signature25519ValueExp: Parser[Signature25519Value, Char, String] = P("Signature25519Value(" ~ base16 ~ ")").map(Signature25519Value)
+
+    val boxedValue: Parser[BoxedValue, Char, String] =
+      intValueExp | byteValueExp | boolValueExp | stringValueExp | byteCollectionValueExp | signature25519ValueExp
+
+    val p: Parser[Seq[(String, BoxedValue)], Char, String] = (Lexer.identifier.map(_.name) ~ ":" ~ boxedValue).rep(sep = ";") ~ (";" | End)
+
+    p.parse(s) match {
+      case Parsed.Success(v, _) => Right(v)
+      case f: Parsed.Failure[Char, String] => Left(new ParseError(f))
+    }
+
+  }
+
 
 }

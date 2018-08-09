@@ -88,32 +88,33 @@ object Transaction {
   def defaultPaymentTransactionScratch(privKey: PrivateKey25519,
                                        fee: Long,
                                        timestamp: Long,
-                                       useOutputs: Seq[(Output, String)],
+                                       useOutputs: Seq[(Output, Option[(CompiledContract, Seq[Proof])])],
                                        recipient: String,
                                        amount: Long,
                                        tokenIdOpt: Option[ADKey] = None): EncryTransaction = {
 
     val pubKey: PublicKey25519 = privKey.publicImage
 
-    val outputs: IndexedSeq[(Output, String)] =
+    val outputs: IndexedSeq[(Output, Option[(CompiledContract, Seq[Proof])])] =
       useOutputs
         .sortWith(_._1.monetaryValue > _._1.monetaryValue)
-        .foldLeft((IndexedSeq.empty[(Output, String)], 0L))((t, o) => if (t._2 < amount) (t._1 :+ o, t._2 + o._1.monetaryValue) else t)
-        ._1
+        .foldLeft(IndexedSeq.empty[(Output, Option[(CompiledContract, Seq[Proof])])])((acc , e) => if (acc.map(_._1.monetaryValue).sum < amount) acc :+ e else acc)
 
     val uInputs: IndexedSeq[Input] =
       outputs
-        .map { t =>
+        .map { case (o, co) =>
           Input.unsigned(
-            Base16.decode(t._1.id).map(ADKey @@ _).getOrElse(throw new RuntimeException(s"Output id ${t._1.id} con not be decoded with Base16")),
-            if (t._2.isEmpty) Right(PubKeyLockedContract(pubKey.pubKeyBytes))
-            else Left(PCompiler.compile(t._2).getOrElse(throw new RuntimeException("Smart contract compilation has failed")))
+            Base16.decode(o.id).map(ADKey @@ _).getOrElse(throw new RuntimeException(s"Output id ${o.id} can not be decoded with Base16")),
+            co match {
+              case Some((ct, _)) => Left(ct)
+              case None => Right(PubKeyLockedContract(pubKey.pubKeyBytes))
+            }
           )
         }
 
     val change: Long = outputs.map(_._1.monetaryValue).sum - (amount + fee)
 
-    if (change < 0) throw new RuntimeException("Transaction impossible: required amount is bigger that available ")
+    if (change < 0) throw new RuntimeException("Transaction impossible: required amount is bigger than available")
 
     val directives: IndexedSeq[TransferDirective] = if (change > 0) {
       IndexedSeq(TransferDirective(recipient, amount, tokenIdOpt), TransferDirective(pubKey.address.address, change, tokenIdOpt))
@@ -124,37 +125,41 @@ object Transaction {
     val uTransaction: UnsignedEncryTransaction = UnsignedEncryTransaction(fee, timestamp, uInputs, directives)
     val signature: Signature25519 = privKey.sign(uTransaction.messageToSign)
 
-    uTransaction.toSigned(IndexedSeq.empty, Some(Proof(BoxedValue.Signature25519Value(signature.bytes.toList))))
+    val proofs: IndexedSeq[Seq[Proof]] = useOutputs.flatMap(_._2.map(_._2)).toIndexedSeq
+
+    uTransaction.toSigned(proofs, Some(Proof(BoxedValue.Signature25519Value(signature.bytes.toList))))
   }
 
   def scriptedAssetTransactionScratch(privKey: PrivateKey25519,
                                       fee: Long,
                                       timestamp: Long,
-                                      useOutputs: Seq[(Output, String)],
+                                      useOutputs: Seq[(Output, Option[(CompiledContract, Seq[Proof])])],
                                       contract: CompiledContract,
                                       amount: Long,
                                       tokenIdOpt: Option[ADKey] = None): EncryTransaction = {
 
     val pubKey: PublicKey25519 = privKey.publicImage
 
-    val outputs: IndexedSeq[(Output, String)] =
+    val outputs: IndexedSeq[(Output, Option[(CompiledContract, Seq[Proof])])] =
       useOutputs
         .sortWith(_._1.monetaryValue > _._1.monetaryValue)
-        .foldLeft((IndexedSeq.empty[(Output, String)], 0L))((t, o) => if (t._2 < amount) (t._1 :+ o, t._2 + o._1.monetaryValue) else t)
-        ._1
+        .foldLeft(IndexedSeq.empty[(Output, Option[(CompiledContract, Seq[Proof])])])((acc , e) => if (acc.map(_._1.monetaryValue).sum < amount) acc :+ e else acc)
 
     val uInputs: IndexedSeq[Input] =
       outputs
-        .map { t =>
+        .map { case (o, co) =>
           Input.unsigned(
-            Base16.decode(t._1.id).map(ADKey @@ _).getOrElse(throw new RuntimeException(s"Output id ${t._1.id} con not be decoded with Base16")),
-            if (t._2.isEmpty) Right(PubKeyLockedContract(pubKey.pubKeyBytes))
-            else Left(PCompiler.compile(t._2).getOrElse(throw new RuntimeException("Smart contract compilation has failed")))          )
+            Base16.decode(o.id).map(ADKey @@ _).getOrElse(throw new RuntimeException(s"Output id ${o.id} can not be decoded with Base16")),
+            co match {
+              case Some((ct, _)) => Left(ct)
+              case None => Right(PubKeyLockedContract(pubKey.pubKeyBytes))
+            }
+          )
         }
 
     val change: Long = outputs.map(_._1.monetaryValue).sum - (amount + fee)
 
-    if (change < 0) throw new RuntimeException("Transaction impossible: required amount is bigger that available ")
+    if (change < 0) throw new RuntimeException("Transaction impossible: required amount is bigger than available")
 
     val assetDirective: ScriptedAssetDirective = ScriptedAssetDirective(contract.hash, amount, tokenIdOpt)
     val directives: IndexedSeq[Directive] =
@@ -164,6 +169,8 @@ object Transaction {
     val uTransaction: UnsignedEncryTransaction = UnsignedEncryTransaction(fee, timestamp, uInputs, directives)
     val signature: Signature25519 = privKey.sign(uTransaction.messageToSign)
 
-    uTransaction.toSigned(IndexedSeq.empty, Some(Proof(BoxedValue.Signature25519Value(signature.bytes.toList))))
+    val proofs: IndexedSeq[Seq[Proof]] = useOutputs.flatMap(_._2.map(_._2)).toIndexedSeq
+
+    uTransaction.toSigned(proofs, Some(Proof(BoxedValue.Signature25519Value(signature.bytes.toList))))
   }
 }
