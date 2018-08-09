@@ -27,3 +27,5 @@ object ScriptedTransactionRequest {
     } yield ScriptedTransactionRequest(fee, amount, script)
   }
 }
+
+case class AssetIssuingTransactionRequest(fee: Long, amount: Long, source: String)

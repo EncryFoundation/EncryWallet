@@ -86,6 +86,28 @@ class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionSer
       )
   }
 
+  def showAssetIssuingTransactionForm(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
+    wallet match {
+      case Some(w) => Ok(views.html.issuing(Base16.encode(w.pubKey), ViewController.assetIssuingTransactionRequestForm))
+      case None => Redirect(routes.ViewController.message("You should set up a wallet before making transaction"))
+    }
+  }
+
+  def sendAssetIssuingTransactionFromForm(walletId: String): Action[AnyContent] = Action.async {
+    implicit request =>
+      ViewController.scriptedTransactionRequestForm.bindFromRequest.fold(
+        errors => Future.successful(Redirect(routes.ViewController.message("Wrong transaction parameters\n" + errors.errors.mkString("\n") + errors))),
+        strd => {
+          val inputsE: Either[Throwable, Seq[ParsedInput]] = ViewController.parseInputs(strd.inputsIds)
+          inputsE match {
+            case Right(v) =>
+              handleSendTransactionResponse(ts.sendScriptedTransactionWithInputsIds(walletId, strd.scriptedTransactionRequest, v))
+            case Left(f) => Future.successful(Redirect(routes.ViewController.message(f.getMessage)))
+          }
+        }
+      )
+  }
+
   def message(msg: String): Action[AnyContent] = Action {
     Ok(views.html.message(msg))
   }
@@ -130,7 +152,7 @@ object ViewController {
 
   val base58text: Mapping[String] = text.verifying(Base58.decode(_).isSuccess)
 
-  val paymentTransactionRequestForm: Form[ViewController.PaymentTransactionRequestData] = Form(
+  val paymentTransactionRequestForm: Form[PaymentTransactionRequestData] = Form(
     mapping(
       "paymentTransactionRequest" -> mapping(
         "fee" -> longNumber,
@@ -138,9 +160,9 @@ object ViewController {
         "recipient" -> base58text)
       (PaymentTransactionRequest.apply)(PaymentTransactionRequest.unapply),
       "inputsIds" -> text
-    )(ViewController.PaymentTransactionRequestData.apply)(ViewController.PaymentTransactionRequestData.unapply))
+    )(PaymentTransactionRequestData.apply)(PaymentTransactionRequestData.unapply))
 
-  val scriptedTransactionRequestForm: Form[ViewController.ScriptedTransactionRequestData] = Form(
+  val scriptedTransactionRequestForm: Form[ScriptedTransactionRequestData] = Form(
     mapping(
       "scriptedTransactionRequest" -> mapping(
         "fee" -> longNumber,
@@ -148,17 +170,29 @@ object ViewController {
         "source" -> text
       )(ScriptedTransactionRequest.apply)(ScriptedTransactionRequest.unapply),
       "inputsIds" -> text
-    )(ViewController.ScriptedTransactionRequestData.apply)(ViewController.ScriptedTransactionRequestData.unapply))
+    )(ScriptedTransactionRequestData.apply)(ScriptedTransactionRequestData.unapply))
 
-  val settingsForm: Form[ViewController.SettingsData] = Form(
+  val assetIssuingTransactionRequestForm: Form[AssetIssuingTransactionRequestData] = Form(
+    mapping(
+      "assetIssuingTransactionRequest" -> mapping(
+        "fee" -> longNumber,
+        "amount" -> longNumber,
+        "source" -> text
+      )(AssetIssuingTransactionRequest.apply)(AssetIssuingTransactionRequest.unapply),
+      "inputsIds" -> text
+    )(AssetIssuingTransactionRequestData.apply)(AssetIssuingTransactionRequestData.unapply))
+
+  val settingsForm: Form[SettingsData] = Form(
     mapping(
       "secretKey" -> base16text
-    )(ViewController.SettingsData.apply)(ViewController.SettingsData.unapply)
+    )(SettingsData.apply)(SettingsData.unapply)
   )
 
   case class PaymentTransactionRequestData(paymentTransactionRequest: PaymentTransactionRequest, inputsIds: String)
 
   case class ScriptedTransactionRequestData(scriptedTransactionRequest: ScriptedTransactionRequest, inputsIds: String)
+
+  case class AssetIssuingTransactionRequestData(assetIssuingTransactionRequest: AssetIssuingTransactionRequest, inputsIds: String)
 
   case class SettingsData(secretKey: String)
 

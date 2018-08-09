@@ -42,7 +42,7 @@
             <td>@{Base16.decode(output.id).map(_.head).map {
                     case 1 => "AssetBox"
                     case 2 => "AssetCreationBox"
-                    case 3 => "AssetIssuingBox"
+                    case 3 => "TokenIssuingBox"
                     case 4 => "DataBox"
                     case _ => "unknown"
                 }.getOrElse("invalid")}

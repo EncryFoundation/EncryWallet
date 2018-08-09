@@ -15,6 +15,8 @@ GET     /transactions/payment/                     controllers.ViewController.sh
 POST    /transactions/payment/send/:walletId       controllers.ViewController.sendPaymentTransactionFromForm(walletId)
 GET     /transactions/scripted/                    controllers.ViewController.showScriptedTransactionForm
 POST    /transactions/scripted/send/:walletId      controllers.ViewController.sendScriptedTransactionFromForm(walletId)
+GET     /transactions/issuing/                     controllers.ViewController.showAssetIssuingTransactionForm
+POST    /transactions/issuing/send/:walletId       controllers.ViewController.sendAssetIssuingTransactionFromForm(walletId)
 GET     /transactions/message                      controllers.ViewController.message(msg)
 GET     /transactions/settings                     controllers.ViewController.showSettingsForm
 POST    /transactions/settings/setKey              controllers.ViewController.setWallet
