@@ -13,6 +13,7 @@ import scorex.crypto.encode.{Base16, Base58}
 import scorex.crypto.signatures.{PrivateKey, PublicKey}
 import storage.LSMStorage
 import models._
+import models.box.EncryProposition
 import org.encryfoundation.common.crypto.PrivateKey25519
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import play.api.test.Injecting

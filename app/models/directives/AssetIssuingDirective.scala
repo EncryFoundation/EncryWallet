@@ -1,12 +1,12 @@
 package models.directives
 
 import com.google.common.primitives.{Bytes, Ints, Longs}
-import encry.modifiers.mempool.directive.Directive.DTypeId
-import encry.modifiers.serialization.Serializer
-import encry.modifiers.state.box.Box.Amount
-import encry.modifiers.state.box.{TokenIssuingBox, EncryBaseBox, EncryProposition}
-import encry.settings.{Algos, Constants}
-import encry.utils.Utils
+import models.directives.Directive.DTypeId
+import org.encryfoundation.common.serialization.Serializer
+import models.box.Box.Amount
+import models.box.{TokenIssuingBox, EncryBaseBox, EncryProposition}
+import org.encryfoundation.common.{Algos, Constants}
+import org.encryfoundation.common.utils.Utils
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder, HCursor}
 import org.encryfoundation.prismlang.compiler.CompiledContract.ContractHash

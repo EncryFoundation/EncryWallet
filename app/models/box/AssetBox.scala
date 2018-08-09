@@ -28,15 +28,6 @@ case class AssetBox(override val proposition: EncryProposition,
 
   lazy val isIntrinsic: Boolean = tokenIdOpt.isEmpty
 
-  override val tpe: Types.Product = Types.AssetBox
-
-  override def asVal: PValue = PValue(asPrism, Types.AssetBox)
-
-  override def asPrism: PObject =
-    PObject(baseFields ++ Map(
-      "amount" -> PValue(amount, Types.PInt),
-      "tokenId" -> PValue(tokenIdOpt.getOrElse(Constants.IntrinsicTokenId), Types.PCollection.ofByte)
-    ), tpe)
 }
 
 object AssetBox {
