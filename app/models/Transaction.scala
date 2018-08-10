@@ -8,7 +8,7 @@ import org.encryfoundation.common.transaction.{Input, Proof, PubKeyLockedContrac
 import org.encryfoundation.prismlang.compiler.CompiledContract
 import org.encryfoundation.prismlang.core.wrapped.BoxedValue
 import scorex.crypto.authds.ADKey
-import scorex.util.encode.Base16
+import org.encryfoundation.common.Algos
 import scorex.crypto.hash.{Blake2b256, Digest32}
 import models.directives._
 
@@ -27,7 +27,7 @@ case class EncryTransaction(fee: Long,
 object EncryTransaction {
 
   implicit val jsonEncoder: Encoder[EncryTransaction] = (tx: EncryTransaction) => Map(
-    "id" -> Base16.encode(tx.id).asJson,
+    "id" -> Algos.encode(tx.id).asJson,
     "fee" -> tx.fee.asJson,
     "timestamp" -> tx.timestamp.asJson,
     "inputs" -> tx.inputs.map(_.asJson).asJson,
@@ -137,7 +137,7 @@ object Transaction {
       outputs
         .map { case (o, co) =>
           Input.unsigned(
-            Base16.decode(o.id).map(ADKey @@ _).getOrElse(throw new RuntimeException(s"Output id ${o.id} can not be decoded with Base16")),
+            Algos.decode(o.id).map(ADKey @@ _).getOrElse(throw new RuntimeException(s"Output id ${o.id} can not be decoded with Base16")),
             co match {
               case Some((ct, _)) => Left(ct)
               case None => Right(PubKeyLockedContract(pubKey.pubKeyBytes))

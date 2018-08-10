@@ -4,7 +4,7 @@ import io.circe.syntax._
 import javax.inject.{Inject, Singleton}
 import play.api.libs.circe.Circe
 import play.api.mvc._
-import scorex.util.encode.Base58
+import org.encryfoundation.utils.encoding.Base58
 import services.WalletService
 import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal

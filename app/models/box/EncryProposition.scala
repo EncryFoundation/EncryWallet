@@ -5,7 +5,7 @@ import io.circe.{Decoder, Encoder, HCursor}
 import org.encryfoundation.common.serialization.Serializer
 import org.encryfoundation.common.transaction._
 import org.encryfoundation.prismlang.compiler.CompiledContract.ContractHash
-import scorex.util.encode.Base16
+import org.encryfoundation.common.Algos
 import scorex.crypto.signatures.PublicKey
 import scala.util.{Failure, Success, Try}
 
@@ -19,12 +19,12 @@ case class EncryProposition(contractHash: ContractHash) extends Proposition {
 object EncryProposition {
 
   implicit val jsonEncoder: Encoder[EncryProposition] = (p: EncryProposition) => Map(
-    "contractHash" -> Base16.encode(p.contractHash).asJson
+    "contractHash" -> Algos.encode(p.contractHash).asJson
   ).asJson
 
   implicit val jsonDecoder: Decoder[EncryProposition] = (c: HCursor) => for {
     contractHash <- c.downField("contractHash").as[String]
-  } yield Base16.decode(contractHash).map(EncryProposition.apply)
+  } yield Algos.decode(contractHash).map(EncryProposition.apply)
     .getOrElse(throw new Exception("Decoding failed"))
 
   def open: EncryProposition = EncryProposition(OpenContract.contract.hash)
