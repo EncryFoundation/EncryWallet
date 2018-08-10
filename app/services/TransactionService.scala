@@ -5,7 +5,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import akka.http.scaladsl.model.HttpResponse
 import org.encryfoundation.prismlang.compiler.{CompiledContract, PCompiler}
 import org.encryfoundation.common.transaction.Proof
-import scorex.crypto.encode.Base16
+import scorex.util.encode.Base16
 import storage.LSMStorage
 import models._
 

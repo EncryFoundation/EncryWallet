@@ -9,7 +9,7 @@ import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers._
 import org.scalatest.Matchers._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import scorex.crypto.encode.{Base16, Base58}
+import scorex.util.encode.{Base16, Base58}
 import scorex.crypto.signatures.{PrivateKey, PublicKey}
 import storage.LSMStorage
 import models._

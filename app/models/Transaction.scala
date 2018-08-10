@@ -8,7 +8,7 @@ import org.encryfoundation.common.transaction.{Input, Proof, PubKeyLockedContrac
 import org.encryfoundation.prismlang.compiler.CompiledContract
 import org.encryfoundation.prismlang.core.wrapped.BoxedValue
 import scorex.crypto.authds.ADKey
-import scorex.crypto.encode.Base16
+import scorex.util.encode.Base16
 import scorex.crypto.hash.{Blake2b256, Digest32}
 import models.directives._
 

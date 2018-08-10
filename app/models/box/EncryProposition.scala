@@ -5,7 +5,7 @@ import io.circe.{Decoder, Encoder, HCursor}
 import org.encryfoundation.common.serialization.Serializer
 import org.encryfoundation.common.transaction._
 import org.encryfoundation.prismlang.compiler.CompiledContract.ContractHash
-import scorex.crypto.encode.Base16
+import scorex.util.encode.Base16
 import scorex.crypto.signatures.PublicKey
 import scala.util.{Failure, Success, Try}
 

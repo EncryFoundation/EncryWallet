@@ -12,7 +12,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.test.Injecting
-import scorex.crypto.encode.Base58
+import scorex.util.encode.Base58
 import scorex.crypto.hash.Blake2b256
 import scorex.crypto.signatures.PublicKey
 import storage.LSMStorage

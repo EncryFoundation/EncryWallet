@@ -15,7 +15,7 @@ import play.api.mvc._
 import org.encryfoundation.prismlang.core.wrapped.BoxedValue
 import org.encryfoundation.prismlang.core.wrapped.BoxedValue._
 import org.encryfoundation.prismlang.parser.{Expressions, Lexer}
-import scorex.crypto.encode.{Base16, Base58}
+import scorex.util.encode.{Base16, Base58}
 import models._
 import org.encryfoundation.common.transaction.{Proof, PubKeyLockedContract}
 import org.encryfoundation.prismlang.compiler.{CompiledContract, PCompiler}

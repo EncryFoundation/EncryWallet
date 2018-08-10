@@ -12,7 +12,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.test.Injecting
-import scorex.crypto.encode.{Base16, Base58}
+import scorex.util.encode.{Base16, Base58}
 
 class ViewControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting with MockitoSugar with EitherValues {
 

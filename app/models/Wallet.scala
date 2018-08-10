@@ -8,7 +8,7 @@ import io.iohk.iodb.ByteArrayWrapper
 import org.encryfoundation.common.crypto.PublicKey25519
 import org.encryfoundation.common.transaction.Pay2PubKeyAddress
 import org.whispersystems.curve25519.OpportunisticCurve25519Provider
-import scorex.crypto.encode.Base16
+import scorex.util.encode.Base16
 import scorex.crypto.hash.Blake2b256
 import scorex.crypto.signatures.PublicKey
 
