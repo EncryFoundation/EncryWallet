@@ -1,5 +1,6 @@
 package models.box
 
+import scala.util.Try
 import com.google.common.primitives.{Bytes, Longs, Shorts}
 import org.encryfoundation.common.serialization.Serializer
 import models.box.EncryBox.BxTypeId
@@ -8,8 +9,6 @@ import io.circe.syntax._
 import org.encryfoundation.common.Algos
 import org.encryfoundation.prismlang.core.Types
 import org.encryfoundation.prismlang.core.wrapped.{PObject, PValue}
-
-import scala.util.Try
 
 /** Stores arbitrary data in EncryTL binary format. */
 case class DataBox(override val proposition: EncryProposition,

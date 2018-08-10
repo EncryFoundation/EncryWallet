@@ -24,8 +24,8 @@ trait EncryBaseBox extends Box[EncryProposition] with PConvertible {
 
   lazy val baseFields: Map[String, PValue] = Map(
     "contractHash" -> PValue(proposition.contractHash, Types.PCollection.ofByte),
-    "typeId"       -> PValue(typeId.toLong, Types.PInt),
-    "id"           -> PValue(id, Types.PCollection.ofByte)
+    "typeId" -> PValue(typeId.toLong, Types.PInt),
+    "id" -> PValue(id, Types.PCollection.ofByte)
   )
 
   def asPrism: PObject = PObject(baseFields, tpe)

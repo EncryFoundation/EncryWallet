@@ -119,12 +119,12 @@ object Transaction {
   }
 
   private[this] def prepareTransaction(privKey: PrivateKey25519,
-                                 fee: Long,
-                                 timestamp: Long,
-                                 useOutputs: Seq[(Output, Option[(CompiledContract, Seq[Proof])])],
-                                 directive: Directive,
-                                 amount: Long,
-                                 tokenIdOpt: Option[ADKey] = None): EncryTransaction = {
+                                       fee: Long,
+                                       timestamp: Long,
+                                       useOutputs: Seq[(Output, Option[(CompiledContract, Seq[Proof])])],
+                                       directive: Directive,
+                                       amount: Long,
+                                       tokenIdOpt: Option[ADKey] = None): EncryTransaction = {
 
     val pubKey: PublicKey25519 = privKey.publicImage
 
