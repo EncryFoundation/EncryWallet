@@ -8,7 +8,7 @@ import io.iohk.iodb.ByteArrayWrapper
 import org.encryfoundation.common.crypto.PublicKey25519
 import org.encryfoundation.common.transaction.Pay2PubKeyAddress
 import org.whispersystems.curve25519.OpportunisticCurve25519Provider
-import scorex.crypto.encode.Base16
+import org.encryfoundation.common.Algos
 import scorex.crypto.hash.Blake2b256
 import scorex.crypto.signatures.PublicKey
 
@@ -36,12 +36,12 @@ case class Wallet(pubKey: PublicKey) {
 
 object Wallet {
 
-  def apply(id: String): Option[Wallet] = Base16.decode(id)
+  def apply(id: String): Option[Wallet] = Algos.decode(id)
     .filter(_.length == PublicKey25519.Length)
     .map(id => Wallet(PublicKey @@ id)).toOption
 
   implicit val jsonEncoder: Encoder[Wallet] = (w: Wallet) => Map(
-    "pubKey" -> Base16.encode(w.pubKey).asJson,
+    "pubKey" -> Algos.encode(w.pubKey).asJson,
     "address" -> w.address.address.asJson
   ).asJson
 

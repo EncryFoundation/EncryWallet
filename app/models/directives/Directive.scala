@@ -1,21 +1,17 @@
 package models.directives
 
+import models.directives.Directive.DTypeId
+import models.box.EncryBaseBox
 import io.circe._
-import models.box.EncryBox
+import org.encryfoundation.common.serialization.BytesSerializable
 import scorex.crypto.hash.Digest32
 
-trait Directive {
+trait Directive extends BytesSerializable {
 
-  val typeId: Byte
-
+  val typeId: DTypeId
   val isValid: Boolean
 
-  lazy val bytes: Array[Byte] = this match {
-    case td: TransferDirective => TransferDirective.Serializer.toBytes(td)
-    case sad: ScriptedAssetDirective => ScriptedAssetDirective.Serializer.toBytes(sad)
-  }
-
-  def boxes(digest: Digest32, idx: Int): Seq[EncryBox]
+  def boxes(digest: Digest32, idx: Int): Seq[EncryBaseBox]
 }
 
 object Directive {
@@ -24,6 +20,7 @@ object Directive {
 
   implicit val jsonEncoder: Encoder[Directive] = {
     case td: TransferDirective => TransferDirective.jsonEncoder(td)
+    case aid: AssetIssuingDirective => AssetIssuingDirective.jsonEncoder(aid)
     case sad: ScriptedAssetDirective => ScriptedAssetDirective.jsonEncoder(sad)
     case _ => throw new Exception("Incorrect directive type")
   }
@@ -33,8 +30,9 @@ object Directive {
       c.downField("typeId").as[DTypeId] match {
         case Right(s) => s match {
           case TransferDirective.TypeId => TransferDirective.jsonDecoder(c)
+          case AssetIssuingDirective.TypeId => AssetIssuingDirective.jsonDecoder(c)
           case ScriptedAssetDirective.TypeId => ScriptedAssetDirective.jsonDecoder(c)
-          case _ => Left(DecodingFailure("Incorrect typeId", c.history))
+          case _ => Left(DecodingFailure("Incorrect directive typeID", c.history))
         }
         case Left(_) => Left(DecodingFailure("None typeId", c.history))
       }

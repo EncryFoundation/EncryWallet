@@ -9,10 +9,12 @@ import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers._
 import org.scalatest.Matchers._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import scorex.crypto.encode.{Base16, Base58}
+import org.encryfoundation.common.Algos
+import scorex.crypto.encode.Base58
 import scorex.crypto.signatures.{PrivateKey, PublicKey}
 import storage.LSMStorage
 import models._
+import models.box.EncryProposition
 import org.encryfoundation.common.crypto.PrivateKey25519
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import play.api.test.Injecting
@@ -24,7 +26,7 @@ class TransactionServiceSpec extends PlaySpec with GuiceOneAppPerTest with Injec
   val sampleWalletID: String = "7e627a119d6051f2930ee6651c6c52308b0f446144d19d2a179c2df3ec60565e"
   val sampleWalletPrivateKey: PrivateKey25519 = PrivateKey25519(
     PrivateKey @@ Base58.decode("4Etkd64NNYEDt8TZ21Z3jNHPvfbvEksmuuTwRUtPgqGH").get,
-    PublicKey @@ Base16.decode(sampleWalletID).get
+    PublicKey @@ Algos.decode(sampleWalletID).get
   )
 
   val sampleProposition: EncryProposition = EncryProposition(new Array[Byte](0))

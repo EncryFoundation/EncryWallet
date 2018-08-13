@@ -1,41 +1,50 @@
 package models.directives
 
-import java.nio.charset.Charset
+import scala.util.Try
 import com.google.common.primitives.{Bytes, Ints, Longs}
+import models.directives.Directive.DTypeId
+import org.encryfoundation.common.serialization.Serializer
+import models.box.Box.Amount
+import models.box.{AssetBox, EncryBaseBox, EncryProposition}
+import org.encryfoundation.common.{Algos, Constants}
+import org.encryfoundation.common.utils.Utils
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder, HCursor}
-import models.box.{AssetBox, EncryBox}
-import models.EncryProposition
 import org.encryfoundation.common.transaction.EncryAddress
+import org.encryfoundation.common.transaction.EncryAddress.Address
+import scorex.crypto.authds
 import scorex.crypto.authds.ADKey
-import scorex.crypto.encode.Base16
 import scorex.crypto.hash.Digest32
-import scala.util.Try
+import supertagged.@@
 
-case class TransferDirective(address: String,
-                             amount: Long,
+case class TransferDirective(address: Address,
+                             amount: Amount,
                              tokenIdOpt: Option[ADKey] = None) extends Directive {
 
-  override val typeId: Byte = TransferDirective.TypeId
+  override type M = TransferDirective
 
-  override def boxes(digest: Digest32, idx: Int): Seq[EncryBox] =
+  override val typeId: DTypeId = TransferDirective.TypeId
+
+  override def boxes(digest: Digest32, idx: Int): Seq[EncryBaseBox] =
     Seq(AssetBox(EncryProposition.addressLocked(address),
-      EncryBox.nonceFromDigest(digest ++ Ints.toByteArray(idx)), amount, tokenIdOpt))
+      Utils.nonceFromDigest(digest ++ Ints.toByteArray(idx)), amount, tokenIdOpt))
 
   override lazy val isValid: Boolean = amount > 0 && EncryAddress.resolveAddress(address).isSuccess
+
+  override def serializer: Serializer[M] = TransferDirectiveSerializer
 
   lazy val isIntrinsic: Boolean = tokenIdOpt.isEmpty
 }
 
 object TransferDirective {
 
-  val TypeId: Byte = 1.toByte
+  val TypeId: DTypeId = 1.toByte
 
   implicit val jsonEncoder: Encoder[TransferDirective] = (d: TransferDirective) => Map(
     "typeId" -> d.typeId.asJson,
     "address" -> d.address.toString.asJson,
     "amount" -> d.amount.asJson,
-    "tokenId" -> d.tokenIdOpt.map(id => Base16.encode(id)).asJson
+    "tokenId" -> d.tokenIdOpt.map(id => Algos.encode(id)).getOrElse("null").asJson
   ).asJson
 
   implicit val jsonDecoder: Decoder[TransferDirective] = (c: HCursor) => {
@@ -47,29 +56,30 @@ object TransferDirective {
       TransferDirective(
         address,
         amount,
-        tokenIdOpt.flatMap(id => Base16.decode(id).map(ADKey @@ _).toOption)
+        tokenIdOpt.flatMap(id => Algos.decode(id).map(ADKey @@ _).toOption)
       )
     }
   }
+}
 
-  object Serializer {
-    def toBytes(obj: TransferDirective): Array[Byte] = {
-      val address: Array[Byte] = obj.address.getBytes(Charset.defaultCharset())
-      address.length.toByte +: Bytes.concat(
-        address,
-        Longs.toByteArray(obj.amount),
-        obj.tokenIdOpt.getOrElse(Array.empty)
-      )
-    }
+object TransferDirectiveSerializer extends Serializer[TransferDirective] {
 
-    def parseBytes(bytes: Array[Byte]): Try[TransferDirective] = Try {
-      val addressLen: Int = bytes.head.toInt
-      val address: String = new String(bytes.slice(1, 1 + addressLen), Charset.defaultCharset())
-      val amount: Long = Longs.fromByteArray(bytes.slice(1 + addressLen, 1 + addressLen + 8))
-      val tokenIdOpt: Option[ADKey] = if ((bytes.length - (1 + addressLen + 8)) == 32) {
-        Some(ADKey @@ bytes.takeRight(32))
-      } else None
-      TransferDirective(address, amount, tokenIdOpt)
-    }
+  override def toBytes(obj: TransferDirective): Array[Byte] = {
+    val address: Array[Byte] = obj.address.getBytes(Algos.charset)
+    address.length.toByte +: Bytes.concat(
+      address,
+      Longs.toByteArray(obj.amount),
+      obj.tokenIdOpt.getOrElse(Array.empty)
+    )
+  }
+
+  override def parseBytes(bytes: Array[Byte]): Try[TransferDirective] = Try {
+    val addressLen: Int = bytes.head.toInt
+    val address: Address = new String(bytes.slice(1, 1 + addressLen), Algos.charset)
+    val amount: Amount = Longs.fromByteArray(bytes.slice(1 + addressLen, 1 + addressLen + 8))
+    val tokenIdOpt: Option[@@[Array[DTypeId], authds.ADKey.Tag]] = if ((bytes.length - (1 + addressLen + 8)) == Constants.ModifierIdSize) {
+      Some(ADKey @@ bytes.takeRight(Constants.ModifierIdSize))
+    } else None
+    TransferDirective(address, amount, tokenIdOpt)
   }
 }

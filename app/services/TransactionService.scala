@@ -5,7 +5,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import akka.http.scaladsl.model.HttpResponse
 import org.encryfoundation.prismlang.compiler.{CompiledContract, PCompiler}
 import org.encryfoundation.common.transaction.Proof
-import scorex.crypto.encode.Base16
+import org.encryfoundation.common.Algos
 import storage.LSMStorage
 import models._
 
@@ -25,7 +25,7 @@ class TransactionService @Inject()(implicit ec: ExecutionContext, lsmStrorage: L
 
         val outputsF: Future[Seq[(Output, Option[(CompiledContract, Seq[Proof])])]] =
           if (inputs.isEmpty) es.requestUtxos(w.address.address).map(x => x.map((_, None)))
-          else Future.sequence(inputs.map(x => es.requestOutput(Base16.encode(x.key)).map(_ -> x.contract)))
+          else Future.sequence(inputs.map(x => es.requestOutput(Algos.encode(x.key)).map(_ -> x.contract)))
 
         outputsF.map { outputs =>
 
@@ -54,7 +54,7 @@ class TransactionService @Inject()(implicit ec: ExecutionContext, lsmStrorage: L
 
           val outputsF: Future[Seq[(Output, Option[(CompiledContract, Seq[Proof])])]] =
             if (inputs.isEmpty) es.requestUtxos(w.address.address).map(x => x.map((_, None)))
-            else Future.sequence(inputs.map(x => es.requestOutput(Base16.encode(x.key)).map(_ -> x.contract)))
+            else Future.sequence(inputs.map(x => es.requestOutput(Algos.encode(x.key)).map(_ -> x.contract)))
 
           outputsF.map { outputs =>
 

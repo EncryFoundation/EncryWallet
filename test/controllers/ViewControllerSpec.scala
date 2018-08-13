@@ -2,7 +2,9 @@ package controllers
 
 import fastparse.core.ParseError
 import models.ParsedInput
+import org.encryfoundation.common.Algos
 import org.encryfoundation.common.transaction.Proof
+import scorex.crypto.encode.Base58
 import org.encryfoundation.prismlang.compiler.{CompiledContract, PCompiler}
 import org.encryfoundation.prismlang.core.wrapped.BoxedValue
 import org.encryfoundation.prismlang.core.wrapped.BoxedValue._
@@ -12,7 +14,6 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.test.Injecting
-import scorex.crypto.encode.{Base16, Base58}
 
 class ViewControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting with MockitoSugar with EitherValues {
 
@@ -50,7 +51,7 @@ class ViewControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting
 
       val res: Seq[ParsedInput] = ViewController.parseInputs(input).right.value
 
-      res.map(_.key).map(Base16.encode) shouldBe
+      res.map(_.key).map(Algos.encode) shouldBe
         Seq(
           "013d9ac1455a6f67cb1b4614153b6e1b4d566b1380e742fffb43421952d7c220",
           "019ea638a100c16202b4cfb86da9cede0c634cf4ad70bfff3afe6d58e8f1ff8b",
@@ -61,7 +62,7 @@ class ViewControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting
       res(1).contract shouldBe None
       res(2).contract shouldBe None
       res(3).contract shouldBe Some(contract ->
-        Seq(Proof(Signature25519Value(Base16.decode("047dfb95c380d0e98faa66c6f2118669725cc91fe60dce7e8d53b9337a6eb2a0").get.toList), Some("sig")))
+        Seq(Proof(Signature25519Value(Algos.decode("047dfb95c380d0e98faa66c6f2118669725cc91fe60dce7e8d53b9337a6eb2a0").get.toList), Some("sig")))
       )
     }
 
@@ -91,9 +92,9 @@ class ViewControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting
         "b1" -> BoolValue(true),
         "b2" -> BoolValue(false),
         "_" -> StringValue("34@5$zsFH34"),
-        "secret1" -> ByteCollectionValue(Base16.decode("047dfb95c380d0e98faa66c6f2118669725cc91fe60dce7e8d53b9337a6eb2a0").get.toList),
+        "secret1" -> ByteCollectionValue(Algos.decode("047dfb95c380d0e98faa66c6f2118669725cc91fe60dce7e8d53b9337a6eb2a0").get.toList),
         "secret2" -> ByteCollectionValue(Base58.decode("4Etkd64NNYEDt8TZ21Z3jNHPvfbvEksmuuTwRUtPgqGH").get.toList),
-        "key" -> Signature25519Value(Base16.decode("047dfb95c380d0e98faa66c6f2118669725cc91fe60dce7e8d53b9337a6eb2a0").get.toList)
+        "key" -> Signature25519Value(Algos.decode("047dfb95c380d0e98faa66c6f2118669725cc91fe60dce7e8d53b9337a6eb2a0").get.toList)
       )
       ViewController.parseScriptArgs(s).right.value shouldBe expected
     }

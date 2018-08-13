@@ -1,14 +1,14 @@
 @(w: Wallet, balance: Option[Long], hash: String, outputs: Seq[Output])(implicit lang: play.api.i18n.Messages)
 
 @import helper._
-@import scorex.crypto.encode.{Base16, Base58}
+@import org.encryfoundation.common.Algos
 
 @layout("Wallet info") {
 <form class="form-horizontal">
 
     <div class="form-group">
         <label class="col-form-label col-sm-3"><b>Public key</b></label>
-        <div class="col-sm-9">@{Base16.encode(w.pubKey)}</div>
+        <div class="col-sm-9">@{Algos.encode(w.pubKey)}</div>
     </div>
 
     <div class="form-group">
@@ -39,10 +39,10 @@
         @for(output <- outputs) {
         <tr>
             <td scope="row">@output.id</td>
-            <td>@{Base16.decode(output.id).map(_.head).map {
+            <td>@{Algos.decode(output.id).map(_.head).map {
                     case 1 => "AssetBox"
                     case 2 => "AssetCreationBox"
-                    case 3 => "AssetIssuingBox"
+                    case 3 => "TokenIssuingBox"
                     case 4 => "DataBox"
                     case _ => "unknown"
                 }.getOrElse("invalid")}
