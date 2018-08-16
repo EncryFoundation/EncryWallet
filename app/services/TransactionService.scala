@@ -50,7 +50,7 @@ class TransactionService @Inject()(implicit ec: ExecutionContext, lsmStrorage: L
   def sendScriptedTransactionWithInputsIds(walletId: String, str: ScriptedTransactionRequest, inputs: Seq[ParsedInput]): Future[HttpResponse] = {
     Wallet(walletId) match {
       case Some(w) =>
-        Future.fromTry(PCompiler.compile(str.source)).flatMap { contract =>
+        Future.fromTry(PCompiler.compile(str.source.replaceAll("\r\n", "\n"))).flatMap { contract =>
 
           val outputsF: Future[Seq[(Output, Option[(CompiledContract, Seq[Proof])])]] =
             if (inputs.isEmpty) es.requestUtxos(w.address.address).map(x => x.map((_, None)))

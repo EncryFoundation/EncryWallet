@@ -42,11 +42,9 @@ object AssetIssuingDirective {
 
   implicit val jsonDecoder: Decoder[AssetIssuingDirective] = (c: HCursor) => {
     for {
-      contractHash <- c.downField("contractHash").as[String]
+      contractHash <- c.downField("contractHash").as[ContractHash](Decoder.decodeString.emapTry(Algos.decode))
       amount <- c.downField("amount").as[Long]
-    } yield Algos.decode(contractHash)
-      .map(ch => AssetIssuingDirective(ch, amount))
-      .getOrElse(throw new Exception("Decoding failed"))
+    } yield AssetIssuingDirective(contractHash, amount)
   }
 }
 

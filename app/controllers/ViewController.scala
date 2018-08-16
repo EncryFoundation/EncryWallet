@@ -28,7 +28,8 @@ import storage.LSMStorage
 class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionService, ws: WalletService, lsmStorage: LSMStorage, es: ExplorerService, cc: ControllerComponents)
   extends AbstractController(cc) with I18nSupport {
 
-  private var wallet: Option[Wallet] = None
+  private def wallet(implicit request: Request[AnyContent]): Option[Wallet] =
+    request.cookies.get(ViewController.pubKeyCookieName).flatMap(x => Wallet(x.value))
 
   private def handleSendTransactionResponse(f: Future[HttpResponse]): Future[Result] = {
     f.map {
@@ -51,7 +52,7 @@ class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionSer
   }
 
   def sendPaymentTransactionFromForm(walletId: String): Action[AnyContent] = Action.async {
-    implicit request =>
+    implicit request: Request[AnyContent] =>
       ViewController.paymentTransactionRequestForm.bindFromRequest.fold(
         errors => Future.successful(Redirect(routes.ViewController.message("Wrong transaction parameters\n" + errors.errors.mkString("\n") + errors))),
         ptrd => {
@@ -73,7 +74,7 @@ class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionSer
   }
 
   def sendScriptedTransactionFromForm(walletId: String): Action[AnyContent] = Action.async {
-    implicit request =>
+    implicit request: Request[AnyContent] =>
       ViewController.scriptedTransactionRequestForm.bindFromRequest.fold(
         errors => Future.successful(Redirect(routes.ViewController.message("Wrong transaction parameters\n" + errors.errors.mkString("\n") + errors))),
         strd => {
@@ -95,7 +96,7 @@ class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionSer
   }
 
   def sendAssetIssuingTransactionFromForm(walletId: String): Action[AnyContent] = Action.async {
-    implicit request =>
+    implicit request: Request[AnyContent] =>
       ViewController.scriptedTransactionRequestForm.bindFromRequest.fold(
         errors => Future.successful(Redirect(routes.ViewController.message("Wrong transaction parameters\n" + errors.errors.mkString("\n") + errors))),
         strd => {
@@ -119,8 +120,8 @@ class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionSer
       data => {
         Algos.decode(data.secretKey).map(ws.restoreFromSecret) match {
           case Success(w) =>
-            wallet = Some(w)
             Redirect(routes.ViewController.message("Wallet has been successfully set"))
+              .withCookies(Cookie(ViewController.pubKeyCookieName, Algos.encode(w.pubKey), Some(86400 * 5)))
           case Failure(_) => Redirect(routes.ViewController.message("Can not restore wallet from this key"))
         }
       }
@@ -132,7 +133,7 @@ class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionSer
     Ok(views.html.settings(ViewController.settingsForm.fill(ViewController.SettingsData(privateKey))))
   }
 
-  def showWalletInfo(): Action[AnyContent] = Action.async { implicit request =>
+  def showWalletInfo(): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
     wallet match {
       case Some(w) =>
         val balanceF: Future[Option[Long]] = ws.loadWalletInfo(w).map(_.balance).map(Some(_)).recover { case NonFatal(_) => None }
@@ -148,6 +149,8 @@ class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionSer
 }
 
 object ViewController {
+
+  val pubKeyCookieName: String = "pubKey"
 
   val base16text: Mapping[String] = text.verifying(Algos.decode(_).isSuccess)
 
@@ -207,12 +210,12 @@ object ViewController {
         case id :: contractSource :: Nil =>
           for {
             i <- Algos.decode(id).map(ADKey @@ _)
-            c <- PCompiler.compile(contractSource)
+            c <- PCompiler.compile(contractSource.replaceAll("\r\n", "\n"))
           } yield ParsedInput(i, Some(c -> Seq.empty))
         case id :: contractSource :: contractArgs :: Nil =>
           for {
             i <- Algos.decode(id).map(ADKey @@ _)
-            c <- PCompiler.compile(contractSource)
+            c <- PCompiler.compile(contractSource.replaceAll("\r\n", "\n"))
             a <- parseScriptArgs(contractArgs).map { xs => xs.map { case (tag, bv) => if (tag != "_") Proof(bv, Some(tag)) else Proof(bv) } }.toTry
           } yield ParsedInput(i, Some(c -> a))
         case _ => Failure(new RuntimeException("Inputs can not be parsed"))

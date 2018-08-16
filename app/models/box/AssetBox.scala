@@ -9,8 +9,6 @@ import io.circe.{Decoder, Encoder, HCursor}
 import io.circe.syntax._
 import org.encryfoundation.common.{Algos, Constants}
 import org.encryfoundation.common.serialization.Serializer
-import org.encryfoundation.prismlang.core.Types
-import org.encryfoundation.prismlang.core.wrapped.{PObject, PValue}
 
 /** Represents monetary asset of some type locked with some `proposition`.
   * `tokenIdOpt = None` if the asset is of intrinsic type. */
@@ -47,8 +45,8 @@ object AssetBox {
     nonce <- c.downField("nonce").as[Long]
     proposition <- c.downField("proposition").as[EncryProposition]
     value <- c.downField("value").as[Long]
-    tokenIdOpt <- c.downField("tokenId").as[Option[String]]
-  } yield AssetBox(proposition, nonce, value, tokenIdOpt.flatMap(id => Algos.decode(id).toOption))
+    tokenIdOpt <- c.downField("tokenId").as[Option[TokenId]](Decoder.decodeOption(Decoder.decodeString.emapTry(Algos.decode)))
+  } yield AssetBox(proposition, nonce, value, tokenIdOpt)
 }
 
 object AssetBoxSerializer extends Serializer[AssetBox] {

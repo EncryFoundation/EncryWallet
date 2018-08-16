@@ -1,7 +1,7 @@
 package models.box
 
 import io.circe.syntax._
-import io.circe.{Decoder, Encoder, HCursor}
+import io.circe.{Decoder, Encoder}
 import org.encryfoundation.common.serialization.Serializer
 import org.encryfoundation.common.transaction._
 import org.encryfoundation.prismlang.compiler.CompiledContract.ContractHash
@@ -22,10 +22,11 @@ object EncryProposition {
     "contractHash" -> Algos.encode(p.contractHash).asJson
   ).asJson
 
-  implicit val jsonDecoder: Decoder[EncryProposition] = (c: HCursor) => for {
-    contractHash <- c.downField("contractHash").as[String]
-  } yield Algos.decode(contractHash).map(EncryProposition.apply)
-    .getOrElse(throw new Exception("Decoding failed"))
+  implicit val jsonDecoder: Decoder[EncryProposition] =
+    Decoder.decodeString
+      .emapTry(Algos.decode)
+      .map(EncryProposition.apply)
+      .prepare(_.downField("contractHash"))
 
   def open: EncryProposition = EncryProposition(OpenContract.contract.hash)
   def heightLocked(height: Int): EncryProposition = EncryProposition(HeightLockedContract(height).contract.hash)
