@@ -1,14 +1,15 @@
 package services
 
-import io.iohk.iodb.ByteArrayWrapper
 import javax.inject.Inject
-import models.{Wallet, WalletInfo}
-import org.encryfoundation.common.crypto.{PrivateKey25519, PublicKey25519}
-import scorex.crypto.hash.Blake2b256
-import scorex.crypto.signatures.PublicKey
-import storage.LSMStorage
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
+import io.iohk.iodb.ByteArrayWrapper
+import org.encryfoundation.common.crypto.{PrivateKey25519, PublicKey25519}
+import scorex.crypto.hash.Blake2b256
+import scorex.crypto.signatures.{Curve25519, PrivateKey, PublicKey}
+import storage.LSMStorage
+import models.{Wallet, WalletInfo}
+import utils.Mnemonic
 
 class WalletService @Inject()(implicit ec: ExecutionContext, lsmStorage: LSMStorage, es: ExplorerService) {
 
@@ -28,6 +29,22 @@ class WalletService @Inject()(implicit ec: ExecutionContext, lsmStorage: LSMStor
           Wallet.walletsKey -> ByteArrayWrapper(loadAll.flatMap(_.pubKey).toArray ++ publicKey))
       )
     Wallet(publicKey)
+  }
+
+  def createNewWalletWithOutSeed: (Wallet, String) = {
+    val phrase: String = Mnemonic.entropyToMnemonicCode(scorex.utils.Random.randomBytes(16))
+    val (privateKey: PrivateKey, publicKey: PublicKey) = Curve25519.createKeyPair(
+      Blake2b256.hash(Mnemonic.seedFromMnemonic(phrase))
+    )
+
+    lsmStorage.store.update(
+      Random.nextLong(),
+      Seq.empty,
+      Seq(Wallet.secretKey(publicKey) -> ByteArrayWrapper(privateKey),
+        Wallet.walletsKey -> ByteArrayWrapper(loadAll.flatMap(_.pubKey).toArray ++ publicKey))
+    )
+
+    Wallet(publicKey) -> phrase
   }
 
   def restoreFromSecret(secret: Array[Byte]): Wallet = {

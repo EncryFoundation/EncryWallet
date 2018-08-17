@@ -10,7 +10,7 @@ import org.encryfoundation.common.crypto.PrivateKey25519
 @Singleton
 class LSMStorage {
 
-  val dir: File = new File("keys")
+  private val dir: File = new File("keys")
   dir.mkdirs()
 
   lazy val store: LSMStore = new LSMStore(dir, keepVersions = 0)

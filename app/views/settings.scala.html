@@ -1,4 +1,5 @@
-@(settingsForm: Form[controllers.ViewController.SettingsData])(implicit lang: play.api.i18n.Messages)
+@(settingsForm: Form[controllers.ViewController.SettingsData],
+  settingsMnemonicForm: Form[controllers.ViewController.SettingsMnemonicData])(implicit lang: play.api.i18n.Messages)
 
 @import helper._
 
@@ -8,6 +9,15 @@
     @b4.horizontal.form(routes.ViewController.setWallet(), "col-sm-3", "col-sm-9") { implicit hfc =>
         @b4.text(settingsForm("secretKey"), '_label -> "Private key", 'placeholder -> "Base16 encoded key")
         @b4.submit('class -> "btn btn-default"){ Submit }
+    }
+
+    @b4.horizontal.form(routes.ViewController.setWalletWithMnemonic(), "col-sm-3", "col-sm-9") { implicit hfc =>
+        @b4.text(settingsMnemonicForm("mnemonicCode"), '_label -> "Mnemonic code", 'placeholder -> "Mnemonic code")
+        @b4.submit('class -> "btn btn-default"){ Submit }
+    }
+
+    @b4.horizontal.form(routes.ViewController.createAndSetWalletWithOutSeed(), "col-sm-3", "col-sm-9") { implicit hfc =>
+        @b4.submit('class -> "btn btn-success"){ Create new wallet }
     }
 
 }

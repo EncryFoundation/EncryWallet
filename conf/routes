@@ -19,7 +19,9 @@ GET     /transactions/issuing/                     controllers.ViewController.sh
 POST    /transactions/issuing/send/:walletId       controllers.ViewController.sendAssetIssuingTransactionFromForm(walletId)
 GET     /transactions/message                      controllers.ViewController.message(msg)
 GET     /transactions/settings                     controllers.ViewController.showSettingsForm
-POST    /transactions/settings/setKey              controllers.ViewController.setWallet
+POST    /transactions/settings/setWithKey          controllers.ViewController.setWallet
+POST    /transactions/settings/setWithMnemonic     controllers.ViewController.setWalletWithMnemonic
+POST    /transactions/createWalletWithOutSeed      controllers.ViewController.createAndSetWalletWithOutSeed
 GET     /transactions/walletInfo                   controllers.ViewController.showWalletInfo
 
 # Map static resources from the /public folder to the /assets URL path

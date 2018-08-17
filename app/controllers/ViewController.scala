@@ -12,17 +12,18 @@ import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
+import scorex.crypto.encode.Base58
 import org.encryfoundation.common.Algos
+import org.encryfoundation.common.transaction.{Proof, PubKeyLockedContract}
 import org.encryfoundation.prismlang.core.wrapped.BoxedValue
 import org.encryfoundation.prismlang.core.wrapped.BoxedValue._
 import org.encryfoundation.prismlang.parser.{Expressions, Lexer}
-import scorex.crypto.encode.Base58
-import models._
-import org.encryfoundation.common.transaction.{Proof, PubKeyLockedContract}
 import org.encryfoundation.prismlang.compiler.PCompiler
 import scorex.crypto.authds.ADKey
-import services._
 import storage.LSMStorage
+import services._
+import models._
+import utils.Mnemonic
 
 @Singleton
 class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionService, ws: WalletService, lsmStorage: LSMStorage, es: ExplorerService, cc: ControllerComponents)
@@ -128,9 +129,29 @@ class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionSer
     )
   }
 
+  def setWalletWithMnemonic(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
+    ViewController.settingsMnemonicForm.bindFromRequest.fold(
+      _ => Redirect(routes.ViewController.message("Mnemonic cod can not be empty")),
+      data => {
+        val w: Wallet = ws.createNewWallet(Mnemonic.seedFromMnemonic(data.mnemonicCode).some)
+        Redirect(routes.ViewController.message("Wallet has been successfully set"))
+          .withCookies(Cookie(ViewController.pubKeyCookieName, Algos.encode(w.pubKey), Some(86400 * 5)))
+      }
+    )
+  }
+
+  def createAndSetWalletWithOutSeed(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
+    val (w: Wallet, phrase: String) = ws.createNewWalletWithOutSeed
+    Redirect(routes.ViewController.message(s"Wallet has been successfully created with mnemonic phrase: $phrase"))
+      .withCookies(Cookie(ViewController.pubKeyCookieName, Algos.encode(w.pubKey), Some(86400 * 5)))
+  }
+
   def showSettingsForm(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
     val privateKey: String = wallet.flatMap(w => Try(lsmStorage.getWalletSecret(w)).toOption).map(_.privKeyBytes).map(Algos.encode).getOrElse("")
-    Ok(views.html.settings(ViewController.settingsForm.fill(ViewController.SettingsData(privateKey))))
+    Ok(views.html.settings(
+      ViewController.settingsForm.fill(ViewController.SettingsData(privateKey)),
+      ViewController.settingsMnemonicForm.fill(ViewController.SettingsMnemonicData(""))
+    ))
   }
 
   def showWalletInfo(): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
@@ -146,6 +167,7 @@ class ViewController @Inject()(implicit ec: ExecutionContext, ts: TransactionSer
       case None => Future.successful(Redirect(routes.ViewController.message("You should set up a wallet before making transaction")))
     }
   }
+
 }
 
 object ViewController {
@@ -192,6 +214,12 @@ object ViewController {
     )(SettingsData.apply)(SettingsData.unapply)
   )
 
+  val settingsMnemonicForm: Form[SettingsMnemonicData] = Form(
+    mapping(
+      "mnemonicCode" -> nonEmptyText
+    )(SettingsMnemonicData.apply)(SettingsMnemonicData.unapply)
+  )
+
   case class PaymentTransactionRequestData(paymentTransactionRequest: PaymentTransactionRequest, inputsIds: String)
 
   case class ScriptedTransactionRequestData(scriptedTransactionRequest: ScriptedTransactionRequest, inputsIds: String)
@@ -199,6 +227,8 @@ object ViewController {
   case class AssetIssuingTransactionRequestData(assetIssuingTransactionRequest: AssetIssuingTransactionRequest, inputsIds: String)
 
   case class SettingsData(secretKey: String)
+
+  case class SettingsMnemonicData(mnemonicCode: String)
 
   def parseInputs(str: String): Either[Throwable, Seq[ParsedInput]] = {
     str
