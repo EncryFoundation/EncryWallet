@@ -10,8 +10,8 @@ import org.encryfoundation.common.{Algos, Constants}
 import org.encryfoundation.common.utils.Utils
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder, HCursor}
+import org.encryfoundation.common.utils.TaggedTypes.ADKey
 import org.encryfoundation.prismlang.compiler.CompiledContract.ContractHash
-import scorex.crypto.authds.ADKey
 import scorex.crypto.hash.Digest32
 
 case class ScriptedAssetDirective(contractHash: ContractHash,

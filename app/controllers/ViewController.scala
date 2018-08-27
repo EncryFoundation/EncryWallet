@@ -7,7 +7,7 @@ import scala.util.{Failure, Success, Try}
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import cats.implicits._
 import fastparse.all._
-import fastparse.core.{ParseError, Parsed, Parser}
+import fastparse.core.{Parsed, ParseError, Parser}
 import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
 import play.api.i18n.I18nSupport
@@ -19,10 +19,10 @@ import org.encryfoundation.prismlang.core.wrapped.BoxedValue
 import org.encryfoundation.prismlang.core.wrapped.BoxedValue._
 import org.encryfoundation.prismlang.parser.{Expressions, Lexer}
 import org.encryfoundation.prismlang.compiler.PCompiler
-import scorex.crypto.authds.ADKey
 import storage.LSMStorage
 import services._
 import models._
+import org.encryfoundation.common.utils.TaggedTypes.ADKey
 import utils.Mnemonic
 
 @Singleton

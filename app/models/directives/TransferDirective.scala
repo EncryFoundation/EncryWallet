@@ -12,8 +12,7 @@ import io.circe.syntax._
 import io.circe.{Decoder, Encoder, HCursor}
 import org.encryfoundation.common.transaction.EncryAddress
 import org.encryfoundation.common.transaction.EncryAddress.Address
-import scorex.crypto.authds
-import scorex.crypto.authds.ADKey
+import org.encryfoundation.common.utils.TaggedTypes.ADKey
 import scorex.crypto.hash.Digest32
 import supertagged.@@
 
@@ -77,7 +76,7 @@ object TransferDirectiveSerializer extends Serializer[TransferDirective] {
     val addressLen: Int = bytes.head.toInt
     val address: Address = new String(bytes.slice(1, 1 + addressLen), Algos.charset)
     val amount: Amount = Longs.fromByteArray(bytes.slice(1 + addressLen, 1 + addressLen + 8))
-    val tokenIdOpt: Option[@@[Array[DTypeId], authds.ADKey.Tag]] = if ((bytes.length - (1 + addressLen + 8)) == Constants.ModifierIdSize) {
+    val tokenIdOpt: Option[@@[Array[DTypeId], ADKey.Tag]] = if ((bytes.length - (1 + addressLen + 8)) == Constants.ModifierIdSize) {
       Some(ADKey @@ bytes.takeRight(Constants.ModifierIdSize))
     } else None
     TransferDirective(address, amount, tokenIdOpt)

@@ -1,7 +1,7 @@
 package models.box
 
 import org.encryfoundation.common.Algos
-import scorex.crypto.authds._
+import org.encryfoundation.common.utils.TaggedTypes.ADKey
 
 abstract class EncryBoxStateChangeOperation
 

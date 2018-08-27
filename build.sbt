@@ -17,7 +17,7 @@ libraryDependencies ++= Seq(
   "net.codingwell" %% "scala-guice" % "4.2.1",
   "org.scorexfoundation" %% "iodb" % "0.3.2",
   "com.iheart" %% "ficus" % "1.4.3",
-  "org.encry" %% "encry-common" % "0.8.0",
+  "org.encry" %% "encry-common" % "0.8.3",
   "com.adrianhurt" %% "play-bootstrap" % "1.4-P26-B4-SNAPSHOT",
   "org.webjars" % "bootstrap" % "4.1.2",
   "org.webjars" % "jquery" % "3.3.1",

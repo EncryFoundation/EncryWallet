@@ -7,10 +7,10 @@ import org.encryfoundation.common.crypto.{PrivateKey25519, PublicKey25519, Signa
 import org.encryfoundation.common.transaction.{Input, Proof, PubKeyLockedContract}
 import org.encryfoundation.prismlang.compiler.CompiledContract
 import org.encryfoundation.prismlang.core.wrapped.BoxedValue
-import scorex.crypto.authds.ADKey
 import org.encryfoundation.common.Algos
 import scorex.crypto.hash.{Blake2b256, Digest32}
 import models.directives._
+import org.encryfoundation.common.utils.TaggedTypes.ADKey
 
 /** Completely assembled atomic state modifier. */
 case class EncryTransaction(fee: Long,
