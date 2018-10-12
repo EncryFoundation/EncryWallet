@@ -24,7 +24,7 @@ object Output {
   implicit val jsonDecoder: Decoder[Output] = (c: HCursor) => for {
     id <- c.downField("id").as[String]
     txId <- c.downField("txId").as[String]
-    monetaryValue <- c.downField("value").as[Long]
+    monetaryValue <- c.downField("monetaryValue").as[Long]
     coinId <- c.downField("coinId").as[String]
     contractHash <- c.downField("contractHash").as[String]
     data <- c.downField("data").as[String]
