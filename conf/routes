@@ -1,28 +1,25 @@
-# Routes
-# This file defines all application routes (Higher priority routes first)
-# https://www.playframework.com/documentation/latest/ScalaRouting
-# ~~~~
+GET         /                                             controllers.HomeController.index
+GET         /wallet/all                                   controllers.WalletController.getAll
+GET         /wallet/all/info                              controllers.WalletController.getAllWithInfo
+POST        /wallet/create                                controllers.WalletController.createNewWallet
+POST        /wallet/restoreWithSecret                     controllers.WalletController.restoreFromSecret
+POST        /transactions/send/payment/:walletId          controllers.TransactionController.sendPaymentTransaction(walletId)
+POST        /transactions/send/scripted/:walletId         controllers.TransactionController.sendScriptedTransaction(walletId)
+POST        /transactions/send/data/:walletId             controllers.TransactionController.sendDataTransaction(walletId)
 
-GET     /                                     controllers.HomeController.index
-GET     /wallet/all                           controllers.WalletController.getAll
-GET     /wallet/all/info                      controllers.WalletController.getAllWithInfo
-POST    /wallet/create                        controllers.WalletController.createNewWallet
-POST    /wallet/restoreWithSecret             controllers.WalletController.restoreFromSecret
-POST    /transactions/send/payment/:walletId  controllers.TransactionController.sendPaymentTransaction(walletId)
-POST    /transactions/send/scripted/:walletId controllers.TransactionController.sendScriptedTransaction(walletId)
+GET         /transactions/payment/                        controllers.ViewController.showPaymentTransactionForm
+POST        /transactions/payment/send/:walletId          controllers.ViewController.sendPaymentTransactionFromForm(walletId)
+GET         /transactions/scripted/                       controllers.ViewController.showScriptedTransactionForm
+POST        /transactions/scripted/send/:walletId         controllers.ViewController.sendScriptedTransactionFromForm(walletId)
+GET         /transactions/issuing/                        controllers.ViewController.showAssetIssuingTransactionForm
+POST        /transactions/issuing/send/:walletId          controllers.ViewController.sendAssetIssuingTransactionFromForm(walletId)
+GET         /transaction/data/                            controllers.ViewController.showDataTransactionForm
+POST        /transactions/data/send/:walletId             controllers.ViewController.sendDataTransactionFromForm(walletId)
+GET         /transactions/message                         controllers.ViewController.message(msg)
+GET         /transactions/settings                        controllers.ViewController.showSettingsForm
+POST        /transactions/settings/setWithKey             controllers.ViewController.setWallet
+POST        /transactions/settings/setWithMnemonic        controllers.ViewController.setWalletWithMnemonic
+POST        /transactions/createWalletWithOutSeed         controllers.ViewController.createAndSetWalletWithOutSeed
+GET         /transactions/walletInfo                      controllers.ViewController.showWalletInfo
 
-GET     /transactions/payment/                     controllers.ViewController.showPaymentTransactionForm
-POST    /transactions/payment/send/:walletId       controllers.ViewController.sendPaymentTransactionFromForm(walletId)
-GET     /transactions/scripted/                    controllers.ViewController.showScriptedTransactionForm
-POST    /transactions/scripted/send/:walletId      controllers.ViewController.sendScriptedTransactionFromForm(walletId)
-GET     /transactions/issuing/                     controllers.ViewController.showAssetIssuingTransactionForm
-POST    /transactions/issuing/send/:walletId       controllers.ViewController.sendAssetIssuingTransactionFromForm(walletId)
-GET     /transactions/message                      controllers.ViewController.message(msg)
-GET     /transactions/settings                     controllers.ViewController.showSettingsForm
-POST    /transactions/settings/setWithKey          controllers.ViewController.setWallet
-POST    /transactions/settings/setWithMnemonic     controllers.ViewController.setWalletWithMnemonic
-POST    /transactions/createWalletWithOutSeed      controllers.ViewController.createAndSetWalletWithOutSeed
-GET     /transactions/walletInfo                   controllers.ViewController.showWalletInfo
-
-# Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file                         controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file                                 controllers.Assets.versioned(path="/public", file: Asset)

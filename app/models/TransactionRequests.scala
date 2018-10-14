@@ -29,3 +29,16 @@ object ScriptedTransactionRequest {
 }
 
 case class AssetIssuingTransactionRequest(fee: Long, amount: Long, source: String)
+
+case class DataTransactionRequest(fee: Long, amount: Long, data: String)
+
+object DataTransactionRequest {
+
+  implicit val jsonDecoder: Decoder[DataTransactionRequest] = (c: HCursor) => {
+    for {
+      fee <- c.downField("fee").as[Long]
+      amount <- c.downField("amount").as[Long]
+      data <- c.downField("data").as[String]
+    } yield DataTransactionRequest(fee, amount, data)
+  }
+}
