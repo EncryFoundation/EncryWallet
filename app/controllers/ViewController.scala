@@ -96,16 +96,10 @@ class ViewController @Inject()(implicit ec: ExecutionContext,
               "Wrong transaction parameters\n" + errors.errors.mkString("\n") + errors))
           ),
         ptrd => {
-          val inputsE: Either[Throwable, Seq[ParsedInput]] = ViewController.parseInputs(ptrd.inputsIds)
-          inputsE match {
-            case Right(v) =>
-              handleSendTransactionResponse(
-                ts.sendDataTransactionWithInputsIds(walletId, ptrd.dataTransactionRequest, v)
-              )
-            case Left(f) => Future.successful(Redirect(routes.ViewController.message(f.getMessage)))
-          }
-        }
-      )
+          handleSendTransactionResponse(
+            ts.sendDataTransactionWithInputsIds(walletId, ptrd.dataTransactionRequest)
+          )
+        })
   }
 
   def showScriptedTransactionForm(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
@@ -218,7 +212,10 @@ class ViewController @Inject()(implicit ec: ExecutionContext,
           .map(Some(_))
           .recover { case NonFatal(_) => None }
         val hash: String = PubKeyLockedContract(w.pubKey).contractHashHex
-        val outputsF: Future[Seq[Output]] = es.requestUtxos(w.address.address).recover { case NonFatal(_) => Seq.empty }
+        val outputsF: Future[Seq[Output]] = es
+          .requestUtxos(w.address.address)
+          .map(_.sortWith(_.data > _.data))
+          .recover { case NonFatal(_) => Seq.empty }
         for {
           balance <- balanceF
           outputs <- outputsF
@@ -246,8 +243,7 @@ object ViewController {
         "fee" -> longNumber,
         "amount" -> longNumber,
         "data" -> text)
-      (DataTransactionRequest.apply)(DataTransactionRequest.unapply),
-      "inputsIds" -> text
+      (DataTransactionRequest.apply)(DataTransactionRequest.unapply)
     )(DataTransactionRequestData.apply)(DataTransactionRequestData.unapply))
 
   val paymentTransactionRequestForm: Form[PaymentTransactionRequestData] = Form(
@@ -299,7 +295,7 @@ object ViewController {
   case class AssetIssuingTransactionRequestData(assetIssuingTransactionRequest: AssetIssuingTransactionRequest,
                                                 inputsIds: String)
 
-  case class DataTransactionRequestData(dataTransactionRequest: DataTransactionRequest, inputsIds: String)
+  case class DataTransactionRequestData(dataTransactionRequest: DataTransactionRequest)
 
   case class SettingsData(secretKey: String)
 

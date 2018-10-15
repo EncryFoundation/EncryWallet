@@ -8,6 +8,7 @@ import play.api.mvc._
 import play.api.libs.circe.Circe
 import models._
 import services.TransactionService
+import io.circe.generic.auto._
 
 @Singleton
 class TransactionController @Inject()(implicit ec: ExecutionContext, ts: TransactionService, cc: ControllerComponents)
@@ -41,9 +42,9 @@ class TransactionController @Inject()(implicit ec: ExecutionContext, ts: Transac
         }
     }
 
-  def sendDataTransaction(walletId: String):  Action[DataTransactionRequest] =
+  def sendDataTransaction(walletId: String): Action[DataTransactionRequest] =
     Action(circe.json[DataTransactionRequest]).async {
-      implicit request: Request[DataTransactionRequest] =>
+      request: Request[DataTransactionRequest] =>
         ts.sendDataTransaction(walletId, request.body).map {
           _.status match {
             case StatusCodes.OK => Ok

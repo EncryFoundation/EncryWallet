@@ -24,18 +24,16 @@ class TransactionService @Inject()(implicit ec: ExecutionContext, lsmStrorage: L
   }
 
   def sendDataTransaction(walletId: String, dtr: DataTransactionRequest): Future[HttpResponse] = {
-    sendDataTransactionWithInputsIds(walletId, dtr, Seq.empty)
+    sendDataTransactionWithInputsIds(walletId, dtr)
   }
 
   def sendDataTransactionWithInputsIds(walletId: String,
-                                       dtr: DataTransactionRequest,
-                                       inputs: Seq[ParsedInput]): Future[HttpResponse] = {
+                                       dtr: DataTransactionRequest): Future[HttpResponse] = {
     Wallet(walletId) match {
       case Some(w) =>
 
         val outputsF: Future[Seq[(Output, Option[(CompiledContract, Seq[Proof])])]] =
-          if (inputs.isEmpty) es.requestUtxos(w.address.address).map(x => x.map((_, None)))
-          else Future.sequence(inputs.map(x => es.requestOutput(Algos.encode(x.key)).map(_ -> x.contract)))
+           es.requestUtxos(w.address.address).map(x => x.map((_, None)))
 
         outputsF.map { outputs =>
 

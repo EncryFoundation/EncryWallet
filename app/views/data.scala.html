@@ -9,29 +9,6 @@
         @b4.text(dataTransactionRequestForm("dataTransactionRequest.fee"), '_label -> "Fee", 'placeholder -> 0, 'type -> "number")
         @b4.text(dataTransactionRequestForm("dataTransactionRequest.amount"), '_label -> "Amount", 'placeholder -> 0, 'type -> "number")
         @b4.text(dataTransactionRequestForm("dataTransactionRequest.data"), '_label -> "Data", 'placeholder -> "data")
-        @b4.textarea(dataTransactionRequestForm("inputsIds"), '_label -> "Inputs", 'rows -> 25, 'placeholder ->
-                """|Optional comma-separated IDs of inputs is special format e.g. :
-                |
-                |013d9ac1455a6f67cb1b4614153b6e1b4d566b1380e742fffb43421952d7c220
-                |>>>>>>
-                |contract (sig: Signature25519, tx: Transaction, state: State) = {
-                |   let pubKey = base16'e49e7e31ce52f75efcdd6c91996028fe57c5f9f3302342d495653d856f68df22'
-                |   checkSig(sig, tx.messageToSign, pubKey) && state.height > 90
-                |}
-                |------
-                |019ea638a100c16202b4cfb86da9cede0c634cf4ad70bfff3afe6d58e8f1ff8b
-                |------
-                |012068c460d58e8670f8adc156deed82e8dec87a98ad57438c9e38a195c29007
-                |------
-                |011d922232b1597aea9a9f9ec92ae7e59b0906a840d13c38e232ab910b554029
-                |>>>>>>
-                |contract (sig: Signature25519, tx: Transaction, state: State) = {
-                |   let pubKey = base16'e49e7e31ce52f75efcdd6c91996028fe57c5f9f3302342d495653d856f68df22'
-                |   checkSig(sig, tx.messageToSign, pubKey) && state.height > 90
-                |}
-                |>>>>>>
-                |sig:Signature25519Value(hex'047dfb95c380d0e98faa66c6f2118669725cc91fe60dce7e8d53b9337a6eb2a0')
-                |""".stripMargin)
         @b4.submit('class -> "btn btn-default"){ Submit }
  }
 }
