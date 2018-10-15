@@ -7,7 +7,7 @@ import scala.util.{Failure, Success, Try}
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import cats.implicits._
 import fastparse.all._
-import fastparse.core.{Parsed, ParseError, Parser}
+import fastparse.core.{ParseError, Parsed, Parser}
 import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
 import play.api.i18n.I18nSupport
@@ -48,7 +48,7 @@ class ViewController @Inject()(implicit ec: ExecutionContext,
       case e: IllegalArgumentException => Redirect(routes.ViewController.message(e.getMessage))
       case e: ExecutionException =>
         Ok(views.html.message(e.getCause.getMessage + "\n" + e.getCause.getStackTrace.mkString("\n")))
-      case NonFatal(e) => Ok(views.html.message(e.getMessage + "\n" + e.getStackTrace.mkString("\n")))
+      case NonFatal(e) => Ok(views.html.message(e.getMessage))
     }
   }
 

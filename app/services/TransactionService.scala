@@ -39,6 +39,8 @@ class TransactionService @Inject()(implicit ec: ExecutionContext, lsmStrorage: L
 
           if (outputs.isEmpty) throw new RuntimeException("Transaction impossible: no inputs available")
 
+          if (dtr.data.getBytes.length > 1000) throw new RuntimeException("Transaction impossible: data size > 1000 bytes")
+
           val secret: PrivateKey25519 = lsmStrorage.getWalletSecret(w)
 
           Transaction.dataTransactionScratch(
