@@ -10,7 +10,9 @@ import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
 
 @Singleton
-class WalletController @Inject()(implicit ec: ExecutionContext, ws: WalletService, cc: ControllerComponents) extends AbstractController(cc) with Circe {
+class WalletController @Inject()(implicit ec: ExecutionContext,
+                                 ws: WalletService,
+                                 cc: ControllerComponents) extends AbstractController(cc) with Circe {
 
   def getAll: Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
     Ok(ws.loadAll.asJson)

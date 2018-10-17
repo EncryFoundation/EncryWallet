@@ -118,7 +118,19 @@ object Transaction {
     prepareTransaction(privKey, fee, timestamp, useOutputs, assetIssuingDirective, amount, tokenIdOpt)
   }
 
-  private[this] def prepareTransaction(privKey: PrivateKey25519,
+  def dataTransactionScratch(privKey: PrivateKey25519,
+                             fee: Long,
+                             timestamp: Long,
+                             useOutputs: Seq[(Output, Option[(CompiledContract, Seq[Proof])])],
+                             contract: CompiledContract,
+                             amount: Long,
+                             data: Array[Byte],
+                             tokenIdOpt: Option[ADKey] = None): EncryTransaction = {
+    val dataDirective: DataDirective = DataDirective(contract.hash, data)
+    prepareTransaction(privKey, fee, timestamp, useOutputs, dataDirective, amount, tokenIdOpt)
+  }
+
+  private def prepareTransaction(privKey: PrivateKey25519,
                                        fee: Long,
                                        timestamp: Long,
                                        useOutputs: Seq[(Output, Option[(CompiledContract, Seq[Proof])])],
@@ -131,13 +143,15 @@ object Transaction {
     val outputs: IndexedSeq[(Output, Option[(CompiledContract, Seq[Proof])])] =
       useOutputs
         .sortWith(_._1.monetaryValue > _._1.monetaryValue)
-        .foldLeft(IndexedSeq.empty[(Output, Option[(CompiledContract, Seq[Proof])])])((acc, e) => if (acc.map(_._1.monetaryValue).sum < amount) acc :+ e else acc)
+        .foldLeft(IndexedSeq.empty[(Output, Option[(CompiledContract, Seq[Proof])])])((acc, e) =>
+          if (acc.map(_._1.monetaryValue).sum < amount) acc :+ e else acc)
 
     val uInputs: IndexedSeq[Input] =
       outputs
         .map { case (o, co) =>
           Input.unsigned(
-            Algos.decode(o.id).map(ADKey @@ _).getOrElse(throw new RuntimeException(s"Output id ${o.id} can not be decoded with Base16")),
+            Algos.decode(o.id).map(ADKey @@ _)
+              .getOrElse(throw new RuntimeException(s"Output id ${o.id} can not be decoded with Base16")),
             co match {
               case Some((ct, _)) => Left(ct)
               case None => Right(PubKeyLockedContract(pubKey.pubKeyBytes))

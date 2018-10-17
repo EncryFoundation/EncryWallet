@@ -1,0 +1,14 @@
+@(walletId: String, dataTransactionRequestForm: Form[controllers.ViewController.DataTransactionRequestData])(implicit lang: play.api.i18n.Messages)
+
+@import helper._
+
+@layout("Data transaction") {
+    <div class="container">
+
+    @b4.horizontal.form(routes.ViewController.sendDataTransactionFromForm(walletId), "col-sm-3", "col-sm-9") { implicit hfc =>
+        @b4.text(dataTransactionRequestForm("dataTransactionRequest.fee"), '_label -> "Fee", 'placeholder -> 0, 'type -> "number")
+        @b4.text(dataTransactionRequestForm("dataTransactionRequest.amount"), '_label -> "Amount", 'placeholder -> 0, 'type -> "number")
+        @b4.text(dataTransactionRequestForm("dataTransactionRequest.data"), '_label -> "Data", 'placeholder -> "data")
+        @b4.submit('class -> "btn btn-default"){ Submit }
+ }
+}

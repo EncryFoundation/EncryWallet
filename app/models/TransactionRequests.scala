@@ -29,3 +29,5 @@ object ScriptedTransactionRequest {
 }
 
 case class AssetIssuingTransactionRequest(fee: Long, amount: Long, source: String)
+
+case class DataTransactionRequest(fee: Long, amount: Long, data: String)
