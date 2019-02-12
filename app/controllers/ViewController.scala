@@ -206,14 +206,12 @@ class ViewController @Inject()(implicit ec: ExecutionContext,
   def showWalletInfo(): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
     wallet match {
       case Some(w) =>
-        val balanceF: Future[Option[Long]] = ws
-          .loadWalletInfo(w)
-          .map(_.balance)
-          .map(Some(_))
+        val balanceF: Future[Option[Long]] = es
+          .requestBalance(w.address.address)
           .recover { case NonFatal(_) => None }
         val hash: String = PubKeyLockedContract(w.pubKey).contractHashHex
         val outputsF: Future[Seq[Output]] = es
-          .requestUtxos(w.address.address)
+          .requestUtxosWithLimit(w.address.address, 300)
           .map(_.sortWith(_.data > _.data))
           .recover { case NonFatal(_) => Seq.empty }
         for {

@@ -14,8 +14,10 @@ import models.Output
 import models.EncryTransaction
 import settings.WalletAppSettings
 
-class ExplorerService @Inject()(implicit val system: ActorSystem, implicit val materializer: Materializer,
-                                implicit val ec: ExecutionContext, settings: WalletAppSettings) {
+class ExplorerService @Inject()(implicit val system: ActorSystem,
+                                implicit val materializer: Materializer,
+                                implicit val ec: ExecutionContext,
+                                settings: WalletAppSettings) {
 
   def requestUtxos(address: String): Future[Seq[Output]] =
     Http().singleRequest(HttpRequest(
@@ -44,4 +46,23 @@ class ExplorerService @Inject()(implicit val system: ActorSystem, implicit val m
       .map(decode[Output])
       .map(_.fold(throw _, identity))
 
+  def requestBalance(address: String): Future[Option[Long]] =
+    Http().singleRequest(HttpRequest(
+      method = HttpMethods.GET,
+      uri = s"/wallet/balance/$address"
+    ).withEffectiveUri(securedConnection = false, Host(settings.explorerAddress)))
+      .flatMap(_.entity.dataBytes.runFold(ByteString.empty)(_ ++ _))
+      .map(_.utf8String)
+      .map(decode[Option[Long]])
+      .flatMap(_.fold(Future.failed, Future.successful))
+
+  def requestUtxosWithLimit(address: String, limit: Long): Future[Seq[Output]] =
+    Http().singleRequest(HttpRequest(
+      method = HttpMethods.GET,
+      uri = s"/outputs/$address/limit/$limit "
+    ).withEffectiveUri(securedConnection = false, Host(settings.explorerAddress)))
+      .flatMap(_.entity.dataBytes.runFold(ByteString.empty)(_ ++ _))
+      .map(_.utf8String)
+      .map(decode[Seq[Output]])
+      .flatMap(_.fold(Future.failed, Future.successful))
 }
