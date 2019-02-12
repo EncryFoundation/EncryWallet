@@ -59,7 +59,7 @@ class ExplorerService @Inject()(implicit val system: ActorSystem,
   def requestUtxosWithLimit(address: String, limit: Long): Future[Seq[Output]] =
     Http().singleRequest(HttpRequest(
       method = HttpMethods.GET,
-      uri = s"/outputs/$address/limit/$limit "
+      uri = s"/outputs/$address/limit/$limit"
     ).withEffectiveUri(securedConnection = false, Host(settings.explorerAddress)))
       .flatMap(_.entity.dataBytes.runFold(ByteString.empty)(_ ++ _))
       .map(_.utf8String)
